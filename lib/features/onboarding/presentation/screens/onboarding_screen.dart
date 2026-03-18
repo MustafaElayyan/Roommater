@@ -49,7 +49,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      context.go(AppRoutes.authChoice);
+      context.push(AppRoutes.authChoice);
     }
   }
 
@@ -164,7 +164,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     const SizedBox(height: 8),
                     if (currentIndex < pages.length - 1)
                       TextButton(
-                        onPressed: () => context.go(AppRoutes.authChoice),
+                        onPressed: () => context.push(AppRoutes.authChoice),
                         child: const Text('Skip'),
                       ),
                   ],

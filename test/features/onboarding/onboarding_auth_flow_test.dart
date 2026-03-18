@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:roommater/app/router/app_routes.dart';
 import 'package:roommater/features/auth/presentation/screens/auth_choice_screen.dart';
+import 'package:roommater/features/auth/presentation/screens/login_screen.dart';
 import 'package:roommater/features/onboarding/presentation/screens/onboarding_screen.dart';
 
 Widget _buildRouterApp({
@@ -85,6 +86,35 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Auth Choice'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'system back from auth choice returns to onboarding when opened from skip',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildRouterApp(
+            initialLocation: AppRoutes.onboarding,
+            routes: [
+              GoRoute(
+                path: AppRoutes.onboarding,
+                builder: (_, __) => const OnboardingScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.authChoice,
+                builder: (_, __) => const AuthChoiceScreen(),
+              ),
+            ],
+          ),
+        );
+
+        await tester.tap(find.text('Skip'));
+        await tester.pumpAndSettle();
+        expect(find.text('Choose how you want to continue'), findsOneWidget);
+
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+        expect(find.text('Next'), findsOneWidget);
       },
     );
 
@@ -303,5 +333,31 @@ void main() {
         expect(find.text('Choose how you want to continue'), findsOneWidget);
       },
     );
+
+    testWidgets('sign in shows register helper and opens sign up', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildRouterApp(
+          initialLocation: AppRoutes.login,
+          routes: [
+            GoRoute(
+              path: AppRoutes.login,
+              builder: (_, __) => const LoginScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.register,
+              builder: (_, __) => const Scaffold(body: Text('Register Page')),
+            ),
+          ],
+        ),
+      );
+
+      expect(find.text("Don't have account? Register"), findsOneWidget);
+
+      await tester.tap(find.text("Don't have account? Register"));
+      await tester.pumpAndSettle();
+      expect(find.text('Register Page'), findsOneWidget);
+    });
   });
 }
