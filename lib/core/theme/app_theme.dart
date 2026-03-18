@@ -46,7 +46,7 @@ abstract final class AppTheme {
           surface: AppColors.surfaceDark,
         ),
         scaffoldBackgroundColor: AppColors.backgroundDark,
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           backgroundColor: AppColors.surfaceDark,
           foregroundColor: AppColors.textOnPrimary,
           elevation: 0,
