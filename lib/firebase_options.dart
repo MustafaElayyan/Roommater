@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart'
 ///
 /// TODO(firebase): Replace these placeholder values by running:
 /// `flutterfire configure --project <firebase-project-id>`.
-/// Also download `google-services.json` from Firebase Console and place it at
+/// Also open Firebase Console > Project settings > Your apps, select/create
+/// the Android app, and download `google-services.json` into
 /// `android/app/google-services.json` for Android package
 /// `com.example.roommater`.
 class DefaultFirebaseOptions {

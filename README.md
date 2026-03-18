@@ -232,7 +232,7 @@ lib/
    flutterfire configure
    ```
    This generates `lib/firebase_options.dart`.
-3. Add your `google-services.json` (Android) to `android/app/` and ensure the Firebase Android app package is `com.example.roommater`.
+3. In Firebase Console, register/select the Android app with package name `com.example.roommater`, download `google-services.json`, then place it in `android/app/`.
 4. Add `GoogleService-Info.plist` (iOS, if present) to `ios/Runner/`.
 5. Run the app:
    ```bash

@@ -22,23 +22,17 @@ Future<void> main() async {
 }
 
 Future<void> _initializeFirebase() async {
-  var initialized = false;
-
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    initialized = true;
+    return;
   } catch (error, stackTrace) {
     debugPrint(
       'Firebase options-based initialization failed; retrying with native '
       'configuration. Error: $error',
     );
     debugPrintStack(stackTrace: stackTrace);
-  }
-
-  if (initialized) {
-    return;
   }
 
   try {
