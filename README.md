@@ -199,7 +199,7 @@ lib/
 | `lib/features/<name>/data/` | Implements repository interfaces with Firebase datasources and converts Firestore/Auth data to domain models. |
 | `lib/shared/` | Generic, feature-agnostic UI components (`AppButton`, `AppTextField`, `LoadingIndicator`) and `BuildContext` extensions. |
 | **auth** | Handles email/password sign-in and sign-up via Firebase Auth; exposes auth-state stream. |
-| **onboarding** | Renders a first-launch carousel from static page data; navigates to login when dismissed. |
+| **onboarding** | Renders a first-launch carousel from static page data; navigates to auth choice when dismissed. |
 | **home** | Provides the bottom-navigation shell that composes the listings, chats, and profile tabs. |
 | **roommate_listing** | Enables users to browse paginated Firestore listings and publish new listings with photos. |
 | **chat** | Delivers real-time Firestore messaging between two users with live message streams. |
@@ -232,4 +232,3 @@ lib/
    ```bash
    flutter run
    ```
-
