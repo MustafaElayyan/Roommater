@@ -16,13 +16,6 @@ dependencies:
   # Navigation
   go_router: ^14.2.0
 
-  # Firebase
-  firebase_core: ^3.4.0
-  firebase_auth: ^5.3.0
-  cloud_firestore: ^5.4.0
-  firebase_storage: ^12.3.0
-  firebase_messaging: ^15.1.0
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,6 +1,6 @@
 import '../../domain/entities/settings_entity.dart';
 
-/// Data-layer model for user settings (can map to shared_preferences or Firestore).
+/// Data-layer model for user settings (can map to shared_preferences or local storage).
 class SettingsModel extends SettingsEntity {
   const SettingsModel({
     super.isDarkMode,

@@ -1,64 +1,77 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/app_exception.dart';
+import '../../../../core/local/local_store.dart';
 import '../models/listing_model.dart';
 
-/// Handles all Firestore calls related to listings.
+/// Handles all local data calls related to listings.
 class ListingRemoteDataSource {
-  const ListingRemoteDataSource(this._firestore);
-
-  final FirebaseFirestore _firestore;
-
-  CollectionReference<Map<String, dynamic>> get _col =>
-      _firestore.collection(AppConstants.listingsCollection);
+  const ListingRemoteDataSource();
 
   Future<List<ListingModel>> getListings({
     int limit = 20,
     String? startAfterId,
   }) async {
     try {
-      Query<Map<String, dynamic>> query =
-          _col.where('isAvailable', isEqualTo: true).limit(limit);
+      final items = LocalStore.listingsById.values
+          .where((listing) => listing.isAvailable)
+          .toList()
+        ..sort((a, b) => b.postedAt.compareTo(a.postedAt));
+
       if (startAfterId != null) {
-        final snapshot = await _col.doc(startAfterId).get();
-        query = query.startAfterDocument(snapshot);
+        final startIndex = items.indexWhere((listing) => listing.id == startAfterId);
+        if (startIndex >= 0 && startIndex + 1 < items.length) {
+          return items.skip(startIndex + 1).take(limit).toList();
+        }
+        return const [];
       }
-      final result = await query.get();
-      return result.docs
-          .map((d) => ListingModel.fromFirestore(d.id, d.data()))
-          .toList();
+      return items.take(limit).toList();
+    } on DataStoreException {
+      rethrow;
     } catch (e) {
-      throw FirestoreException('Failed to load listings.', e);
+      throw DataStoreException('Failed to load listings.', e);
     }
   }
 
   Future<ListingModel> getListingById(String id) async {
     try {
-      final doc = await _col.doc(id).get();
-      if (!doc.exists) {
-        throw const FirestoreException('Listing not found.');
-      }
-      return ListingModel.fromFirestore(doc.id, doc.data()!);
+      final listing = LocalStore.listingsById[id];
+      if (listing == null) throw const DataStoreException('Listing not found.');
+      return listing;
+    } on DataStoreException {
+      rethrow;
     } catch (e) {
-      throw FirestoreException('Failed to load listing.', e);
+      throw DataStoreException('Failed to load listing.', e);
     }
   }
 
   Future<ListingModel> createListing(ListingModel listing) async {
     try {
-      final ref = await _col.add(listing.toFirestore());
-      return ListingModel.fromFirestore(ref.id, listing.toFirestore());
+      final created = ListingModel(
+        id: listing.id.isNotEmpty ? listing.id : LocalStore.nextId('listing'),
+        ownerId: listing.ownerId,
+        title: listing.title,
+        description: listing.description,
+        rent: listing.rent,
+        location: listing.location,
+        imageUrls: listing.imageUrls,
+        postedAt: listing.postedAt,
+        isAvailable: listing.isAvailable,
+      );
+      LocalStore.listingsById[created.id] = created;
+      return created;
+    } on DataStoreException {
+      rethrow;
     } catch (e) {
-      throw FirestoreException('Failed to create listing.', e);
+      throw DataStoreException('Failed to create listing.', e);
     }
   }
 
   Future<void> deleteListing(String id) async {
     try {
-      await _col.doc(id).delete();
+      LocalStore.listingsById.remove(id);
+    } on DataStoreException {
+      rethrow;
     } catch (e) {
-      throw FirestoreException('Failed to delete listing.', e);
+      throw DataStoreException('Failed to delete listing.', e);
     }
   }
 }

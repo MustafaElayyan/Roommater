@@ -11,19 +11,14 @@ sealed class Failure {
   String toString() => '$runtimeType: $message';
 }
 
-/// A failure originating from the Firebase Auth service.
+/// A failure originating from authentication operations.
 final class AuthFailure extends Failure {
   const AuthFailure(super.message);
 }
 
-/// A failure originating from Firestore read/write operations.
-final class FirestoreFailure extends Failure {
-  const FirestoreFailure(super.message);
-}
-
-/// A failure originating from Firebase Storage operations.
-final class StorageFailure extends Failure {
-  const StorageFailure(super.message);
+/// A failure originating from local data-store read/write operations.
+final class DataStoreFailure extends Failure {
+  const DataStoreFailure(super.message);
 }
 
 /// A failure indicating there is no internet connection.

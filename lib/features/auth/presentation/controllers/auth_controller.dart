@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/firebase/firebase_providers.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
@@ -12,7 +11,7 @@ import '../../domain/usecases/sign_up_usecase.dart';
 // --- Dependency graph ---
 
 final _authDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
-  return AuthRemoteDataSource(ref.watch(firebaseAuthProvider));
+  return const AuthRemoteDataSource();
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {

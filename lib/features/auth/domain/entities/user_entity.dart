@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 /// Represents a signed-in Roommater user in the domain layer.
 ///
-/// This entity is independent of any Firebase or third-party model so that the
+/// This entity is independent of any backend or third-party model so that the
 /// domain layer has no external dependencies.
 @immutable
 class UserEntity {

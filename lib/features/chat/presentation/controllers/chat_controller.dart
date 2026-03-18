@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/firebase/firebase_providers.dart';
 import '../../data/datasources/chat_remote_datasource.dart';
 import '../../data/repositories/chat_repository_impl.dart';
 import '../../domain/entities/chat_entity.dart';
@@ -12,7 +11,7 @@ import '../../domain/usecases/send_message_usecase.dart';
 // --- Dependency graph ---
 
 final _chatDataSourceProvider = Provider<ChatRemoteDataSource>((ref) {
-  return ChatRemoteDataSource(ref.watch(firestoreProvider));
+  return const ChatRemoteDataSource();
 });
 
 final chatRepositoryProvider = Provider<ChatRepository>((ref) {

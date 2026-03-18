@@ -1,6 +1,6 @@
 import '../../domain/entities/message_entity.dart';
 
-/// Data-layer model for a Firestore message document.
+/// Data-layer model for a message record.
 class MessageModel extends MessageEntity {
   const MessageModel({
     required super.id,
@@ -10,7 +10,7 @@ class MessageModel extends MessageEntity {
     required super.sentAt,
   });
 
-  factory MessageModel.fromFirestore(
+  factory MessageModel.fromMap(
       String docId, String chatId, Map<String, dynamic> data) {
     return MessageModel(
       id: docId,
@@ -21,7 +21,7 @@ class MessageModel extends MessageEntity {
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toMap() {
     return {
       'senderId': senderId,
       'text': text,

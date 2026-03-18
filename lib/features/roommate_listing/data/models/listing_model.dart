@@ -1,6 +1,6 @@
 import '../../domain/entities/listing_entity.dart';
 
-/// Data-layer model for a Firestore listing document.
+/// Data-layer model for a listing record.
 class ListingModel extends ListingEntity {
   const ListingModel({
     required super.id,
@@ -14,7 +14,7 @@ class ListingModel extends ListingEntity {
     super.isAvailable,
   });
 
-  factory ListingModel.fromFirestore(
+  factory ListingModel.fromMap(
       String docId, Map<String, dynamic> data) {
     return ListingModel(
       id: docId,
@@ -29,7 +29,7 @@ class ListingModel extends ListingEntity {
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toMap() {
     return {
       'ownerId': ownerId,
       'title': title,
