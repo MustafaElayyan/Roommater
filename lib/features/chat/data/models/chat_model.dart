@@ -1,6 +1,6 @@
 import '../../domain/entities/chat_entity.dart';
 
-/// Data-layer model for a Firestore chat document.
+/// Data-layer model for a chat record.
 class ChatModel extends ChatEntity {
   const ChatModel({
     required super.id,
@@ -9,7 +9,7 @@ class ChatModel extends ChatEntity {
     super.lastMessageAt,
   });
 
-  factory ChatModel.fromFirestore(String docId, Map<String, dynamic> data) {
+  factory ChatModel.fromMap(String docId, Map<String, dynamic> data) {
     return ChatModel(
       id: docId,
       participantIds: List<String>.from(data['participantIds'] as List? ?? []),
@@ -20,7 +20,7 @@ class ChatModel extends ChatEntity {
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toMap() {
     return {
       'participantIds': participantIds,
       if (lastMessage != null) 'lastMessage': lastMessage,

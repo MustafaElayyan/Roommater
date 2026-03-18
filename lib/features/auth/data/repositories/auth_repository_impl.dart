@@ -3,7 +3,7 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
 
-/// Concrete implementation of [AuthRepository] backed by Firebase Auth.
+/// Concrete implementation of [AuthRepository] backed by local auth state.
 class AuthRepositoryImpl implements AuthRepository {
   const AuthRepositoryImpl(this._dataSource);
 

@@ -2,7 +2,7 @@ import '../../domain/entities/user_entity.dart';
 
 /// Data-layer representation of a Roommater user.
 ///
-/// Converts between Firebase Auth [User] data and the domain [UserEntity].
+/// Converts between auth-layer data and the domain [UserEntity].
 class UserModel extends UserEntity {
   const UserModel({
     required super.uid,
@@ -11,7 +11,7 @@ class UserModel extends UserEntity {
     super.photoUrl,
   });
 
-  factory UserModel.fromFirebase({
+  factory UserModel.fromAuthData({
     required String uid,
     required String email,
     String? displayName,
@@ -25,7 +25,7 @@ class UserModel extends UserEntity {
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toMap() {
     return {
       'uid': uid,
       'email': email,
@@ -34,7 +34,7 @@ class UserModel extends UserEntity {
     };
   }
 
-  factory UserModel.fromFirestore(Map<String, dynamic> data) {
+  factory UserModel.fromMap(Map<String, dynamic> data) {
     return UserModel(
       uid: data['uid'] as String,
       email: data['email'] as String,

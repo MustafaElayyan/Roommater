@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/firebase/firebase_providers.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 import '../../data/datasources/listing_remote_datasource.dart';
 import '../../domain/entities/listing_entity.dart';
 
 final _singleListingProvider =
     FutureProvider.family<ListingEntity, String>((ref, id) async {
-  final ds = ListingRemoteDataSource(ref.watch(firestoreProvider));
+  const ds = ListingRemoteDataSource();
   return ds.getListingById(id);
 });
 

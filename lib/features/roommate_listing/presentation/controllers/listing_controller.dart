@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/firebase/firebase_providers.dart';
 import '../../data/datasources/listing_remote_datasource.dart';
 import '../../data/repositories/listing_repository_impl.dart';
 import '../../domain/entities/listing_entity.dart';
@@ -11,7 +10,7 @@ import '../../domain/usecases/get_listings_usecase.dart';
 
 final _listingDataSourceProvider =
     Provider<ListingRemoteDataSource>((ref) {
-  return ListingRemoteDataSource(ref.watch(firestoreProvider));
+  return const ListingRemoteDataSource();
 });
 
 final listingRepositoryProvider = Provider<ListingRepository>((ref) {

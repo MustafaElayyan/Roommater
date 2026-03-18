@@ -12,7 +12,7 @@ Roommater uses a **feature-first clean architecture** powered by [Riverpod](http
 
 ```
 lib/
-├── main.dart                          # App entry point: Firebase init + ProviderScope + App widget
+├── main.dart                          # App entry point: ProviderScope + App widget
 │
 ├── app/                               # Bootstrap & global wiring
 │   ├── app.dart                       # Root MaterialApp.router with theme & router config
@@ -26,8 +26,8 @@ lib/
 │   ├── errors/
 │   │   ├── app_exception.dart         # Typed exceptions thrown by data-layer datasources
 │   │   └── failure.dart               # Sealed domain-layer failure types
-│   ├── firebase/
-│   │   └── firebase_providers.dart    # Riverpod providers for FirebaseAuth, Firestore, Storage
+│   ├── local/
+│   │   └── local_store.dart           # In-memory app data used by local datasources
 │   ├── theme/
 │   │   ├── app_colors.dart            # Brand colour palette constants
 │   │   └── app_theme.dart             # Light and dark ThemeData definitions
@@ -193,17 +193,17 @@ lib/
 | Path | Responsibility |
 |---|---|
 | `lib/app/` | Bootstraps the app: mounts the root `App` widget, wires `ProviderScope`, and configures `GoRouter`. |
-| `lib/core/` | Houses cross-cutting concerns (theme, constants, error types, Firebase provider wrappers, and utilities) consumed by multiple features. |
+| `lib/core/` | Houses cross-cutting concerns (theme, constants, error types, local store primitives, and utilities) consumed by multiple features. |
 | `lib/features/<name>/presentation/` | Contains Riverpod controllers, screens (pages), and feature-scoped widgets — no business logic. |
 | `lib/features/<name>/domain/` | Pure Dart: entities, abstract repository interfaces, and use-case classes that hold business rules. |
-| `lib/features/<name>/data/` | Implements repository interfaces with Firebase datasources and converts Firestore/Auth data to domain models. |
+| `lib/features/<name>/data/` | Implements repository interfaces with local datasources and converts map/auth data to domain models. |
 | `lib/shared/` | Generic, feature-agnostic UI components (`AppButton`, `AppTextField`, `LoadingIndicator`) and `BuildContext` extensions. |
-| **auth** | Handles email/password sign-in and sign-up via Firebase Auth; exposes auth-state stream. |
+| **auth** | Handles local email/password sign-in and sign-up; exposes auth-state stream. |
 | **onboarding** | Renders a first-launch carousel from static page data; navigates to auth choice when dismissed. |
 | **home** | Provides the bottom-navigation shell that composes the listings, chats, and profile tabs. |
-| **roommate_listing** | Enables users to browse paginated Firestore listings and publish new listings with photos. |
-| **chat** | Delivers real-time Firestore messaging between two users with live message streams. |
-| **profile** | Reads and writes a user's public profile document in Firestore, including avatar upload. |
+| **roommate_listing** | Enables users to browse paginated listings and publish new listings with photos. |
+| **chat** | Delivers live local messaging between two users with stream updates. |
+| **profile** | Reads and writes a user's public profile record. |
 | **settings** | Manages in-app preferences (dark mode, notifications, locale) with an easily swappable storage backend. |
 
 ---
@@ -213,9 +213,9 @@ lib/
 **Why feature-first for Roommater?**
 
 - **Parallel development** — each of the 3 developers can own one or more features (`auth`, `chat`, `roommate_listing`) without touching the same files, minimising merge conflicts.
-- **Clean separation** — the domain layer contains zero Flutter or Firebase imports, making business rules independently unit-testable.
+- **Clean separation** — the domain layer contains zero Flutter or backend imports, making business rules independently unit-testable.
 - **Riverpod DI** — every datasource, repository, and use-case is exposed as an overridable `Provider`, enabling widget-test-level mocking with `ProviderScope(overrides: [...])` without a separate DI framework.
-- **Firebase-ready without hardcoded secrets** — `google-services.json` / `GoogleService-Info.plist` are consumed by the native build system; Dart code only calls `Firebase.initializeApp()` with no API keys.
+- **Local-first execution** — data and auth flows are stubbed in-memory so the app can run without external services.
 - **go_router** — declarative URL-based routing ensures deep-link support (required for sharing listing URLs) and simplifies guarded navigation for authenticated routes.
 - **Scalability** — adding a new feature (e.g. `roommate_matching`) requires only a new `lib/features/roommate_matching/` subtree with no changes to existing features.
 
@@ -227,8 +227,15 @@ lib/
    ```bash
    flutter pub get
    ```
-2. Add your `google-services.json` (Android) to `android/app/` and `GoogleService-Info.plist` (iOS) to `ios/Runner/`.
-3. Run the app:
+2. Run the app:
    ```bash
    flutter run
    ```
+
+---
+
+## Firebase removal notes
+
+- All backend SDK usage was removed from the app code and dependencies.
+- Auth, profile, listings, and chat now run on in-memory local stubs so the UI stays functional.
+- This fallback keeps development unblocked while avoiding runtime failures from missing remote configuration files.

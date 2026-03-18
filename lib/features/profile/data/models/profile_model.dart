@@ -1,6 +1,6 @@
 import '../../domain/entities/profile_entity.dart';
 
-/// Data-layer model for a Firestore user profile document.
+/// Data-layer model for a user profile record.
 class ProfileModel extends ProfileEntity {
   const ProfileModel({
     required super.uid,
@@ -13,7 +13,7 @@ class ProfileModel extends ProfileEntity {
     super.location,
   });
 
-  factory ProfileModel.fromFirestore(String uid, Map<String, dynamic> data) {
+  factory ProfileModel.fromMap(String uid, Map<String, dynamic> data) {
     return ProfileModel(
       uid: uid,
       displayName: data['displayName'] as String? ?? '',
@@ -26,7 +26,7 @@ class ProfileModel extends ProfileEntity {
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toMap() {
     return {
       'displayName': displayName,
       'email': email,

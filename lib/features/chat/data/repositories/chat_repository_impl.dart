@@ -4,7 +4,7 @@ import '../../domain/repositories/chat_repository.dart';
 import '../datasources/chat_remote_datasource.dart';
 import '../models/message_model.dart';
 
-/// Firebase-backed implementation of [ChatRepository].
+/// Local-data implementation of [ChatRepository].
 class ChatRepositoryImpl implements ChatRepository {
   const ChatRepositoryImpl(this._dataSource);
 
