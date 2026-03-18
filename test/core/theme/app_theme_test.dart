@@ -14,6 +14,8 @@ void main() {
     final focusedBorder = inputTheme.focusedBorder as OutlineInputBorder?;
     final errorBorder = inputTheme.errorBorder as OutlineInputBorder?;
     final disabledBorder = inputTheme.disabledBorder as OutlineInputBorder?;
+    final labelStyle = inputTheme.labelStyle;
+    final floatingLabelStyle = inputTheme.floatingLabelStyle;
 
     expect(enabledBorder, isNotNull);
     expect(focusedBorder, isNotNull);
@@ -30,6 +32,10 @@ void main() {
     expect(errorBorder.borderSide.width, greaterThan(0));
     expect(disabledBorder!.borderSide.width, greaterThan(0));
     expect(disabledBorder.borderSide.color.alpha, greaterThan(0));
+    expect(labelStyle?.color, AppColors.textPrimary);
+    expect(labelStyle?.fontWeight, FontWeight.w600);
+    expect(floatingLabelStyle?.color, AppColors.textPrimary);
+    expect(floatingLabelStyle?.fontWeight, FontWeight.w700);
   });
 
   test('dark theme keeps visible input borders across states', () {
@@ -38,6 +44,8 @@ void main() {
     final focusedBorder = inputTheme.focusedBorder as OutlineInputBorder?;
     final errorBorder = inputTheme.errorBorder as OutlineInputBorder?;
     final disabledBorder = inputTheme.disabledBorder as OutlineInputBorder?;
+    final labelStyle = inputTheme.labelStyle;
+    final floatingLabelStyle = inputTheme.floatingLabelStyle;
 
     expect(enabledBorder, isNotNull);
     expect(focusedBorder, isNotNull);
@@ -54,5 +62,9 @@ void main() {
     expect(errorBorder.borderSide.width, greaterThan(0));
     expect(disabledBorder!.borderSide.width, greaterThan(0));
     expect(disabledBorder.borderSide.color.alpha, greaterThan(0));
+    expect(labelStyle?.color, Colors.white);
+    expect(labelStyle?.fontWeight, FontWeight.w600);
+    expect(floatingLabelStyle?.color, Colors.white);
+    expect(floatingLabelStyle?.fontWeight, FontWeight.w700);
   });
 }
