@@ -100,7 +100,7 @@ void main() {
         ),
       );
 
-      final firstImage = tester.widget<Image>(find.byType(Image));
+      final firstImage = tester.widget<Image>(find.byType(Image).first);
       expect(
         (firstImage.image as AssetImage).assetName,
         'assets/illustrations/onboarding_1.png',
@@ -108,7 +108,7 @@ void main() {
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
 
-      final secondImage = tester.widget<Image>(find.byType(Image));
+      final secondImage = tester.widget<Image>(find.byType(Image).first);
       expect(
         (secondImage.image as AssetImage).assetName,
         'assets/illustrations/onboarding_2.png',
@@ -116,7 +116,7 @@ void main() {
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
 
-      final thirdImage = tester.widget<Image>(find.byType(Image));
+      final thirdImage = tester.widget<Image>(find.byType(Image).first);
       expect(
         (thirdImage.image as AssetImage).assetName,
         'assets/illustrations/onboarding_3.png',

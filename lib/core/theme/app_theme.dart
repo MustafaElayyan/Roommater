@@ -20,7 +20,7 @@ abstract final class AppTheme {
         scaffoldBackgroundColor: AppColors.backgroundLight,
         appBarTheme: const AppBarTheme(
           backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.textPrimary,
+          foregroundColor: AppColors.textOnPrimary,
           elevation: 0,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
