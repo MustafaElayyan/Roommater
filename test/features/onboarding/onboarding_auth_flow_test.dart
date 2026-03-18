@@ -108,10 +108,13 @@ void main() {
         ),
       );
 
-      expect(find.widgetWithText(ElevatedButton, 'Sign Up'), findsOneWidget);
-      expect(find.widgetWithText(ElevatedButton, 'Sign In'), findsOneWidget);
+      expect(find.byType(ElevatedButton), findsNWidgets(2));
+      expect(find.widgetWithText(ElevatedButton, 'SIGN IN'), findsOneWidget);
+      expect(find.widgetWithText(ElevatedButton, 'SIGN UP'), findsOneWidget);
+      final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+      expect(scaffold.backgroundColor, const Color(0xFFC19A6B));
 
-      await tester.tap(find.text('Sign Up'));
+      await tester.tap(find.text('SIGN UP'));
       await tester.pumpAndSettle();
       expect(find.text('Register Page'), findsOneWidget);
 
@@ -135,7 +138,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('Sign In'));
+      await tester.tap(find.text('SIGN IN'));
       await tester.pumpAndSettle();
       expect(find.text('Login Page'), findsOneWidget);
     });
