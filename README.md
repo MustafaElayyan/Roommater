@@ -215,7 +215,7 @@ lib/
 - **Parallel development** — each of the 3 developers can own one or more features (`auth`, `chat`, `roommate_listing`) without touching the same files, minimising merge conflicts.
 - **Clean separation** — the domain layer contains zero Flutter or Firebase imports, making business rules independently unit-testable.
 - **Riverpod DI** — every datasource, repository, and use-case is exposed as an overridable `Provider`, enabling widget-test-level mocking with `ProviderScope(overrides: [...])` without a separate DI framework.
-- **Firebase-ready without hardcoded secrets** — Dart bootstraps Firebase via `DefaultFirebaseOptions.currentPlatform` and falls back to native files (`google-services.json` / `GoogleService-Info.plist`) when needed.
+- **Firebase-ready without hardcoded secrets** — `google-services.json` / `GoogleService-Info.plist` are consumed by the native build system; Dart code only calls `Firebase.initializeApp()` with no API keys.
 - **go_router** — declarative URL-based routing ensures deep-link support (required for sharing listing URLs) and simplifies guarded navigation for authenticated routes.
 - **Scalability** — adding a new feature (e.g. `roommate_matching`) requires only a new `lib/features/roommate_matching/` subtree with no changes to existing features.
 
@@ -227,14 +227,8 @@ lib/
    ```bash
    flutter pub get
    ```
-2. Configure Firebase with FlutterFire:
-   ```bash
-   flutterfire configure
-   ```
-   This generates `lib/firebase_options.dart`.
-3. In Firebase Console, register/select the Android app with package name `com.example.roommater`, download `google-services.json`, then place it in `android/app/`.
-4. Add `GoogleService-Info.plist` (iOS, if present) to `ios/Runner/`.
-5. Run the app:
+2. Add your `google-services.json` (Android) to `android/app/` and `GoogleService-Info.plist` (iOS) to `ios/Runner/`.
+3. Run the app:
    ```bash
    flutter run
    ```

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
-import 'firebase_options.dart';
 
 /// Application entry point.
 ///
@@ -12,37 +11,13 @@ import 'firebase_options.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await _initializeFirebase();
+  // Firebase is initialised from the platform-specific google-services.json /
+  // GoogleService-Info.plist files.  No secrets are hardcoded in Dart.
+  await Firebase.initializeApp();
 
   runApp(
     const ProviderScope(
       child: App(),
     ),
   );
-}
-
-Future<void> _initializeFirebase() async {
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    return;
-  } catch (error, stackTrace) {
-    debugPrint(
-      'Firebase options-based initialization failed; retrying with native '
-      'configuration. Error: $error',
-    );
-    debugPrintStack(stackTrace: stackTrace);
-  }
-
-  try {
-    await Firebase.initializeApp();
-  } catch (error, stackTrace) {
-    debugPrint(
-      'Firebase initialization skipped. Add android/app/google-services.json '
-      'for package com.example.roommater or run `flutterfire configure`. '
-      'Error: $error',
-    );
-    debugPrintStack(stackTrace: stackTrace);
-  }
 }
