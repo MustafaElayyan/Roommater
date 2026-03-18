@@ -1,9 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:roommater/core/theme/app_colors.dart';
 import 'package:roommater/core/theme/app_theme.dart';
 
 void main() {
   test('light theme uses camel scaffold background', () {
     expect(AppTheme.light.scaffoldBackgroundColor, const Color(0xFFC19A6B));
+  });
+
+  test('light theme keeps visible input borders across states', () {
+    final inputTheme = AppTheme.light.inputDecorationTheme;
+    final enabledBorder = inputTheme.enabledBorder as OutlineInputBorder?;
+    final focusedBorder = inputTheme.focusedBorder as OutlineInputBorder?;
+    final errorBorder = inputTheme.errorBorder as OutlineInputBorder?;
+    final disabledBorder = inputTheme.disabledBorder as OutlineInputBorder?;
+
+    expect(enabledBorder, isNotNull);
+    expect(focusedBorder, isNotNull);
+    expect(errorBorder, isNotNull);
+    expect(disabledBorder, isNotNull);
+
+    expect(enabledBorder!.borderSide.color, AppColors.textPrimary);
+    expect(enabledBorder.borderSide.width, greaterThan(0));
+    expect(
+      focusedBorder!.borderSide.width,
+      greaterThan(enabledBorder.borderSide.width),
+    );
+    expect(errorBorder!.borderSide.color, AppColors.error);
+    expect(errorBorder.borderSide.width, greaterThan(0));
+    expect(disabledBorder!.borderSide.width, greaterThan(0));
+    expect(disabledBorder.borderSide.color.alpha, greaterThan(0));
+  });
+
+  test('dark theme keeps visible input borders across states', () {
+    final inputTheme = AppTheme.dark.inputDecorationTheme;
+    final enabledBorder = inputTheme.enabledBorder as OutlineInputBorder?;
+    final focusedBorder = inputTheme.focusedBorder as OutlineInputBorder?;
+    final errorBorder = inputTheme.errorBorder as OutlineInputBorder?;
+    final disabledBorder = inputTheme.disabledBorder as OutlineInputBorder?;
+
+    expect(enabledBorder, isNotNull);
+    expect(focusedBorder, isNotNull);
+    expect(errorBorder, isNotNull);
+    expect(disabledBorder, isNotNull);
+
+    expect(enabledBorder!.borderSide.color, Colors.white);
+    expect(enabledBorder.borderSide.width, greaterThan(0));
+    expect(
+      focusedBorder!.borderSide.width,
+      greaterThan(enabledBorder.borderSide.width),
+    );
+    expect(errorBorder!.borderSide.color, AppColors.error);
+    expect(errorBorder.borderSide.width, greaterThan(0));
+    expect(disabledBorder!.borderSide.width, greaterThan(0));
+    expect(disabledBorder.borderSide.color.alpha, greaterThan(0));
   });
 }

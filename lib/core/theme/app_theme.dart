@@ -33,11 +33,50 @@ abstract final class AppTheme {
             ),
           ),
         ),
-        inputDecorationTheme: const InputDecorationTheme(
-          border: OutlineInputBorder(
+        inputDecorationTheme: InputDecorationTheme(
+          border: const OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(
+              color: AppColors.textPrimary,
+              width: 1.2,
+            ),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          enabledBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(
+              color: AppColors.textPrimary,
+              width: 1.2,
+            ),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(
+              color: AppColors.primaryDark,
+              width: 2,
+            ),
+          ),
+          errorBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(
+              color: AppColors.error,
+              width: 1.5,
+            ),
+          ),
+          focusedErrorBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(
+              color: AppColors.error,
+              width: 2,
+            ),
+          ),
+          disabledBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(
+              color: Color(0x994D3924),
+              width: 1.2,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       );
 
@@ -67,11 +106,50 @@ abstract final class AppTheme {
             ),
           ),
         ),
-        inputDecorationTheme: const InputDecorationTheme(
-          border: OutlineInputBorder(
+        inputDecorationTheme: InputDecorationTheme(
+          border: const OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(
+              color: Colors.white,
+              width: 1.2,
+            ),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          enabledBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(
+              color: Colors.white,
+              width: 1.2,
+            ),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(
+              color: AppColors.primaryLight,
+              width: 2,
+            ),
+          ),
+          errorBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(
+              color: AppColors.error,
+              width: 1.5,
+            ),
+          ),
+          focusedErrorBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(
+              color: AppColors.error,
+              width: 2,
+            ),
+          ),
+          disabledBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(
+              color: Color(0x99FFFFFF),
+              width: 1.2,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       );
 }
