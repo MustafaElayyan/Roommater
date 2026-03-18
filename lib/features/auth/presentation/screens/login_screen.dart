@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
-import '../../../../core/utils/app_utils.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/auth_form_field.dart';
@@ -39,10 +38,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.read(authControllerProvider);
     authState.whenOrNull(
       error: (e, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+        SnackBar(content: Text(e.toString())),
       ),
       data: (_) => context.go(AppRoutes.home),
     );
@@ -68,13 +64,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 prefixIcon: const Icon(Icons.email_outlined),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Enter your email.';
-                  if (!AppUtils.isValidEmail(v.trim())) {
-                    return 'Enter a valid email address.';
-                  }
-                  return null;
-                },
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'Enter your email' : null,
               ),
               const SizedBox(height: 16),
               AuthFormField(
@@ -83,12 +74,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 obscureText: true,
                 prefixIcon: const Icon(Icons.lock_outline),
                 validator: (v) =>
-                    (v == null || v.length < 8) ? 'Min 8 characters.' : null,
+                    (v == null || v.length < 8) ? 'Min 8 characters' : null,
               ),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => context.push(AppRoutes.forgotPassword),
+                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Password reset is not available yet.',
+                      ),
+                    ),
+                  ),
                   style: TextButton.styleFrom(
                     foregroundColor: _actionTextColor,
                     minimumSize: const Size(120, 48),

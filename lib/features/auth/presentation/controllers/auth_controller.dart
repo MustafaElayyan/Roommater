@@ -5,7 +5,6 @@ import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../../domain/usecases/forgot_password_usecase.dart';
 import '../../domain/usecases/sign_in_usecase.dart';
 import '../../domain/usecases/sign_out_usecase.dart';
 import '../../domain/usecases/sign_up_usecase.dart';
@@ -32,10 +31,6 @@ final _signOutUseCaseProvider = Provider<SignOutUseCase>((ref) {
   return SignOutUseCase(ref.watch(authRepositoryProvider));
 });
 
-final _forgotPasswordUseCaseProvider = Provider<ForgotPasswordUseCase>((ref) {
-  return ForgotPasswordUseCase(ref.watch(authRepositoryProvider));
-});
-
 /// Emits the current [UserEntity] or `null` when no user is signed in.
 final authStateProvider = StreamProvider<UserEntity?>((ref) {
   return ref.watch(authRepositoryProvider).authStateChanges;
@@ -43,8 +38,7 @@ final authStateProvider = StreamProvider<UserEntity?>((ref) {
 
 // --- Controller ---
 
-/// Manages sign-in, sign-up, sign-out, and password-reset interactions from
-/// the UI.
+/// Manages sign-in, sign-up, and sign-out interactions from the UI.
 class AuthController extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
@@ -73,14 +67,6 @@ class AuthController extends AsyncNotifier<void> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
       () => ref.read(_signOutUseCaseProvider)(),
-    );
-  }
-
-  Future<void> sendPasswordReset({required String email}) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => ref
-          .read(_forgotPasswordUseCaseProvider)(email: email),
     );
   }
 }
