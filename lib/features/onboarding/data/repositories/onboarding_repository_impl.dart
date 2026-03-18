@@ -10,21 +10,21 @@ class OnboardingRepositoryImpl {
   List<OnboardingPageEntity> getPages() {
     return const [
       OnboardingPageEntity(
-        title: 'Find Your Perfect Roommate',
+        title: 'Organize Shared Living Together',
         description:
-            'Browse verified profiles and connect with compatible roommates near you.',
+            'Roommater helps teams and housemates coordinate daily lifestyle routines in one place.',
         illustrationAsset: 'assets/illustrations/onboarding_1.png',
       ),
       OnboardingPageEntity(
-        title: 'List Your Space',
+        title: 'Coordinate Responsibilities',
         description:
-            'Post your room or apartment and reach thousands of potential roommates.',
+            'Plan chores, responsibilities, and personal commitments so everyone stays aligned.',
         illustrationAsset: 'assets/illustrations/onboarding_2.png',
       ),
       OnboardingPageEntity(
-        title: 'Chat Safely',
+        title: 'Keep Plans Moving',
         description:
-            'Message roommates directly inside the app before committing to anything.',
+            'Track shared plans and day-to-day progress to keep your team running smoothly.',
         illustrationAsset: 'assets/illustrations/onboarding_3.png',
       ),
     ];
