@@ -7,6 +7,24 @@ import 'app_colors.dart';
 /// All theme customisation should be centralised here so that UI components
 /// pick up changes automatically without modification.
 abstract final class AppTheme {
+  static const BorderRadius _inputBorderRadius = BorderRadius.all(
+    Radius.circular(12),
+  );
+  static const OutlineInputBorder _lightDefaultInputBorder = OutlineInputBorder(
+    borderRadius: _inputBorderRadius,
+    borderSide: BorderSide(
+      color: AppColors.textPrimary,
+      width: 1.2,
+    ),
+  );
+  static const OutlineInputBorder _darkDefaultInputBorder = OutlineInputBorder(
+    borderRadius: _inputBorderRadius,
+    borderSide: BorderSide(
+      color: Colors.white,
+      width: 1.2,
+    ),
+  );
+
   static ThemeData get light => ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -33,11 +51,38 @@ abstract final class AppTheme {
             ),
           ),
         ),
-        inputDecorationTheme: const InputDecorationTheme(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
+        inputDecorationTheme: InputDecorationTheme(
+          border: _lightDefaultInputBorder,
+          enabledBorder: _lightDefaultInputBorder,
+          focusedBorder: const OutlineInputBorder(
+            borderRadius: _inputBorderRadius,
+            borderSide: BorderSide(
+              color: AppColors.primaryDark,
+              width: 2,
+            ),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          errorBorder: const OutlineInputBorder(
+            borderRadius: _inputBorderRadius,
+            borderSide: BorderSide(
+              color: AppColors.error,
+              width: 1.5,
+            ),
+          ),
+          focusedErrorBorder: const OutlineInputBorder(
+            borderRadius: _inputBorderRadius,
+            borderSide: BorderSide(
+              color: AppColors.error,
+              width: 2,
+            ),
+          ),
+          disabledBorder: const OutlineInputBorder(
+            borderRadius: _inputBorderRadius,
+            borderSide: BorderSide(
+              color: Color(0x994D3924),
+              width: 1.2,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       );
 
@@ -67,11 +112,38 @@ abstract final class AppTheme {
             ),
           ),
         ),
-        inputDecorationTheme: const InputDecorationTheme(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
+        inputDecorationTheme: InputDecorationTheme(
+          border: _darkDefaultInputBorder,
+          enabledBorder: _darkDefaultInputBorder,
+          focusedBorder: const OutlineInputBorder(
+            borderRadius: _inputBorderRadius,
+            borderSide: BorderSide(
+              color: AppColors.primaryLight,
+              width: 2,
+            ),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          errorBorder: const OutlineInputBorder(
+            borderRadius: _inputBorderRadius,
+            borderSide: BorderSide(
+              color: AppColors.error,
+              width: 1.5,
+            ),
+          ),
+          focusedErrorBorder: const OutlineInputBorder(
+            borderRadius: _inputBorderRadius,
+            borderSide: BorderSide(
+              color: AppColors.error,
+              width: 2,
+            ),
+          ),
+          disabledBorder: const OutlineInputBorder(
+            borderRadius: _inputBorderRadius,
+            borderSide: BorderSide(
+              color: Color(0x99FFFFFF),
+              width: 1.2,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       );
 }
