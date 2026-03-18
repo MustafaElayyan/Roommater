@@ -79,9 +79,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Password reset is not available yet.',
+                      ),
+                    ),
+                  ),
                   style: TextButton.styleFrom(
                     foregroundColor: _actionTextColor,
+                    minimumSize: const Size(120, 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     textStyle: const TextStyle(
                       fontWeight: FontWeight.w600,
                       decoration: TextDecoration.underline,

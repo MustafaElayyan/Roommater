@@ -21,6 +21,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static const Color _activeDotBorderColor = Colors.white;
   static const Color _inactiveDotBorderColor = Colors.black87;
   static const Color _skipButtonTextColor = Colors.black87;
+  static const double _skipButtonHeight = 48;
   static const List<IconData> _slideIcons = [
     Icons.groups_2_outlined,
     Icons.checklist_rtl_outlined,
@@ -165,7 +166,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     const SizedBox(height: 8),
                     if (currentIndex < pages.length - 1)
                       SizedBox(
-                        height: 48,
+                        height: _skipButtonHeight,
                         child: ElevatedButton(
                           onPressed: () => context.push(AppRoutes.authChoice),
                           style: ElevatedButton.styleFrom(

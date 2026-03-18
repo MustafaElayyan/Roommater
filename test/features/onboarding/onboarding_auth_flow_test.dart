@@ -28,6 +28,10 @@ String _currentOnboardingAsset(WidgetTester tester) {
   return (image.image as AssetImage).assetName;
 }
 
+// 140 px ~= 32(top gap) + ~56*2(buttons) + 12(gap) + 24(bottom gap),
+// allowing expected header/footer space while ensuring actions stay centered.
+const double _maxButtonsCenterTolerance = 140;
+
 void main() {
   group('Onboarding to auth choice flow', () {
     testWidgets(
@@ -280,7 +284,10 @@ void main() {
           tester.getCenter(find.widgetWithText(ElevatedButton, 'SIGN UP'));
       final viewportCenterY = tester.binding.renderView.size.height / 2;
       final buttonsCenterY = (signInCenter.dy + signUpCenter.dy) / 2;
-      expect((buttonsCenterY - viewportCenterY).abs(), lessThan(140));
+      expect(
+        (buttonsCenterY - viewportCenterY).abs(),
+        lessThan(_maxButtonsCenterTolerance),
+      );
       final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
       expect(scaffold.backgroundColor, const Color(0xFFC19A6B));
 
@@ -363,7 +370,11 @@ void main() {
 
       expect(find.text('Forgot Password?'), findsOneWidget);
       await tester.tap(find.text('Forgot Password?'));
-      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Password reset is not available yet.'),
+        findsOneWidget,
+      );
 
       expect(find.text("Don't have account? Register"), findsOneWidget);
 

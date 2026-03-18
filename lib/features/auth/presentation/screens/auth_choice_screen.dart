@@ -8,6 +8,7 @@ class AuthChoiceScreen extends StatelessWidget {
   const AuthChoiceScreen({super.key});
 
   static const Color _camelBackground = Color(0xFFC19A6B);
+  static const double _maxActionsWidth = 420;
 
   Widget _buildActionButton({
     required String label,
@@ -65,7 +66,7 @@ class AuthChoiceScreen extends StatelessWidget {
               Expanded(
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
+                    constraints: const BoxConstraints(maxWidth: _maxActionsWidth),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
