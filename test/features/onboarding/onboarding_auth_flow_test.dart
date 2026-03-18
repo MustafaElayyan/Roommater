@@ -145,7 +145,11 @@ void main() {
         );
 
         final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
-        final backgroundColor = scaffold.backgroundColor;
+        final backgroundColor =
+            scaffold.backgroundColor ??
+            Theme.of(
+              tester.element(find.byType(OnboardingScreen)),
+            ).scaffoldBackgroundColor;
 
         final activeDot = tester.widget<AnimatedContainer>(
           find.byKey(const ValueKey('onboarding-dot-0')),

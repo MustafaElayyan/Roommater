@@ -18,6 +18,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   late final PageController _pageController;
   static const Color _activeDotColor = Color(0xFF2D2115);
   static const Color _inactiveDotColor = Color(0xFFEFE5D6);
+  static const Color _activeDotBorderColor = Colors.white;
+  static const Color _inactiveDotBorderColor = Colors.black87;
   static const List<IconData> _slideIcons = [
     Icons.groups_2_outlined,
     Icons.checklist_rtl_outlined,
@@ -143,8 +145,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             border: Border.all(
                               color:
                                   i == currentIndex
-                                      ? Colors.white70
-                                      : Colors.black38,
+                                      ? _activeDotBorderColor
+                                      : _inactiveDotBorderColor,
                             ),
                             borderRadius: BorderRadius.circular(4),
                           ),
