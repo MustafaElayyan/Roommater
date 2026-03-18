@@ -50,6 +50,7 @@ void main() {
         );
 
         expect(find.text('Skip'), findsOneWidget);
+        expect(find.widgetWithText(ElevatedButton, 'Skip'), findsOneWidget);
         await tester.tap(find.text('Skip'));
         await tester.pumpAndSettle();
 
@@ -273,6 +274,13 @@ void main() {
       expect(find.byType(ElevatedButton), findsNWidgets(2));
       expect(find.widgetWithText(ElevatedButton, 'SIGN IN'), findsOneWidget);
       expect(find.widgetWithText(ElevatedButton, 'SIGN UP'), findsOneWidget);
+      final signInCenter =
+          tester.getCenter(find.widgetWithText(ElevatedButton, 'SIGN IN'));
+      final signUpCenter =
+          tester.getCenter(find.widgetWithText(ElevatedButton, 'SIGN UP'));
+      final viewportCenterY = tester.binding.renderView.size.height / 2;
+      final buttonsCenterY = (signInCenter.dy + signUpCenter.dy) / 2;
+      expect((buttonsCenterY - viewportCenterY).abs(), lessThan(140));
       final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
       expect(scaffold.backgroundColor, const Color(0xFFC19A6B));
 
@@ -352,6 +360,10 @@ void main() {
           ],
         ),
       );
+
+      expect(find.text('Forgot Password?'), findsOneWidget);
+      await tester.tap(find.text('Forgot Password?'));
+      await tester.pump();
 
       expect(find.text("Don't have account? Register"), findsOneWidget);
 

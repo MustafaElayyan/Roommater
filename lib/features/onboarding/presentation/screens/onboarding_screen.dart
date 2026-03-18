@@ -20,6 +20,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static const Color _inactiveDotColor = Color(0xFFEFE5D6);
   static const Color _activeDotBorderColor = Colors.white;
   static const Color _inactiveDotBorderColor = Colors.black87;
+  static const Color _skipButtonTextColor = Colors.black87;
   static const List<IconData> _slideIcons = [
     Icons.groups_2_outlined,
     Icons.checklist_rtl_outlined,
@@ -163,9 +164,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                     const SizedBox(height: 8),
                     if (currentIndex < pages.length - 1)
-                      TextButton(
-                        onPressed: () => context.push(AppRoutes.authChoice),
-                        child: const Text('Skip'),
+                      SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: () => context.push(AppRoutes.authChoice),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: _skipButtonTextColor,
+                            shape: const StadiumBorder(),
+                            side: const BorderSide(
+                              color: Colors.black54,
+                              width: 2,
+                            ),
+                            textStyle: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                          child: const Text('Skip'),
+                        ),
                       ),
                   ],
                 ),
