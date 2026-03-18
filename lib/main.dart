@@ -1,20 +1,23 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
-  runApp(const MainApp());
-}
+import 'app/app.dart';
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+/// Application entry point.
+///
+/// Initialises Firebase, then mounts the widget tree inside a [ProviderScope]
+/// so that every Riverpod provider is available app-wide.
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
-    );
-  }
+  // Firebase is initialised from the platform-specific google-services.json /
+  // GoogleService-Info.plist files.  No secrets are hardcoded in Dart.
+  await Firebase.initializeApp();
+
+  runApp(
+    const ProviderScope(
+      child: App(),
+    ),
+  );
 }
