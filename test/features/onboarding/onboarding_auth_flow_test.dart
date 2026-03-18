@@ -22,6 +22,11 @@ Widget _buildRouterApp({
   );
 }
 
+String _currentOnboardingAsset(WidgetTester tester) {
+  final image = tester.widget<Image>(find.byType(Image).first);
+  return (image.image as AssetImage).assetName;
+}
+
 void main() {
   group('Onboarding to auth choice flow', () {
     testWidgets(
@@ -100,26 +105,113 @@ void main() {
         ),
       );
 
-      final firstImage = tester.widget<Image>(find.byType(Image).first);
       expect(
-        (firstImage.image as AssetImage).assetName,
+        _currentOnboardingAsset(tester),
         'assets/illustrations/onboarding_1.png',
       );
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
 
-      final secondImage = tester.widget<Image>(find.byType(Image).first);
       expect(
-        (secondImage.image as AssetImage).assetName,
+        _currentOnboardingAsset(tester),
         'assets/illustrations/onboarding_2.png',
       );
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
 
-      final thirdImage = tester.widget<Image>(find.byType(Image).first);
       expect(
-        (thirdImage.image as AssetImage).assetName,
+        _currentOnboardingAsset(tester),
         'assets/illustrations/onboarding_3.png',
+      );
+    });
+
+    testWidgets(
+      'pagination dots remain visible and active dot is distinct',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildRouterApp(
+            initialLocation: AppRoutes.onboarding,
+            routes: [
+              GoRoute(
+                path: AppRoutes.onboarding,
+                builder: (_, __) => const OnboardingScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.authChoice,
+                builder: (_, __) => const Scaffold(body: Text('Auth Choice')),
+              ),
+            ],
+          ),
+        );
+
+        final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+        final backgroundColor =
+            scaffold.backgroundColor ??
+            Theme.of(
+              tester.element(find.byType(OnboardingScreen)),
+            ).scaffoldBackgroundColor;
+
+        final activeDot = tester.widget<AnimatedContainer>(
+          find.byKey(const ValueKey('onboarding-dot-0')),
+        );
+        final inactiveDot = tester.widget<AnimatedContainer>(
+          find.byKey(const ValueKey('onboarding-dot-1')),
+        );
+
+        final activeDecoration = activeDot.decoration! as BoxDecoration;
+        final inactiveDecoration = inactiveDot.decoration! as BoxDecoration;
+
+        expect(activeDecoration.color, isNotNull);
+        expect(inactiveDecoration.color, isNotNull);
+        expect(
+          activeDecoration.color,
+          isNot(equals(inactiveDecoration.color)),
+        );
+        expect(activeDecoration.color, isNot(equals(backgroundColor)));
+        expect(inactiveDecoration.color, isNot(equals(backgroundColor)));
+      },
+    );
+
+    testWidgets('system back moves onboarding slide 3 -> 2 -> 1', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildRouterApp(
+          initialLocation: AppRoutes.onboarding,
+          routes: [
+            GoRoute(
+              path: AppRoutes.onboarding,
+              builder: (_, __) => const OnboardingScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.authChoice,
+              builder: (_, __) => const Scaffold(body: Text('Auth Choice')),
+            ),
+          ],
+        ),
+      );
+
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
+      expect(
+        _currentOnboardingAsset(tester),
+        'assets/illustrations/onboarding_3.png',
+      );
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(
+        _currentOnboardingAsset(tester),
+        'assets/illustrations/onboarding_2.png',
+      );
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(
+        _currentOnboardingAsset(tester),
+        'assets/illustrations/onboarding_1.png',
       );
     });
   });
@@ -182,5 +274,34 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Login Page'), findsOneWidget);
     });
+
+    testWidgets(
+      'system back from sign in returns to auth choice',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildRouterApp(
+            initialLocation: AppRoutes.authChoice,
+            routes: [
+              GoRoute(
+                path: AppRoutes.authChoice,
+                builder: (_, __) => const AuthChoiceScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.login,
+                builder: (_, __) => const Scaffold(body: Text('Login Page')),
+              ),
+            ],
+          ),
+        );
+
+        await tester.tap(find.text('SIGN IN'));
+        await tester.pumpAndSettle();
+        expect(find.text('Login Page'), findsOneWidget);
+
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+        expect(find.text('Choose how you want to continue'), findsOneWidget);
+      },
+    );
   });
 }

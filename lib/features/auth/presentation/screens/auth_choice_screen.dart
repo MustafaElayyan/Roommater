@@ -65,12 +65,12 @@ class AuthChoiceScreen extends StatelessWidget {
               const Spacer(),
               _buildActionButton(
                 label: 'SIGN IN',
-                onPressed: () => context.go(AppRoutes.login),
+                onPressed: () => context.push(AppRoutes.login),
               ),
               const SizedBox(height: 12),
               _buildActionButton(
                 label: 'SIGN UP',
-                onPressed: () => context.go(AppRoutes.register),
+                onPressed: () => context.push(AppRoutes.register),
               ),
               const SizedBox(height: 24),
             ],
