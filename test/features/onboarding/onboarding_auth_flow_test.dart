@@ -82,6 +82,46 @@ void main() {
         expect(find.text('Auth Choice'), findsOneWidget);
       },
     );
+
+    testWidgets('intro slides show distinct illustrations', (tester) async {
+      await tester.pumpWidget(
+        _buildRouterApp(
+          initialLocation: AppRoutes.onboarding,
+          routes: [
+            GoRoute(
+              path: AppRoutes.onboarding,
+              builder: (_, __) => const OnboardingScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.authChoice,
+              builder: (_, __) => const Scaffold(body: Text('Auth Choice')),
+            ),
+          ],
+        ),
+      );
+
+      final firstImage = tester.widget<Image>(find.byType(Image).first);
+      expect(
+        (firstImage.image as AssetImage).assetName,
+        'assets/illustrations/onboarding_1.png',
+      );
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
+
+      final secondImage = tester.widget<Image>(find.byType(Image).first);
+      expect(
+        (secondImage.image as AssetImage).assetName,
+        'assets/illustrations/onboarding_2.png',
+      );
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
+
+      final thirdImage = tester.widget<Image>(find.byType(Image).first);
+      expect(
+        (thirdImage.image as AssetImage).assetName,
+        'assets/illustrations/onboarding_3.png',
+      );
+    });
   });
 
   group('Auth choice actions', () {

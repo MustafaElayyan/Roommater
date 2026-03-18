@@ -16,6 +16,11 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   late final PageController _pageController;
+  static const List<IconData> _slideIcons = [
+    Icons.groups_2_outlined,
+    Icons.checklist_rtl_outlined,
+    Icons.calendar_month_outlined,
+  ];
 
   @override
   void initState() {
@@ -65,7 +70,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.home_work, size: 120),
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.85),
+                            shape: BoxShape.circle,
+                          ),
+                          child: SizedBox(
+                            height: 96,
+                            width: 96,
+                            child: Image.asset(
+                              page.illustrationAsset,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => Icon(
+                                _slideIcons[index],
+                                size: 96,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 48),
                         Text(
                           page.title,
