@@ -16,7 +16,7 @@ class ProfileRemoteDataSource {
   Future<ProfileModel> getProfile(String uid) async {
     try {
       final doc = await _col.doc(uid).get();
-      if (!doc.exists) throw FirestoreException('Profile not found.');
+      if (!doc.exists) throw const FirestoreException('Profile not found.');
       return ProfileModel.fromFirestore(uid, doc.data()!);
     } catch (e) {
       throw FirestoreException('Failed to load profile.', e);

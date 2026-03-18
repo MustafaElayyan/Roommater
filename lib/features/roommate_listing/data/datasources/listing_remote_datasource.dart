@@ -37,7 +37,7 @@ class ListingRemoteDataSource {
     try {
       final doc = await _col.doc(id).get();
       if (!doc.exists) {
-        throw FirestoreException('Listing not found.');
+        throw const FirestoreException('Listing not found.');
       }
       return ListingModel.fromFirestore(doc.id, doc.data()!);
     } catch (e) {
