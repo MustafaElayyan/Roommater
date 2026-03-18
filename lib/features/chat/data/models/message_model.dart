@@ -1,0 +1,31 @@
+import '../../domain/entities/message_entity.dart';
+
+/// Data-layer model for a Firestore message document.
+class MessageModel extends MessageEntity {
+  const MessageModel({
+    required super.id,
+    required super.chatId,
+    required super.senderId,
+    required super.text,
+    required super.sentAt,
+  });
+
+  factory MessageModel.fromFirestore(
+      String docId, String chatId, Map<String, dynamic> data) {
+    return MessageModel(
+      id: docId,
+      chatId: chatId,
+      senderId: data['senderId'] as String,
+      text: data['text'] as String,
+      sentAt: DateTime.parse(data['sentAt'] as String),
+    );
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'senderId': senderId,
+      'text': text,
+      'sentAt': sentAt.toIso8601String(),
+    };
+  }
+}

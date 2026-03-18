@@ -1,5 +1,5 @@
 name: roommater
-description: "A new Flutter project."
+description: "Roommater – a roommate-finding Flutter application."
 publish_to: 'none'
 version: 0.1.0
 
@@ -9,6 +9,19 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.5.1
+
+  # Navigation
+  go_router: ^14.2.0
+
+  # Firebase
+  firebase_core: ^3.4.0
+  firebase_auth: ^5.3.0
+  cloud_firestore: ^5.4.0
+  firebase_storage: ^12.3.0
+  firebase_messaging: ^15.1.0
 
 dev_dependencies:
   flutter_test:
