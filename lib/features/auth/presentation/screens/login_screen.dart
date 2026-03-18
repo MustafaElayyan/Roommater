@@ -19,6 +19,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  static const Color _actionTextColor = Colors.black87;
 
   @override
   void dispose() {
@@ -75,6 +76,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 validator: (v) =>
                     (v == null || v.length < 8) ? 'Min 8 characters' : null,
               ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Password reset is not available yet.',
+                      ),
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: _actionTextColor,
+                    minimumSize: const Size(120, 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                  child: const Text('Forgot Password?'),
+                ),
+              ),
               const SizedBox(height: 32),
               AppButton(
                 label: 'Sign In',
@@ -84,6 +107,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () => context.pushReplacement(AppRoutes.register),
+                style: TextButton.styleFrom(
+                  foregroundColor: _actionTextColor,
+                ),
                 child: const Text("Don't have account? Register"),
               ),
             ],

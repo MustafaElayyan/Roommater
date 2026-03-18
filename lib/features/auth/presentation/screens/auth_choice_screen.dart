@@ -8,6 +8,7 @@ class AuthChoiceScreen extends StatelessWidget {
   const AuthChoiceScreen({super.key});
 
   static const Color _camelBackground = Color(0xFFC19A6B);
+  static const double _maxActionsWidth = 420;
 
   Widget _buildActionButton({
     required String label,
@@ -62,15 +63,27 @@ class AuthChoiceScreen extends StatelessWidget {
                 ).textTheme.bodyMedium?.copyWith(color: Colors.black87),
                 textAlign: TextAlign.center,
               ),
-              const Spacer(),
-              _buildActionButton(
-                label: 'SIGN IN',
-                onPressed: () => context.push(AppRoutes.login),
-              ),
-              const SizedBox(height: 12),
-              _buildActionButton(
-                label: 'SIGN UP',
-                onPressed: () => context.push(AppRoutes.register),
+              Expanded(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: _maxActionsWidth),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildActionButton(
+                          label: 'SIGN IN',
+                          onPressed: () => context.push(AppRoutes.login),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildActionButton(
+                          label: 'SIGN UP',
+                          onPressed: () => context.push(AppRoutes.register),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
             ],
