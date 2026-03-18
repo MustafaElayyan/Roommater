@@ -4,6 +4,7 @@
 /// typos and make refactoring easier.
 abstract final class AppRoutes {
   // --- Auth ---
+  static const String authChoice = '/auth-choice';
   static const String login = '/login';
   static const String register = '/register';
 

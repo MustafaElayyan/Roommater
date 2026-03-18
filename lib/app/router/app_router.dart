@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/auth_choice_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/roommate_listing/presentation/screens/listing_screen.dart';
@@ -28,6 +29,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.onboarding,
         builder: (BuildContext context, GoRouterState state) =>
             const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.authChoice,
+        builder: (BuildContext context, GoRouterState state) =>
+            const AuthChoiceScreen(),
       ),
       GoRoute(
         path: AppRoutes.login,
