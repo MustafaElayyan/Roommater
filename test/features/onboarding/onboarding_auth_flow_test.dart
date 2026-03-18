@@ -85,9 +85,7 @@ void main() {
   });
 
   group('Auth choice actions', () {
-    testWidgets('contains Sign Up and Sign In and navigates accordingly', (
-      tester,
-    ) async {
+    testWidgets('contains Sign Up and Sign In actions', (tester) async {
       await tester.pumpWidget(
         _buildRouterApp(
           initialLocation: AppRoutes.authChoice,
@@ -110,11 +108,35 @@ void main() {
 
       expect(find.widgetWithText(ElevatedButton, 'Sign Up'), findsOneWidget);
       expect(find.widgetWithText(ElevatedButton, 'Sign In'), findsOneWidget);
+    });
+
+    testWidgets('Sign Up navigates to register', (tester) async {
+      await tester.pumpWidget(
+        _buildRouterApp(
+          initialLocation: AppRoutes.authChoice,
+          routes: [
+            GoRoute(
+              path: AppRoutes.authChoice,
+              builder: (_, __) => const AuthChoiceScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.register,
+              builder: (_, __) => const Scaffold(body: Text('Register Page')),
+            ),
+            GoRoute(
+              path: AppRoutes.login,
+              builder: (_, __) => const Scaffold(body: Text('Login Page')),
+            ),
+          ],
+        ),
+      );
 
       await tester.tap(find.text('Sign Up'));
       await tester.pumpAndSettle();
       expect(find.text('Register Page'), findsOneWidget);
+    });
 
+    testWidgets('Sign In navigates to login', (tester) async {
       await tester.pumpWidget(
         _buildRouterApp(
           initialLocation: AppRoutes.authChoice,
