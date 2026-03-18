@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:roommater/app/router/app_routes.dart';
 import 'package:roommater/features/auth/presentation/screens/auth_choice_screen.dart';
+import 'package:roommater/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:roommater/features/auth/presentation/screens/login_screen.dart';
 import 'package:roommater/features/onboarding/presentation/screens/onboarding_screen.dart';
 
@@ -364,17 +365,26 @@ void main() {
               path: AppRoutes.register,
               builder: (_, __) => const Scaffold(body: Text('Register Page')),
             ),
+            GoRoute(
+              path: AppRoutes.forgotPassword,
+              builder: (_, __) => const ForgotPasswordScreen(),
+            ),
           ],
         ),
       );
 
+      // Forgot Password? should navigate to the reset-password screen.
       expect(find.text('Forgot Password?'), findsOneWidget);
       await tester.tap(find.text('Forgot Password?'));
       await tester.pumpAndSettle();
       expect(
-        find.text('Password reset is not available yet.'),
+        find.text('Reset Password'),
         findsOneWidget,
       );
+
+      // Navigate back to the login screen.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
 
       expect(find.text("Don't have account? Register"), findsOneWidget);
 

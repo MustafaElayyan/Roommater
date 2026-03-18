@@ -43,5 +43,14 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    try {
+      await _dataSource.sendPasswordResetEmail(email: email);
+    } on AuthException {
+      rethrow;
+    }
+  }
+
+  @override
   Stream<UserEntity?> get authStateChanges => _dataSource.authStateChanges;
 }

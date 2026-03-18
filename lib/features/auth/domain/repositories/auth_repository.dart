@@ -23,6 +23,12 @@ abstract interface class AuthRepository {
   /// Signs out the current user.
   Future<void> signOut();
 
+  /// Sends a password-reset email to [email].
+  ///
+  /// Completes normally even if no account exists for that address to prevent
+  /// account enumeration.
+  Future<void> sendPasswordResetEmail({required String email});
+
   /// Emits the currently authenticated user, or `null` when signed out.
   Stream<UserEntity?> get authStateChanges;
 }
