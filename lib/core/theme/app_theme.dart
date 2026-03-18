@@ -54,6 +54,14 @@ abstract final class AppTheme {
         inputDecorationTheme: InputDecorationTheme(
           border: _lightDefaultInputBorder,
           enabledBorder: _lightDefaultInputBorder,
+          labelStyle: const TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+          floatingLabelStyle: const TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w700,
+          ),
           focusedBorder: const OutlineInputBorder(
             borderRadius: _inputBorderRadius,
             borderSide: BorderSide(
@@ -115,6 +123,14 @@ abstract final class AppTheme {
         inputDecorationTheme: InputDecorationTheme(
           border: _darkDefaultInputBorder,
           enabledBorder: _darkDefaultInputBorder,
+          labelStyle: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+          floatingLabelStyle: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
           focusedBorder: const OutlineInputBorder(
             borderRadius: _inputBorderRadius,
             borderSide: BorderSide(
