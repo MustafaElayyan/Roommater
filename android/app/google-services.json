@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "362302361261",
+    "project_id": "roommaterz",
+    "storage_bucket": "roommaterz.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362302361261:android:4d7748be5038d7b4078024",
+        "android_client_info": {
+          "package_name": "com.company.roommater"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6xLRBEZZPRTbGCUlbMRixX3r1iakdlMs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362302361261:android:277fa0f719eff81b078024",
+        "android_client_info": {
+          "package_name": "com.example.roommater_new"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6xLRBEZZPRTbGCUlbMRixX3r1iakdlMs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
