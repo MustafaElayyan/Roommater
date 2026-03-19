@@ -5,7 +5,7 @@
 abstract final class AppUtils {
   /// Returns `true` if [email] is a syntactically valid email address.
   static bool isValidEmail(String email) {
-    return RegExp(r'^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$').hasMatch(email);
+    return RegExp(r'^[\w.+-]+@([\w-]+\.)+[a-zA-Z]{2,}$').hasMatch(email);
   }
 
   /// Returns `true` if [password] meets the minimum security requirement

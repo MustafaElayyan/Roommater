@@ -371,10 +371,7 @@ void main() {
       expect(find.text('Forgot Password?'), findsOneWidget);
       await tester.tap(find.text('Forgot Password?'));
       await tester.pumpAndSettle();
-      expect(
-        find.text('Password reset is not available yet.'),
-        findsOneWidget,
-      );
+      expect(find.text('Reset Password'), findsOneWidget);
 
       expect(find.text("Don't have account? Register"), findsOneWidget);
 

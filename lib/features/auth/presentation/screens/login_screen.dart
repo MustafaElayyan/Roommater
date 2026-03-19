@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../core/utils/app_utils.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/auth_form_field.dart';
@@ -19,12 +20,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _resetEmailController = TextEditingController();
   static const Color _actionTextColor = Colors.black87;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _resetEmailController.dispose();
     super.dispose();
   }
 
@@ -41,6 +44,66 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         SnackBar(content: Text(e.toString())),
       ),
       data: (_) => context.go(AppRoutes.home),
+    );
+  }
+
+  Future<void> _showResetPasswordDialog() async {
+    _resetEmailController.text = _emailController.text.trim();
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Reset Password'),
+          content: Form(
+            child: AuthFormField(
+              label: 'Email',
+              controller: _resetEmailController,
+              keyboardType: TextInputType.emailAddress,
+              prefixIcon: const Icon(Icons.email_outlined),
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Enter your email';
+                if (!AppUtils.isValidEmail(v)) return 'Enter a valid email';
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final email = _resetEmailController.text.trim();
+                if (!AppUtils.isValidEmail(email)) {
+                  ScaffoldMessenger.of(this.context).showSnackBar(
+                    const SnackBar(content: Text('Enter a valid email')),
+                  );
+                  return;
+                }
+                await ref
+                    .read(authControllerProvider.notifier)
+                    .resetPassword(email: email);
+                if (!mounted) return;
+                final authState = ref.read(authControllerProvider);
+                authState.whenOrNull(
+                  data: (_) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(this.context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Password reset email sent.'),
+                      ),
+                    );
+                  },
+                  error: (e, _) => ScaffoldMessenger.of(this.context)
+                      .showSnackBar(SnackBar(content: Text(e.toString()))),
+                );
+              },
+              child: const Text('Send'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -64,8 +127,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 prefixIcon: const Icon(Icons.email_outlined),
-                validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Enter your email' : null,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Enter your email';
+                  if (!AppUtils.isValidEmail(v)) return 'Enter a valid email';
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               AuthFormField(
@@ -79,13 +145,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Password reset is not available yet.',
-                      ),
-                    ),
-                  ),
+                  onPressed: _showResetPasswordDialog,
                   style: TextButton.styleFrom(
                     foregroundColor: _actionTextColor,
                     minimumSize: const Size(120, 48),
