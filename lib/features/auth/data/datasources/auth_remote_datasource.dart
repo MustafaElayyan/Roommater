@@ -47,7 +47,7 @@ class AuthRemoteDataSource {
         displayName: user.displayName,
         photoUrl: user.photoURL,
       );
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseException catch (e) {
       throw AuthException(e.message ?? 'Sign-up failed.', e);
     }
   }
@@ -55,7 +55,7 @@ class AuthRemoteDataSource {
   Future<void> signOut() async {
     try {
       await _firebaseAuth.signOut();
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseException catch (e) {
       throw AuthException(e.message ?? 'Sign-out failed.', e);
     }
   }
