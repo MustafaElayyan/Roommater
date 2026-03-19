@@ -1,43 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../shared/widgets/app_button.dart';
 
 /// Screen that lets users explicitly choose sign-up or sign-in.
-class AuthChoiceScreen extends StatelessWidget {
+class AuthChoiceScreen extends ConsumerWidget {
   const AuthChoiceScreen({super.key});
 
   static const Color _camelBackground = Color(0xFFC19A6B);
   static const double _maxActionsWidth = 420;
 
-  Widget _buildActionButton({
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return SizedBox(
-      height: 56,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-          shape: const StadiumBorder(),
-          side: const BorderSide(
-            color: Colors.black54,
-            width: 2,
-          ),
-          textStyle: const TextStyle(
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1,
-          ),
-        ),
-        child: Text(label),
-      ),
-    );
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef _) {
     return Scaffold(
       backgroundColor: _camelBackground,
       body: SafeArea(
@@ -63,6 +39,15 @@ class AuthChoiceScreen extends StatelessWidget {
                 ).textTheme.bodyMedium?.copyWith(color: Colors.black87),
                 textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: Center(
+                  child: Image.asset(
+                    'assets/illustrations/onboarding_1.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
               Expanded(
                 child: Center(
                   child: ConstrainedBox(
@@ -71,12 +56,12 @@ class AuthChoiceScreen extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _buildActionButton(
+                        AppButton(
                           label: 'SIGN IN',
                           onPressed: () => context.push(AppRoutes.login),
                         ),
                         const SizedBox(height: 12),
-                        _buildActionButton(
+                        AppButton(
                           label: 'SIGN UP',
                           onPressed: () => context.push(AppRoutes.register),
                         ),

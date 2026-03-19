@@ -5,6 +5,7 @@ import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/usecases/reset_password_usecase.dart';
 import '../../domain/usecases/sign_in_usecase.dart';
 import '../../domain/usecases/sign_out_usecase.dart';
 import '../../domain/usecases/sign_up_usecase.dart';
@@ -12,7 +13,10 @@ import '../../domain/usecases/sign_up_usecase.dart';
 // --- Dependency graph ---
 
 final _authDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
-  return AuthRemoteDataSource(ref.watch(firebaseAuthProvider));
+  return AuthRemoteDataSource(
+    ref.watch(firebaseAuthProvider),
+    ref.watch(firestoreProvider),
+  );
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -29,6 +33,10 @@ final _signUpUseCaseProvider = Provider<SignUpUseCase>((ref) {
 
 final _signOutUseCaseProvider = Provider<SignOutUseCase>((ref) {
   return SignOutUseCase(ref.watch(authRepositoryProvider));
+});
+
+final _resetPasswordUseCaseProvider = Provider<ResetPasswordUseCase>((ref) {
+  return ResetPasswordUseCase(ref.watch(authRepositoryProvider));
 });
 
 /// Emits the current [UserEntity] or `null` when no user is signed in.
@@ -67,6 +75,13 @@ class AuthController extends AsyncNotifier<void> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
       () => ref.read(_signOutUseCaseProvider)(),
+    );
+  }
+
+  Future<void> resetPassword({required String email}) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(_resetPasswordUseCaseProvider)(email: email),
     );
   }
 }

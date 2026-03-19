@@ -13,6 +13,8 @@ import '../../features/chat/presentation/screens/chat_list_screen.dart';
 import '../../features/chat/presentation/screens/chat_room_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/auth/presentation/controllers/auth_controller.dart';
+import '../../features/auth/domain/entities/user_entity.dart';
 import 'app_routes.dart';
 
 /// Riverpod provider that exposes the app-wide [GoRouter] instance.
@@ -21,9 +23,32 @@ import 'app_routes.dart';
 /// Authentication redirects can be wired here once the auth state provider
 /// is implemented (see `lib/features/auth/presentation/controllers/`).
 final appRouterProvider = Provider<GoRouter>((ref) {
+  const publicRoutes = <String>{
+    AppRoutes.onboarding,
+    AppRoutes.authChoice,
+    AppRoutes.login,
+    AppRoutes.register,
+  };
+
   return GoRouter(
     initialLocation: AppRoutes.onboarding,
     debugLogDiagnostics: false,
+    refreshListenable: _RouterNotifier(ref),
+    redirect: (BuildContext context, GoRouterState state) {
+      final isLoggedIn = ref.read(authStateProvider).valueOrNull != null;
+      final currentLocation = state.matchedLocation;
+      final isPublicRoute = publicRoutes.contains(currentLocation);
+
+      if (!isLoggedIn && !isPublicRoute) {
+        return AppRoutes.authChoice;
+      }
+
+      if (isLoggedIn && isPublicRoute) {
+        return AppRoutes.home;
+      }
+
+      return null;
+    },
     routes: [
       GoRoute(
         path: AppRoutes.onboarding,
@@ -87,3 +112,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+class _RouterNotifier extends ChangeNotifier {
+  _RouterNotifier(Ref ref) {
+    ref.listen<AsyncValue<UserEntity?>>(
+      authStateProvider,
+      (_, __) => notifyListeners(),
+    );
+  }
+}

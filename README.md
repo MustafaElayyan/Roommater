@@ -227,7 +227,10 @@ lib/
    ```bash
    flutter pub get
    ```
-2. Add your `google-services.json` (Android) to `android/app/` and `GoogleService-Info.plist` (iOS) to `ios/Runner/`.
+2. Configure Firebase for your local machine:
+   - Run `flutterfire configure` from the project root to generate `lib/firebase_options.dart` and native platform config.
+   - Or manually add `google-services.json` (Android) to `android/app/` and `GoogleService-Info.plist` (iOS) to `ios/Runner/`.
+   - Do not commit environment-specific Firebase config files unless intentionally sharing a non-sensitive dev project.
 3. Run the app:
    ```bash
    flutter run
