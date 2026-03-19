@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace = "com.example.roommater"
+    namespace = "com.company.roommater"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -33,16 +33,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.roommater"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutterVersionCode.toInteger()
-        versionName = flutterVersionName
-    }
+ defaultConfig {
+    applicationId = "com.company.roommater"
+    minSdk = 23
+    targetSdk = flutter.targetSdkVersion
+    versionCode = flutterVersionCode.toInteger()
+    versionName = flutterVersionName
+}
 
     buildTypes {
         release {

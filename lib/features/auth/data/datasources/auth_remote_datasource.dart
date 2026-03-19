@@ -26,7 +26,7 @@ class AuthRemoteDataSource {
         displayName: user.displayName,
         photoUrl: user.photoURL,
       );
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseException catch (e) {
       throw AuthException(e.message ?? 'Sign-in failed.', e);
     }
   }
