@@ -5,6 +5,8 @@ import 'package:roommater/app/router/app_router.dart';
 import 'package:roommater/app/router/app_routes.dart';
 import 'package:go_router/go_router.dart';
 
+const _onboardingPagesToSwipeToLastPage = 2;
+
 void main() {
   testWidgets('router starts at onboarding screen', (tester) async {
     await tester.pumpWidget(
@@ -46,7 +48,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    for (var i = 0; i < 2; i++) {
+    for (var i = 0; i < _onboardingPagesToSwipeToLastPage; i++) {
       await tester.fling(find.byType(PageView), const Offset(-400, 0), 1000);
       await tester.pumpAndSettle();
     }

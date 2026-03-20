@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
-import '../../data/repositories/onboarding_repository_impl.dart';
 import '../controllers/onboarding_controller.dart';
 
 /// First-launch onboarding carousel shown before auth choices.
@@ -16,7 +15,6 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
-  final _pages = const OnboardingRepositoryImpl().getPages();
 
   @override
   void dispose() {
@@ -31,7 +29,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(onboardingPageIndexProvider);
-    final isLastPage = currentIndex == _pages.length - 1;
+    final pages = ref.watch(onboardingPagesProvider);
+    final isLastPage = currentIndex == pages.length - 1;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: SafeArea(
@@ -49,12 +49,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
-                  itemCount: _pages.length,
+                  itemCount: pages.length,
                   onPageChanged: (index) {
                     ref.read(onboardingPageIndexProvider.notifier).state = index;
                   },
                   itemBuilder: (context, index) {
-                    final page = _pages[index];
+                    final page = pages[index];
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -89,15 +89,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
-                  _pages.length,
+                  pages.length,
                   (index) => Container(
                     width: 8,
                     height: 8,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
                       color: currentIndex == index
-                          ? Colors.black87
-                          : Colors.black26,
+                          ? colorScheme.primary
+                          : colorScheme.onSurface.withValues(alpha: 0.3),
                       shape: BoxShape.circle,
                     ),
                   ),
