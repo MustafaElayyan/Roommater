@@ -12,6 +12,7 @@ class TasksScreen extends StatefulWidget {
 
 class _TasksScreenState extends State<TasksScreen> {
   bool myTasks = true;
+  static const String _currentUser = 'Mustafa';
   final List<Map<String, dynamic>> _tasks = [
     {
       'title': 'Wash dishes',
@@ -47,6 +48,14 @@ class _TasksScreenState extends State<TasksScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final visibleTasks = myTasks
+        ? _tasks
+            .where(
+              (task) => (task['assignees'] as List<String>).contains(_currentUser),
+            )
+            .toList()
+        : _tasks;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tasks'),
@@ -65,7 +74,7 @@ class _TasksScreenState extends State<TasksScreen> {
             },
           ),
           const SizedBox(height: 16),
-          ..._tasks.map((task) {
+          ...visibleTasks.map((task) {
             final done = task['done'] as bool;
             return Card(
               child: CheckboxListTile(

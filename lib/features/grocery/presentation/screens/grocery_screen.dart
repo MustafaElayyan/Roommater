@@ -10,10 +10,10 @@ class GroceryScreen extends StatefulWidget {
 class _GroceryScreenState extends State<GroceryScreen> {
   final _controller = TextEditingController();
   final List<Map<String, dynamic>> _toBuy = [
-    {'name': 'Milk', 'qty': 2, 'checked': false},
-    {'name': 'Eggs', 'qty': 12, 'checked': false},
-    {'name': 'Bread', 'qty': 1, 'checked': false},
-    {'name': 'Tomatoes', 'qty': 6, 'checked': false},
+    {'id': 'milk', 'name': 'Milk', 'qty': 2, 'checked': false},
+    {'id': 'eggs', 'name': 'Eggs', 'qty': 12, 'checked': false},
+    {'id': 'bread', 'name': 'Bread', 'qty': 1, 'checked': false},
+    {'id': 'tomatoes', 'name': 'Tomatoes', 'qty': 6, 'checked': false},
   ];
   final List<Map<String, dynamic>> _purchased = [
     {'name': 'Rice', 'qty': 1, 'checked': true},
@@ -47,6 +47,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                   if (_controller.text.trim().isEmpty) return;
                   setState(() {
                     _toBuy.add({
+                      'id': '${_controller.text.trim()}-${DateTime.now().microsecondsSinceEpoch}',
                       'name': _controller.text.trim(),
                       'qty': 1,
                       'checked': false,
@@ -64,7 +65,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
             final index = entry.key;
             final item = entry.value;
             return Dismissible(
-              key: ValueKey('buy-${item['name']}-$index'),
+              key: ValueKey(item['id']),
               onDismissed: (_) => setState(() => _toBuy.removeAt(index)),
               child: CheckboxListTile(
                 value: item['checked'] as bool,

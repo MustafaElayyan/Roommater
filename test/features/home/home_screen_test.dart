@@ -30,4 +30,28 @@ void main() {
     expect(find.text('Roommater'), findsOneWidget);
     expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
   });
+
+  testWidgets('home tab switching shows matching route tab CTA', (tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: HomeScreen()),
+      ),
+    );
+
+    await tester.tap(find.text('Tasks'));
+    await tester.pumpAndSettle();
+    expect(find.text('Open Tasks'), findsOneWidget);
+
+    await tester.tap(find.text('Grocery'));
+    await tester.pumpAndSettle();
+    expect(find.text('Open Grocery'), findsOneWidget);
+
+    await tester.tap(find.text('Events'));
+    await tester.pumpAndSettle();
+    expect(find.text('Open Events'), findsOneWidget);
+
+    await tester.tap(find.text('Expenses'));
+    await tester.pumpAndSettle();
+    expect(find.text('Open Expenses'), findsOneWidget);
+  });
 }

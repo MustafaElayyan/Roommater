@@ -1,23 +1,31 @@
 import 'package:flutter/material.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _darkMode = true;
+  bool _notifications = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: ListView(
-        children: const [
+        children: [
           SwitchListTile(
-            value: true,
-            onChanged: null,
-            title: Text('Dark Mode'),
+            value: _darkMode,
+            onChanged: (value) => setState(() => _darkMode = value),
+            title: const Text('Dark Mode'),
           ),
           SwitchListTile(
-            value: true,
-            onChanged: null,
-            title: Text('Push Notifications'),
+            value: _notifications,
+            onChanged: (value) => setState(() => _notifications = value),
+            title: const Text('Push Notifications'),
           ),
         ],
       ),

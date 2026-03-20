@@ -26,8 +26,10 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
   @override
   Widget build(BuildContext context) {
     final amount = double.tryParse(_amountController.text) ?? 0;
-    final splitCount = _splitAmong.isEmpty ? 1 : _splitAmong.length;
-    final split = (amount / splitCount).toStringAsFixed(2);
+    final hasSplitMembers = _splitAmong.isNotEmpty;
+    final split = hasSplitMembers
+        ? (amount / _splitAmong.length).toStringAsFixed(2)
+        : '0.00';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Create Expense')),
@@ -82,10 +84,14 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
                 .toList(),
           ),
           const SizedBox(height: 12),
-          Text('Each person pays: $split JOD'),
+          Text(
+            hasSplitMembers
+                ? 'Each person pays: $split JOD'
+                : 'Select at least one member for split.',
+          ),
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: hasSplitMembers ? () => Navigator.of(context).pop() : null,
             child: const Text('Submit'),
           ),
         ],
