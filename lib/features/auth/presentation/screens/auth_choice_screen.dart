@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../controllers/guest_provider.dart';
 
-/// Screen that lets users explicitly choose sign-up or sign-in.
-class AuthChoiceScreen extends StatelessWidget {
+/// Screen that lets users explicitly choose sign-up, sign-in, or guest mode.
+class AuthChoiceScreen extends ConsumerWidget {
   const AuthChoiceScreen({super.key});
 
   static const Color _camelBackground = Color(0xFFC19A6B);
@@ -36,8 +38,35 @@ class AuthChoiceScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildOrDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
+        children: [
+          const Expanded(
+            child: Divider(color: Colors.black54, thickness: 1),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              'OR',
+              style: const TextStyle(
+                color: Colors.black54,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
+          const Expanded(
+            child: Divider(color: Colors.black54, thickness: 1),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: _camelBackground,
       body: SafeArea(
@@ -79,6 +108,14 @@ class AuthChoiceScreen extends StatelessWidget {
                         _buildActionButton(
                           label: 'SIGN UP',
                           onPressed: () => context.push(AppRoutes.register),
+                        ),
+                        _buildOrDivider(),
+                        _buildActionButton(
+                          label: 'CONTINUE AS GUEST',
+                          onPressed: () {
+                            ref.read(isGuestProvider.notifier).state = true;
+                            context.go(AppRoutes.home);
+                          },
                         ),
                       ],
                     ),
