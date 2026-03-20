@@ -382,6 +382,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Choose how you want to continue'), findsNothing);
       expect(find.text('Home Page'), findsOneWidget);
+      expect(container.read(isGuestProvider), isTrue);
     });
 
     testWidgets(
