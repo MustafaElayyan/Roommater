@@ -1,88 +1,110 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/profile_setup_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
-import '../../features/auth/presentation/screens/auth_choice_screen.dart';
-import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/events/presentation/screens/create_event_screen.dart';
+import '../../features/events/presentation/screens/event_detail_screen.dart';
+import '../../features/events/presentation/screens/events_screen.dart';
+import '../../features/expenses/presentation/screens/create_expense_screen.dart';
+import '../../features/expenses/presentation/screens/expenses_screen.dart';
+import '../../features/grocery/presentation/screens/grocery_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
-import '../../features/roommate_listing/presentation/screens/listing_screen.dart';
-import '../../features/roommate_listing/presentation/screens/listing_detail_screen.dart';
-import '../../features/chat/presentation/screens/chat_list_screen.dart';
-import '../../features/chat/presentation/screens/chat_room_screen.dart';
+import '../../features/household/presentation/screens/create_household_screen.dart';
+import '../../features/household/presentation/screens/join_household_screen.dart';
+import '../../features/household/presentation/screens/manage_members_screen.dart';
+import '../../features/household/presentation/screens/no_household_screen.dart';
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/tasks/presentation/screens/create_task_screen.dart';
+import '../../features/tasks/presentation/screens/tasks_screen.dart';
 import 'app_routes.dart';
 
-/// Riverpod provider that exposes the app-wide [GoRouter] instance.
-///
-/// The router is created once and reused for the lifetime of the app.
-/// Authentication redirects can be wired here once the auth state provider
-/// is implemented (see `lib/features/auth/presentation/controllers/`).
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: AppRoutes.onboarding,
+    initialLocation: AppRoutes.login,
     debugLogDiagnostics: false,
     routes: [
       GoRoute(
-        path: AppRoutes.onboarding,
-        builder: (BuildContext context, GoRouterState state) =>
-            const OnboardingScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.authChoice,
-        builder: (BuildContext context, GoRouterState state) =>
-            const AuthChoiceScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.login,
-        builder: (BuildContext context, GoRouterState state) =>
-            const LoginScreen(),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (BuildContext context, GoRouterState state) =>
-            const RegisterScreen(),
+        builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.profileSetup,
+        builder: (context, state) => const ProfileSetupScreen(),
       ),
       GoRoute(
         path: AppRoutes.home,
-        builder: (BuildContext context, GoRouterState state) =>
-            const HomeScreen(),
+        builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
-        path: AppRoutes.listings,
-        builder: (BuildContext context, GoRouterState state) =>
-            const ListingScreen(),
+        path: AppRoutes.noHousehold,
+        builder: (context, state) => const NoHouseholdScreen(),
       ),
       GoRoute(
-        path: AppRoutes.listingDetail,
-        builder: (BuildContext context, GoRouterState state) {
+        path: AppRoutes.createHousehold,
+        builder: (context, state) => const CreateHouseholdScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.joinHousehold,
+        builder: (context, state) => const JoinHouseholdScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.manageMembers,
+        builder: (context, state) => const ManageMembersScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.tasks,
+        builder: (context, state) => const TasksScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.createTask,
+        builder: (context, state) => const CreateTaskScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.grocery,
+        builder: (context, state) => const GroceryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.events,
+        builder: (context, state) => const EventsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.createEvent,
+        builder: (context, state) => const CreateEventScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.eventDetail,
+        builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return ListingDetailScreen(listingId: id);
+          return EventDetailScreen(eventId: id);
         },
       ),
       GoRoute(
-        path: AppRoutes.chatList,
-        builder: (BuildContext context, GoRouterState state) =>
-            const ChatListScreen(),
+        path: AppRoutes.expenses,
+        builder: (context, state) => const ExpensesScreen(),
       ),
       GoRoute(
-        path: AppRoutes.chatRoom,
-        builder: (BuildContext context, GoRouterState state) {
-          final id = state.pathParameters['id'] ?? '';
-          return ChatRoomScreen(chatId: id);
-        },
+        path: AppRoutes.createExpense,
+        builder: (context, state) => const CreateExpenseScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsScreen(),
       ),
       GoRoute(
         path: AppRoutes.profile,
-        builder: (BuildContext context, GoRouterState state) =>
-            const ProfileScreen(),
+        builder: (context, state) => const ProfileScreen(),
       ),
       GoRoute(
         path: AppRoutes.settings,
-        builder: (BuildContext context, GoRouterState state) =>
-            const SettingsScreen(),
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );
