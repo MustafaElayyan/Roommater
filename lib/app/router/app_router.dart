@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/screens/auth_choice_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/profile_setup_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
@@ -16,6 +17,7 @@ import '../../features/household/presentation/screens/join_household_screen.dart
 import '../../features/household/presentation/screens/manage_members_screen.dart';
 import '../../features/household/presentation/screens/no_household_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
+import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/tasks/presentation/screens/create_task_screen.dart';
@@ -24,9 +26,17 @@ import 'app_routes.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: AppRoutes.login,
+    initialLocation: AppRoutes.onboarding,
     debugLogDiagnostics: false,
     routes: [
+      GoRoute(
+        path: AppRoutes.onboarding,
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.authChoice,
+        builder: (context, state) => const AuthChoiceScreen(),
+      ),
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),

@@ -3,7 +3,11 @@
 /// Prefer referencing these constants rather than hard-coding strings to avoid
 /// typos and make refactoring easier.
 abstract final class AppRoutes {
+  // --- Onboarding ---
+  static const String onboarding = '/onboarding';
+
   // --- Auth ---
+  static const String authChoice = '/auth-choice';
   static const String login = '/login';
   static const String register = '/register';
   static const String profileSetup = '/profile-setup';

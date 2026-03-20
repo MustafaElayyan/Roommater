@@ -6,7 +6,7 @@ import 'package:roommater/app/router/app_routes.dart';
 import 'package:go_router/go_router.dart';
 
 void main() {
-  testWidgets('router starts at login screen', (tester) async {
+  testWidgets('router starts at onboarding screen', (tester) async {
     await tester.pumpWidget(
       const ProviderScope(
         child: _RouterHarness(),
@@ -15,7 +15,47 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Sign In'), findsOneWidget);
+    expect(find.text('Skip'), findsOneWidget);
+    expect(find.text('Get Started'), findsNothing);
+  });
+
+  testWidgets('onboarding skip navigates to auth choice screen', (tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: _RouterHarness(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Choose how you want to continue'), findsOneWidget);
+    expect(find.text('SIGN IN'), findsOneWidget);
+    expect(find.text('SIGN UP'), findsOneWidget);
+    expect(find.text('CONTINUE AS GUEST'), findsOneWidget);
+  });
+
+  testWidgets('onboarding get started navigates to auth choice screen', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: _RouterHarness(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    for (var i = 0; i < 2; i++) {
+      await tester.fling(find.byType(PageView), const Offset(-400, 0), 1000);
+      await tester.pumpAndSettle();
+    }
+
+    expect(find.text('Get Started'), findsOneWidget);
+    await tester.tap(find.text('Get Started'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Choose how you want to continue'), findsOneWidget);
   });
 
   testWidgets('router supports profile setup to no-household to home flow', (
