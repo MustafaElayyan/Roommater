@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:roommater/app/router/app_routes.dart';
+import 'package:roommater/features/auth/presentation/controllers/guest_provider.dart';
 import 'package:roommater/features/auth/presentation/screens/auth_choice_screen.dart';
 import 'package:roommater/features/auth/presentation/screens/login_screen.dart';
 import 'package:roommater/features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -271,13 +272,22 @@ void main() {
               path: AppRoutes.login,
               builder: (_, __) => const Scaffold(body: Text('Login Page')),
             ),
+            GoRoute(
+              path: AppRoutes.home,
+              builder: (_, __) => const Scaffold(body: Text('Home Page')),
+            ),
           ],
         ),
       );
 
-      expect(find.byType(ElevatedButton), findsNWidgets(2));
+      expect(find.byType(ElevatedButton), findsNWidgets(3));
       expect(find.widgetWithText(ElevatedButton, 'SIGN IN'), findsOneWidget);
       expect(find.widgetWithText(ElevatedButton, 'SIGN UP'), findsOneWidget);
+      expect(
+        find.widgetWithText(ElevatedButton, 'CONTINUE AS GUEST'),
+        findsOneWidget,
+      );
+      expect(find.text('OR'), findsOneWidget);
       final signInCenter =
           tester.getCenter(find.widgetWithText(ElevatedButton, 'SIGN IN'));
       final signUpCenter =
@@ -311,6 +321,10 @@ void main() {
               path: AppRoutes.login,
               builder: (_, __) => const Scaffold(body: Text('Login Page')),
             ),
+            GoRoute(
+              path: AppRoutes.home,
+              builder: (_, __) => const Scaffold(body: Text('Home Page')),
+            ),
           ],
         ),
       );
@@ -318,6 +332,57 @@ void main() {
       await tester.tap(find.text('SIGN IN'));
       await tester.pumpAndSettle();
       expect(find.text('Login Page'), findsOneWidget);
+    });
+
+    testWidgets('continue as guest sets guest mode and navigates to home', (
+      tester,
+    ) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final router = GoRouter(
+        initialLocation: AppRoutes.authChoice,
+        routes: [
+          GoRoute(
+            path: AppRoutes.authChoice,
+            builder: (_, __) => const AuthChoiceScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.login,
+            builder: (_, __) => const Scaffold(body: Text('Login Page')),
+          ),
+          GoRoute(
+            path: AppRoutes.register,
+            builder: (_, __) => const Scaffold(body: Text('Register Page')),
+          ),
+          GoRoute(
+            path: AppRoutes.home,
+            builder: (_, __) => const Scaffold(body: Text('Home Page')),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            routerConfig: router,
+          ),
+        ),
+      );
+
+      expect(container.read(isGuestProvider), isFalse);
+
+      await tester.tap(find.text('CONTINUE AS GUEST'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(isGuestProvider), isTrue);
+      expect(find.text('Home Page'), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.text('Choose how you want to continue'), findsNothing);
+      expect(find.text('Home Page'), findsOneWidget);
+      expect(container.read(isGuestProvider), isTrue);
     });
 
     testWidgets(
