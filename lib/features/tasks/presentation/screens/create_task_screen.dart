@@ -27,7 +27,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Task')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

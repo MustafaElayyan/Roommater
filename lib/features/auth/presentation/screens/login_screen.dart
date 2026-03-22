@@ -51,7 +51,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ref.watch(authControllerProvider).isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign In')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(

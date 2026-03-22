@@ -22,7 +22,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Event Detail')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
