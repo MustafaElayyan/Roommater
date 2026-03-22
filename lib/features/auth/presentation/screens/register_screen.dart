@@ -39,7 +39,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       error: (e, _) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),
       ),
-      data: (_) => context.go(AppRoutes.home),
+      data: (_) => context.go(AppRoutes.noHousehold),
     );
   }
 

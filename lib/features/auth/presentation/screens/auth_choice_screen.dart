@@ -80,7 +80,8 @@ class AuthChoiceScreen extends ConsumerWidget {
               Center(
                 child: Image.asset(
                   _logoAsset,
-                  height: 120,
+                  height: 200,
+                  fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(height: 20),
@@ -139,7 +140,7 @@ class AuthChoiceScreen extends ConsumerWidget {
                           label: 'CONTINUE AS GUEST',
                           onPressed: () {
                             ref.read(isGuestProvider.notifier).state = true;
-                            context.go(AppRoutes.home);
+                            context.go(AppRoutes.noHousehold);
                           },
                         ),
                       ],
