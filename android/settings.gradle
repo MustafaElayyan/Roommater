@@ -3,7 +3,7 @@ pluginManagement {
         def properties = new Properties()
         def localPropertiesFile = file("local.properties")
         if (!localPropertiesFile.exists()) {
-            throw new GradleException(
+            throw new Exception(
                     "android/local.properties is missing.\n" +
                     "Create it from android/local.properties.example and set:\n" +
                     "  flutter.sdk=<absolute path to Flutter SDK>\n" +
@@ -29,8 +29,8 @@ pluginManagement {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "7.3.0" apply false
-    id "org.jetbrains.kotlin.android" version "1.7.10" apply false
+    id "com.android.application" version "8.1.0" apply false
+    id "org.jetbrains.kotlin.android" version "1.9.0" apply false
     id "com.google.gms.google-services" version "4.4.2" apply false
 }
 
