@@ -70,21 +70,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notifications'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              setState(() {
-                for (final item in notifications) {
-                  item['unread'] = false;
-                }
-              });
-            },
-            child: const Text('Mark All Read'),
-          ),
-        ],
-      ),
       body: ListView.builder(
         itemCount: notifications.length,
         itemBuilder: (context, index) {

@@ -36,11 +36,6 @@ abstract final class AppTheme {
           onSurface: AppColors.textPrimary,
         ),
         scaffoldBackgroundColor: AppColors.backgroundLight,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.textOnPrimary,
-          elevation: 0,
-        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryLight,
@@ -105,11 +100,6 @@ abstract final class AppTheme {
           onSurface: Colors.white,
         ),
         scaffoldBackgroundColor: AppColors.backgroundDark,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.primaryDark,
-          foregroundColor: AppColors.textOnPrimary,
-          elevation: 0,
-        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryLight,

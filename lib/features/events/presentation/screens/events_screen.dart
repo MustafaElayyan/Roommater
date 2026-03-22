@@ -44,7 +44,6 @@ class EventsScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Events')),
       body: ListView.builder(
         itemCount: events.length,
         itemBuilder: (context, index) {

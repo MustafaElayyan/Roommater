@@ -18,7 +18,7 @@ void main() {
     expect(find.text('Expenses'), findsOneWidget);
   });
 
-  testWidgets('home app bar has Roommater title and notification icon', (
+  testWidgets('home screen has no app bar title or notification icon', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -27,8 +27,8 @@ void main() {
       ),
     );
 
-    expect(find.text('Roommater'), findsOneWidget);
-    expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
+    expect(find.text('Roommater'), findsNothing);
+    expect(find.byIcon(Icons.notifications_outlined), findsNothing);
   });
 
   testWidgets('home tab switching shows matching route tab CTA', (tester) async {

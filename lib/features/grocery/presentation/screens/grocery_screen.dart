@@ -29,7 +29,6 @@ class _GroceryScreenState extends State<GroceryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Grocery')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

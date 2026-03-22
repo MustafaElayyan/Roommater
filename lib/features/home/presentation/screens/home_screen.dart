@@ -16,15 +16,6 @@ class HomeScreen extends ConsumerWidget {
     final tabIndex = ref.watch(homeTabIndexProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Roommater'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => context.go(AppRoutes.notifications),
-          ),
-        ],
-      ),
       drawer: Drawer(
         child: SafeArea(
           child: ListView(

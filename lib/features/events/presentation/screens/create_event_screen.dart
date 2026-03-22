@@ -26,7 +26,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Event')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

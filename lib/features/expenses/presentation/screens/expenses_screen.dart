@@ -40,7 +40,6 @@ class ExpensesScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Expenses')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
