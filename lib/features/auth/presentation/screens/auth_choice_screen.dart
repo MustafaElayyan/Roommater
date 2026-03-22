@@ -10,7 +10,7 @@ import '../controllers/guest_provider.dart';
 class AuthChoiceScreen extends ConsumerWidget {
   const AuthChoiceScreen({super.key});
 
-  static const Color _darkTeal = AppColors.primaryDark;
+  static const Color _primaryDark = AppColors.primaryDark;
   static const String _logoAsset = 'Logo.png';
   static const double _maxActionsWidth = 420;
 
@@ -24,10 +24,10 @@ class AuthChoiceScreen extends ConsumerWidget {
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
-          foregroundColor: _darkTeal,
+          foregroundColor: _primaryDark,
           shape: const StadiumBorder(),
           side: const BorderSide(
-            color: _darkTeal,
+            color: _primaryDark,
             width: 2,
           ),
           textStyle: const TextStyle(
@@ -77,7 +77,7 @@ class AuthChoiceScreen extends ConsumerWidget {
         }
       },
       child: Scaffold(
-        backgroundColor: _darkTeal,
+        backgroundColor: _primaryDark,
         body: SafeArea(
           child: SingleChildScrollView(
             child: Center(
