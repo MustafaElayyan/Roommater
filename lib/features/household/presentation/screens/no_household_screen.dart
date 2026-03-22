@@ -11,7 +11,8 @@ class NoHouseholdScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
+      // Change the property name and remove the 'result' parameter
+      onPopInvoked: (bool didPop) {
         if (!didPop) {
           context.go(AppRoutes.authChoice);
         }

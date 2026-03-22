@@ -30,7 +30,7 @@ class _JoinHouseholdScreenState extends State<JoinHouseholdScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
+      onPopInvoked: (bool didPop) {
         if (!didPop) {
           context.go(AppRoutes.noHousehold);
         }
@@ -113,7 +113,8 @@ class _JoinHouseholdScreenState extends State<JoinHouseholdScreen> {
                   child: FilledButton(
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Request sent successfully.')),
+                        const SnackBar(
+                            content: Text('Request sent successfully.')),
                       );
                     },
                     style: FilledButton.styleFrom(

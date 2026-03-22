@@ -11,7 +11,7 @@ class CreateHouseholdScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
+      onPopInvoked: (bool didPop) {
         if (!didPop) {
           context.go(AppRoutes.noHousehold);
         }

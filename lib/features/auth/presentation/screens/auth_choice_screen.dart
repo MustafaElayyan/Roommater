@@ -71,7 +71,7 @@ class AuthChoiceScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
+      onPopInvoked: (bool didPop) {
         if (!didPop) {
           context.go(AppRoutes.onboarding);
         }
@@ -93,7 +93,8 @@ class AuthChoiceScreen extends ConsumerWidget {
                         alignment: Alignment.centerLeft,
                         child: IconButton(
                           onPressed: () => context.go(AppRoutes.onboarding),
-                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          icon:
+                              const Icon(Icons.arrow_back, color: Colors.white),
                         ),
                       ),
                       Center(
@@ -106,7 +107,10 @@ class AuthChoiceScreen extends ConsumerWidget {
                       const SizedBox(height: 10),
                       Text(
                         'Welcome to Roommater',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -115,22 +119,29 @@ class AuthChoiceScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       Text(
                         'Your shared living, simplified',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyLarge
+                            ?.copyWith(color: Colors.white70),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'Choose how you want to continue',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 12),
                       Text(
                         'Create a new team account or sign in to keep organizing your shared lifestyle together.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: Colors.white70),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 20),
