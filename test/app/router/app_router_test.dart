@@ -60,6 +60,60 @@ void main() {
     expect(find.text('Choose how you want to continue'), findsOneWidget);
   });
 
+  testWidgets('system back on auth choice returns to onboarding', (tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: _RouterHarness(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
+    expect(find.text('Choose how you want to continue'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Skip'), findsOneWidget);
+  });
+
+  testWidgets('system back on onboarding pages moves to previous page', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: _RouterHarness(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.fling(find.byType(PageView), const Offset(-400, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(find.text('Coordinate Responsibilities'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Organize Shared Living Together'), findsOneWidget);
+  });
+
+  testWidgets('guest flow from auth choice goes to no-household', (tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: _RouterHarness(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('CONTINUE AS GUEST'));
+    await tester.pumpAndSettle();
+
+    expect(find.text("You're not in a household"), findsOneWidget);
+  });
+
   testWidgets('router supports profile setup to no-household to home flow', (
     tester,
   ) async {
