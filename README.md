@@ -223,12 +223,79 @@ lib/
 
 ## Getting Started
 
-1. Install dependencies:
-   ```bash
-   flutter pub get
-   ```
-2. Add your `google-services.json` (Android) to `android/app/` and `GoogleService-Info.plist` (iOS) to `ios/Runner/`.
-3. Run the app:
-   ```bash
-   flutter run
-   ```
+### 1) Install Flutter dependencies
+
+```bash
+flutter pub get
+```
+
+### 2) Add Firebase config files
+
+- Android: place `google-services.json` in `android/app/`
+- iOS: place `GoogleService-Info.plist` in `ios/Runner/`
+
+### 3) Create `android/local.properties` (required)
+
+The Android build reads `flutter.sdk` from `android/local.properties`.
+That file is machine-specific and intentionally not committed.
+
+Copy the example file and edit absolute paths:
+
+```bash
+cp android/local.properties.example android/local.properties
+```
+
+Then set:
+
+```properties
+flutter.sdk=/absolute/path/to/flutter
+sdk.dir=/absolute/path/to/android/sdk
+```
+
+Path examples by OS:
+
+- **macOS/Linux** `flutter.sdk=/Users/<you>/development/flutter` or `/home/<you>/flutter`
+- **Windows** `flutter.sdk=C:\\src\\flutter` and `sdk.dir=C:\\Users\\<you>\\AppData\\Local\\Android\\Sdk`
+
+### 4) Java/JDK requirement for Gradle
+
+- This repo currently uses Gradle **7.6.3** (`android/gradle/wrapper/gradle-wrapper.properties`), which works with JDK 11–19.
+- If you are on a project/branch using Gradle **8.4**, use **JDK 17** (recommended).
+
+Check Java:
+
+```bash
+java -version
+```
+
+If needed, point Gradle to JDK 17:
+
+```bash
+export JAVA_HOME=/path/to/jdk-17
+```
+
+### 5) Run from a fresh clone
+
+```bash
+flutter doctor -v
+flutter pub get
+flutter clean
+flutter pub get
+flutter run
+```
+
+If no device is detected:
+
+```bash
+flutter devices
+flutter emulators
+flutter emulators --launch <emulator_id>
+```
+
+### Common Android troubleshooting
+
+- **`android/local.properties is missing`**: create it from `android/local.properties.example`.
+- **`flutter.sdk not set in local.properties`**: verify `flutter.sdk` points to your Flutter SDK root.
+- **`SDK location not found`**: verify `sdk.dir` points to your Android SDK directory.
+- **Google Services plugin errors**: confirm `android/app/google-services.json` exists and package name matches.
+- **Gradle/JDK mismatch**: use JDK 17 when building with Gradle 8.x.
