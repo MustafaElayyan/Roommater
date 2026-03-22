@@ -95,9 +95,9 @@ class AuthChoiceScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               Text(
                 'Your shared living, simplified',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(color: Colors.white70),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.white70,
+                    ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -112,9 +112,9 @@ class AuthChoiceScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               Text(
                 'Create a new team account or sign in to keep organizing your shared lifestyle together.',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white70,
+                    ),
                 textAlign: TextAlign.center,
               ),
               Expanded(
