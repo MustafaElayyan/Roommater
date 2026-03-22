@@ -19,7 +19,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  static const Color _actionTextColor = Colors.black87;
+  static const Color _actionTextColor = Colors.white;
 
   @override
   void dispose() {

@@ -4,8 +4,23 @@ import 'package:roommater/core/theme/app_colors.dart';
 import 'package:roommater/core/theme/app_theme.dart';
 
 void main() {
-  test('light theme uses camel scaffold background', () {
-    expect(AppTheme.light.scaffoldBackgroundColor, const Color(0xFFC19A6B));
+  test('light and dark themes use updated teal scaffold backgrounds', () {
+    expect(AppTheme.light.scaffoldBackgroundColor, AppColors.backgroundLight);
+    expect(AppTheme.dark.scaffoldBackgroundColor, AppColors.backgroundDark);
+  });
+
+  test('elevated buttons use brand CTA color in both themes', () {
+    final lightStyle = AppTheme.light.elevatedButtonTheme.style;
+    final darkStyle = AppTheme.dark.elevatedButtonTheme.style;
+
+    expect(
+      lightStyle?.backgroundColor?.resolve(<MaterialState>{}),
+      AppColors.primaryLight,
+    );
+    expect(
+      darkStyle?.backgroundColor?.resolve(<MaterialState>{}),
+      AppColors.primaryLight,
+    );
   });
 
   test('light theme keeps visible input borders across states', () {
