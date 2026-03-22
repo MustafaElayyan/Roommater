@@ -115,6 +115,60 @@ void main() {
     expect(find.text("You're not in a household"), findsOneWidget);
   });
 
+  testWidgets(
+    'auth choice stays usable on small screens without overflow',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(320, 568));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: _RouterHarness(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Skip'));
+      await tester.pumpAndSettle();
+
+      final continueAsGuest = find.text('CONTINUE AS GUEST');
+      expect(continueAsGuest, findsOneWidget);
+
+      await tester.ensureVisible(continueAsGuest);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(continueAsGuest);
+      await tester.pumpAndSettle();
+
+      expect(find.text("You're not in a household"), findsOneWidget);
+    },
+  );
+
+  testWidgets('continue as guest tap target meets Material minimum', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: _RouterHarness(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
+
+    final continueButton = find.widgetWithText(
+      ElevatedButton,
+      'CONTINUE AS GUEST',
+    );
+    expect(continueButton, findsOneWidget);
+
+    final buttonSize = tester.getSize(continueButton);
+    expect(buttonSize.height, greaterThanOrEqualTo(48));
+    expect(buttonSize.width, greaterThanOrEqualTo(48));
+  });
+
   testWidgets('router supports profile setup to no-household to home flow', (
     tester,
   ) async {
