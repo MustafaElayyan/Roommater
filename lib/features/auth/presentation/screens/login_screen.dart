@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/auth_form_field.dart';
@@ -19,7 +20,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  static const Color _actionTextColor = Colors.white;
+  static const Color _actionTextColor = AppColors.primary;
 
   @override
   void dispose() {

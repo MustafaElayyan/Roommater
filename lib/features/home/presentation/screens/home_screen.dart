@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/confirmation_dialog.dart';
 import '../controllers/home_controller.dart';
 
@@ -61,6 +62,15 @@ class HomeScreen extends ConsumerWidget {
                     context.go(AppRoutes.noHousehold);
                   }
                 },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.logout, color: AppColors.error),
+                title: const Text(
+                  'Logout',
+                  style: TextStyle(color: AppColors.error),
+                ),
+                onTap: () => context.go(AppRoutes.authChoice),
               ),
             ],
           ),

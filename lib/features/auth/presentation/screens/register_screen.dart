@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/auth_form_field.dart';
@@ -84,7 +85,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               TextButton(
                 onPressed: () => context.pushReplacement(AppRoutes.login),
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.primary,
                 ),
                 child: const Text('Already have an account? Sign In'),
               ),

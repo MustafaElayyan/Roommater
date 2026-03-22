@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../app/router/app_routes.dart';
 
 class JoinHouseholdScreen extends StatefulWidget {
   const JoinHouseholdScreen({super.key});
@@ -24,42 +27,50 @@ class _JoinHouseholdScreenState extends State<JoinHouseholdScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Join Household')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            Autocomplete<String>(
-              optionsBuilder: (value) {
-                if (value.text.trim().isEmpty) return _households;
-                return _households.where(
-                  (h) => h.toLowerCase().contains(value.text.toLowerCase()),
-                );
-              },
-              fieldViewBuilder:
-                  (context, textController, focusNode, onFieldSubmitted) {
-                return TextField(
-                  controller: textController,
-                  focusNode: focusNode,
-                  decoration: const InputDecoration(
-                    labelText: 'Household name',
-                  ),
-                  onChanged: (value) => _controller.text = value,
-                );
-              },
-              onSelected: (selection) => _controller.text = selection,
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Request sent successfully.')),
-                );
-              },
-              child: const Text('Send Request'),
-            ),
-          ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          context.go(AppRoutes.noHousehold);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Join Household')),
+        body: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              Autocomplete<String>(
+                optionsBuilder: (value) {
+                  if (value.text.trim().isEmpty) return _households;
+                  return _households.where(
+                    (h) => h.toLowerCase().contains(value.text.toLowerCase()),
+                  );
+                },
+                fieldViewBuilder:
+                    (context, textController, focusNode, onFieldSubmitted) {
+                  return TextField(
+                    controller: textController,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(
+                      labelText: 'Household name',
+                    ),
+                    onChanged: (value) => _controller.text = value,
+                  );
+                },
+                onSelected: (selection) => _controller.text = selection,
+              ),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Request sent successfully.')),
+                  );
+                },
+                child: const Text('Send Request'),
+              ),
+            ],
+          ),
         ),
       ),
     );
