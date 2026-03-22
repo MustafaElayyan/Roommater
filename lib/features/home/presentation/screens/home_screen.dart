@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../../shared/widgets/confirmation_dialog.dart';
 import '../controllers/home_controller.dart';
 
@@ -29,8 +30,30 @@ class HomeScreen extends ConsumerWidget {
           child: ListView(
             children: [
               const DrawerHeader(
-                child: Text('Household Menu'),
+                margin: EdgeInsets.zero,
+                decoration: BoxDecoration(color: AppColors.primaryDark),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Image(
+                      image: AssetImage('Logo.png'),
+                      height: 56,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Household Menu',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const Divider(height: 1, thickness: 1),
               ListTile(
                 leading: const Icon(Icons.person_outline),
                 title: const Text('Profile'),
@@ -70,7 +93,13 @@ class HomeScreen extends ConsumerWidget {
                   'Logout',
                   style: TextStyle(color: AppColors.error),
                 ),
-                onTap: () => context.go(AppRoutes.authChoice),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await ref.read(authControllerProvider.notifier).signOut();
+                  if (context.mounted) {
+                    context.go(AppRoutes.authChoice);
+                  }
+                },
               ),
             ],
           ),

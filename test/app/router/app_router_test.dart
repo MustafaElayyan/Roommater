@@ -61,7 +61,7 @@ void main() {
     expect(find.text('Choose how you want to continue'), findsOneWidget);
   });
 
-  testWidgets('system back on auth choice returns to onboarding', (tester) async {
+  testWidgets('system back on auth choice is blocked', (tester) async {
     await tester.pumpWidget(
       const ProviderScope(
         child: _RouterHarness(),
@@ -76,7 +76,7 @@ void main() {
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
 
-    expect(find.text('Skip'), findsOneWidget);
+    expect(find.text('Choose how you want to continue'), findsOneWidget);
   });
 
   testWidgets('system back on onboarding pages moves to previous page', (

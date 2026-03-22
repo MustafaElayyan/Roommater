@@ -68,74 +68,79 @@ class AuthChoiceScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: _darkTeal,
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: _maxActionsWidth),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(
-                    child: Image.asset(
-                      _logoAsset,
-                      height: 200,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Welcome to Roommater',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: _darkTeal,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: _maxActionsWidth),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Center(
+                        child: Image.asset(
+                          _logoAsset,
+                          height: 200,
+                          fit: BoxFit.contain,
                         ),
-                    textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Welcome to Roommater',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Your shared living, simplified',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Choose how you want to continue',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Create a new team account or sign in to keep organizing your shared lifestyle together.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+                      _buildActionButton(
+                        label: 'SIGN IN',
+                        onPressed: () => context.push(AppRoutes.login),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildActionButton(
+                        label: 'SIGN UP',
+                        onPressed: () => context.push(AppRoutes.register),
+                      ),
+                      _buildOrDivider(),
+                      _buildActionButton(
+                        label: 'CONTINUE AS GUEST',
+                        onPressed: () {
+                          ref.read(isGuestProvider.notifier).state = true;
+                          context.go(AppRoutes.noHousehold);
+                        },
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Your shared living, simplified',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Choose how you want to continue',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Create a new team account or sign in to keep organizing your shared lifestyle together.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  _buildActionButton(
-                    label: 'SIGN IN',
-                    onPressed: () => context.push(AppRoutes.login),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildActionButton(
-                    label: 'SIGN UP',
-                    onPressed: () => context.push(AppRoutes.register),
-                  ),
-                  _buildOrDivider(),
-                  _buildActionButton(
-                    label: 'CONTINUE AS GUEST',
-                    onPressed: () {
-                      ref.read(isGuestProvider.notifier).state = true;
-                      context.go(AppRoutes.noHousehold);
-                    },
-                  ),
-                ],
+                ),
               ),
             ),
           ),
