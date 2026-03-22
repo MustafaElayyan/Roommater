@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../app/router/app_routes.dart';
 
 class EventDetailScreen extends StatefulWidget {
   const EventDetailScreen({super.key, required this.eventId});
@@ -22,6 +25,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     ];
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Event Details'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go(AppRoutes.events),
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

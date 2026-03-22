@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:roommater/app/router/app_router.dart';
 import 'package:roommater/app/router/app_routes.dart';
+import 'package:roommater/core/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
 
 const _onboardingPagesToSwipeToLastPage = 2;
@@ -97,6 +98,22 @@ void main() {
 
     expect(find.text('Skip'), findsOneWidget);
     expect(find.text('Choose how you want to continue'), findsNothing);
+  });
+
+  testWidgets('auth choice back arrow is in app bar', (tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: _RouterHarness(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
+
+    final appBar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(appBar.backgroundColor, equals(AppColors.primaryDark));
+    expect(find.descendant(of: find.byType(AppBar), matching: find.byIcon(Icons.arrow_back)), findsOneWidget);
   });
 
   testWidgets('system back on onboarding pages moves to previous page', (
@@ -210,11 +227,20 @@ void main() {
 
     await tester.tap(find.text('Create Household'));
     await tester.pumpAndSettle();
-    expect(find.text('Create Household'), findsOneWidget);
+    expect(find.text('Name your household'), findsOneWidget);
 
     await tester.tap(find.text('Create'));
     await tester.pumpAndSettle();
-    expect(find.text('Roommater'), findsOneWidget);
+    expect(find.text('Household name is required'), findsOneWidget);
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Household Name'),
+      'Sunrise Apartment 4B',
+    );
+    await tester.tap(find.text('Create'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Home'), findsOneWidget);
   });
 }
 
