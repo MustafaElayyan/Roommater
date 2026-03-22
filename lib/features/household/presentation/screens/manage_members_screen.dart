@@ -9,7 +9,6 @@ class ManageMembersScreen extends StatelessWidget {
     const pending = ['Yousef', 'Nour'];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Manage Members')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

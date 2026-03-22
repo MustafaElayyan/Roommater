@@ -36,19 +36,19 @@ class _JoinHouseholdScreenState extends State<JoinHouseholdScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.go(AppRoutes.noHousehold),
-          ),
-          title: const Text('Join Household'),
-        ),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => context.go(AppRoutes.noHousehold),
+                  ),
+                ),
                 Center(
                   child: Container(
                     width: 110,

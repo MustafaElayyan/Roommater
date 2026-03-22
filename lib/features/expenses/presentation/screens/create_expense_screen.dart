@@ -32,7 +32,6 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
         : '0.00';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Expense')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

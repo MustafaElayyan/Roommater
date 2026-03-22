@@ -18,28 +18,19 @@ class NoHouseholdScreen extends StatelessWidget {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.go(AppRoutes.authChoice),
-          ),
-          title: const Text('Household'),
-        ),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 8),
-                Center(
-                  child: Image.asset(
-                    'Logo.png',
-                    height: 100,
-                    fit: BoxFit.contain,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => context.go(AppRoutes.authChoice),
                   ),
                 ),
-                const SizedBox(height: 20),
                 const Icon(
                   Icons.home_work_outlined,
                   size: 80,

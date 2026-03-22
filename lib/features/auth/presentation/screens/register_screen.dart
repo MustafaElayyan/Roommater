@@ -49,7 +49,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final isLoading = ref.watch(authControllerProvider).isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Account')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
