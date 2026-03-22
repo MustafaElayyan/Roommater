@@ -9,7 +9,13 @@ class ProfileSetupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile Setup')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+        title: const Text('Profile Setup'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(

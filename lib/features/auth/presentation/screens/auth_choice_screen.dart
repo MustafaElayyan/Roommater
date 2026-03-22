@@ -3,13 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../controllers/guest_provider.dart';
 
 /// Screen that lets users explicitly choose sign-up, sign-in, or guest mode.
 class AuthChoiceScreen extends ConsumerWidget {
   const AuthChoiceScreen({super.key});
 
-  static const Color _darkTeal = Color(0xFF13524A);
+  static const Color _primaryDark = AppColors.primaryDark;
   static const String _logoAsset = 'Logo.png';
   static const double _maxActionsWidth = 420;
 
@@ -23,10 +24,10 @@ class AuthChoiceScreen extends ConsumerWidget {
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
-          foregroundColor: _darkTeal,
+          foregroundColor: _primaryDark,
           shape: const StadiumBorder(),
           side: const BorderSide(
-            color: _darkTeal,
+            color: _primaryDark,
             width: 2,
           ),
           textStyle: const TextStyle(
@@ -41,7 +42,7 @@ class AuthChoiceScreen extends ConsumerWidget {
 
   Widget _buildOrDivider() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
           const Expanded(
@@ -70,8 +71,13 @@ class AuthChoiceScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return PopScope(
       canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          context.go(AppRoutes.onboarding);
+        }
+      },
       child: Scaffold(
-        backgroundColor: _darkTeal,
+        backgroundColor: _primaryDark,
         body: SafeArea(
           child: SingleChildScrollView(
             child: Center(
@@ -83,14 +89,21 @@ class AuthChoiceScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: IconButton(
+                          onPressed: () => context.go(AppRoutes.onboarding),
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        ),
+                      ),
                       Center(
                         child: Image.asset(
                           _logoAsset,
-                          height: 200,
+                          height: 140,
                           fit: BoxFit.contain,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                       Text(
                         'Welcome to Roommater',
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -105,7 +118,7 @@ class AuthChoiceScreen extends ConsumerWidget {
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                       Text(
                         'Choose how you want to continue',
                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -120,7 +133,7 @@ class AuthChoiceScreen extends ConsumerWidget {
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 20),
                       _buildActionButton(
                         label: 'SIGN IN',
                         onPressed: () => context.push(AppRoutes.login),
