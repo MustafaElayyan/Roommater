@@ -1,0 +1,14 @@
+# Copy this file to android/local.properties and replace the paths below.
+#
+# Required:
+# - flutter.sdk: absolute path to your Flutter SDK
+# - sdk.dir: absolute path to your Android SDK
+#
+# Optional:
+# - flutter.versionCode / flutter.versionName override app version values.
+
+flutter.sdk=/absolute/path/to/flutter
+sdk.dir=/absolute/path/to/android/sdk
+
+# flutter.versionCode=1
+# flutter.versionName=1.0
