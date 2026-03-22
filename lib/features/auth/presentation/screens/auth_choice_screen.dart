@@ -78,81 +78,80 @@ class AuthChoiceScreen extends ConsumerWidget {
       },
       child: Scaffold(
         backgroundColor: _primaryDark,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: _maxActionsWidth),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: IconButton(
-                          onPressed: () => context.go(AppRoutes.onboarding),
-                          icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        ),
+        appBar: AppBar(
+          backgroundColor: _primaryDark,
+          elevation: 0,
+          leading: IconButton(
+            onPressed: () => context.go(AppRoutes.onboarding),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+          ),
+        ),
+        body: SingleChildScrollView(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: _maxActionsWidth),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Center(
+                      child: Image.asset(
+                        _logoAsset,
+                        height: 140,
+                        fit: BoxFit.contain,
                       ),
-                      Center(
-                        child: Image.asset(
-                          _logoAsset,
-                          height: 140,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Welcome to Roommater',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Your shared living, simplified',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Choose how you want to continue',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Create a new team account or sign in to keep organizing your shared lifestyle together.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 20),
-                      _buildActionButton(
-                        label: 'SIGN IN',
-                        onPressed: () => context.push(AppRoutes.login),
-                      ),
-                      const SizedBox(height: 12),
-                      _buildActionButton(
-                        label: 'SIGN UP',
-                        onPressed: () => context.push(AppRoutes.register),
-                      ),
-                      _buildOrDivider(),
-                      _buildActionButton(
-                        label: 'CONTINUE AS GUEST',
-                        onPressed: () {
-                          ref.read(isGuestProvider.notifier).state = true;
-                          context.go(AppRoutes.noHousehold);
-                        },
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Welcome to Roommater',
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Your shared living, simplified',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Choose how you want to continue',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Create a new team account or sign in to keep organizing your shared lifestyle together.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    _buildActionButton(
+                      label: 'SIGN IN',
+                      onPressed: () => context.push(AppRoutes.login),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildActionButton(
+                      label: 'SIGN UP',
+                      onPressed: () => context.push(AppRoutes.register),
+                    ),
+                    _buildOrDivider(),
+                    _buildActionButton(
+                      label: 'CONTINUE AS GUEST',
+                      onPressed: () {
+                        ref.read(isGuestProvider.notifier).state = true;
+                        context.go(AppRoutes.noHousehold);
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CreateExpenseScreen extends StatefulWidget {
   const CreateExpenseScreen({super.key});
@@ -32,6 +33,13 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
         : '0.00';
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Create Expense'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
