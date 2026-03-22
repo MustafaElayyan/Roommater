@@ -21,7 +21,8 @@ void main() {
     expect(find.text('Get Started'), findsNothing);
   });
 
-  testWidgets('onboarding skip navigates to auth choice screen', (tester) async {
+  testWidgets('onboarding skip navigates to auth choice screen',
+      (tester) async {
     await tester.pumpWidget(
       const ProviderScope(
         child: _RouterHarness(),
@@ -131,7 +132,7 @@ void main() {
 
     await tester.tap(find.text('Complete Setup'));
     await tester.pumpAndSettle();
-    expect(find.text(\"You're not in a household\"), findsOneWidget);
+    expect(find.text('You\'re not in a household'), findsOneWidget);
 
     await tester.tap(find.text('Create Household'));
     await tester.pumpAndSettle();

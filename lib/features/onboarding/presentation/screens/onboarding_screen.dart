@@ -49,8 +49,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppColors.primaryLight.withValues(alpha: 0.18),
-                AppColors.primary.withValues(alpha: 0.12),
+                AppColors.primaryLight.withOpacity(0.18),
+                AppColors.primary.withOpacity(0.12),
               ],
             ),
           ),
@@ -59,10 +59,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           width: 160,
           height: 160,
           decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.14),
+            color: AppColors.primary.withOpacity(0.14),
             borderRadius: BorderRadius.circular(32),
             border: Border.all(
-              color: AppColors.primaryDark.withValues(alpha: 0.32),
+              color: AppColors.primaryDark.withOpacity(0.32),
               width: 2,
             ),
           ),
@@ -83,7 +83,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final isLastPage = currentIndex == pages.length - 1;
     return PopScope(
       canPop: currentIndex == 0,
-      onPopInvokedWithResult: (didPop, _) {
+      // Change this line:
+      onPopInvoked: (didPop) {
         if (!didPop && currentIndex > 0) {
           _pageController.previousPage(
             duration: const Duration(milliseconds: 250),
@@ -109,7 +110,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     controller: _pageController,
                     itemCount: pages.length,
                     onPageChanged: (index) {
-                      ref.read(onboardingPageIndexProvider.notifier).state = index;
+                      ref.read(onboardingPageIndexProvider.notifier).state =
+                          index;
                     },
                     itemBuilder: (context, index) {
                       final page = pages[index];
@@ -125,7 +127,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           const SizedBox(height: 16),
                           Text(
                             page.title,
-                            style: Theme.of(context).textTheme.headlineSmall
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
                                 ?.copyWith(fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),

@@ -13,7 +13,7 @@ Future<void> main() async {
 
   // Firebase is initialised from the platform-specific google-services.json /
   // GoogleService-Info.plist files.  No secrets are hardcoded in Dart.
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
 
   runApp(
     const ProviderScope(
