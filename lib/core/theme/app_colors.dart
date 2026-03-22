@@ -5,23 +5,23 @@ import 'package:flutter/material.dart';
 /// Use only these constants throughout the app to ensure visual consistency.
 abstract final class AppColors {
   // Primary brand colours
-  static const Color primary = Color(0xFFC19A6B);
-  static const Color primaryDark = Color(0xFF8B6B45);
-  static const Color primaryLight = Color(0xFFD8BE9B);
+  static const Color primary = Color(0xFF1D7B6F);
+  static const Color primaryDark = Color(0xFF13524A);
+  static const Color primaryLight = Color(0xFF23967F);
 
   // Accent
-  static const Color accent = Color(0xFFFF7043);
+  static const Color accent = Color(0xFF23967F);
 
   // Neutral
-  static const Color backgroundLight = Color(0xFFC19A6B);
-  static const Color backgroundDark = Color(0xFFC19A6B);
+  static const Color backgroundLight = Color(0xFFE8F5F2);
+  static const Color backgroundDark = Color(0xFF13524A);
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceDark = Color(0xFF4D3924);
+  static const Color surfaceDark = Color(0xFF0E3D37);
 
   // Text
-  static const Color textPrimary = Color(0xFF2D2115);
-  static const Color textSecondary = Color(0xFF4D3924);
-  static const Color textOnPrimary = Color(0xFF1A130B);
+  static const Color textPrimary = Color(0xFF0E2E29);
+  static const Color textSecondary = Color(0xFF13524A);
+  static const Color textOnPrimary = Color(0xFFFFFFFF);
 
   // Status
   static const Color success = Color(0xFF4CAF50);

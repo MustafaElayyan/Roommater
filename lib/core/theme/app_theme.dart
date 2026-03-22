@@ -43,7 +43,7 @@ abstract final class AppTheme {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryDark,
+            backgroundColor: AppColors.primaryLight,
             foregroundColor: Colors.white,
             minimumSize: const Size(double.infinity, 48),
             shape: const RoundedRectangleBorder(
@@ -65,7 +65,7 @@ abstract final class AppTheme {
           focusedBorder: const OutlineInputBorder(
             borderRadius: _inputBorderRadius,
             borderSide: BorderSide(
-              color: AppColors.primaryDark,
+              color: AppColors.primary,
               width: 2,
             ),
           ),
@@ -86,7 +86,7 @@ abstract final class AppTheme {
           disabledBorder: const OutlineInputBorder(
             borderRadius: _inputBorderRadius,
             borderSide: BorderSide(
-              color: Color(0x994D3924),
+              color: Color(0x9913524A),
               width: 1.2,
             ),
           ),
@@ -100,19 +100,19 @@ abstract final class AppTheme {
           seedColor: AppColors.primary,
           brightness: Brightness.dark,
           primary: AppColors.primaryDark,
-          onPrimary: Colors.white,
+          onPrimary: AppColors.textOnPrimary,
           surface: AppColors.surfaceDark,
           onSurface: Colors.white,
         ),
-        scaffoldBackgroundColor: AppColors.primary,
+        scaffoldBackgroundColor: AppColors.backgroundDark,
         appBarTheme: const AppBarTheme(
           backgroundColor: AppColors.primaryDark,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.textOnPrimary,
           elevation: 0,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.surfaceDark,
+            backgroundColor: AppColors.primaryLight,
             foregroundColor: Colors.white,
             minimumSize: const Size(double.infinity, 48),
             shape: const RoundedRectangleBorder(
@@ -134,7 +134,7 @@ abstract final class AppTheme {
           focusedBorder: const OutlineInputBorder(
             borderRadius: _inputBorderRadius,
             borderSide: BorderSide(
-              color: AppColors.primaryLight,
+              color: AppColors.primary,
               width: 2,
             ),
           ),

@@ -9,7 +9,8 @@ import '../controllers/guest_provider.dart';
 class AuthChoiceScreen extends ConsumerWidget {
   const AuthChoiceScreen({super.key});
 
-  static const Color _camelBackground = Color(0xFFC19A6B);
+  static const Color _darkTealBackground = Color(0xFF13524A);
+  static const Color _darkTeal = Color(0xFF13524A);
   static const double _maxActionsWidth = 420;
 
   Widget _buildActionButton({
@@ -22,10 +23,10 @@ class AuthChoiceScreen extends ConsumerWidget {
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
+          foregroundColor: _darkTeal,
           shape: const StadiumBorder(),
           side: const BorderSide(
-            color: Colors.black54,
+            color: _darkTeal,
             width: 2,
           ),
           textStyle: const TextStyle(
@@ -44,21 +45,21 @@ class AuthChoiceScreen extends ConsumerWidget {
       child: Row(
         children: [
           const Expanded(
-            child: Divider(color: Colors.black54, thickness: 1),
+            child: Divider(color: Colors.white70, thickness: 1),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
               'OR',
               style: const TextStyle(
-                color: Colors.black54,
+                color: Colors.white70,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 1,
               ),
             ),
           ),
           const Expanded(
-            child: Divider(color: Colors.black54, thickness: 1),
+            child: Divider(color: Colors.white70, thickness: 1),
           ),
         ],
       ),
@@ -68,7 +69,7 @@ class AuthChoiceScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: _camelBackground,
+      backgroundColor: _darkTealBackground,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -76,11 +77,35 @@ class AuthChoiceScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 32),
+              Center(
+                child: Image.asset(
+                  'Logo.png',
+                  height: 120,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Welcome to Roommater',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Your shared living, simplified',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: Colors.white70),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
               Text(
                 'Choose how you want to continue',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Colors.white,
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -89,7 +114,7 @@ class AuthChoiceScreen extends ConsumerWidget {
                 'Create a new team account or sign in to keep organizing your shared lifestyle together.',
                 style: Theme.of(
                   context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.black87),
+                ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
                 textAlign: TextAlign.center,
               ),
               Expanded(
