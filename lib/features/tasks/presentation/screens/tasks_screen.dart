@@ -57,6 +57,13 @@ class _TasksScreenState extends State<TasksScreen> {
         : _tasks;
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Tasks'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go(AppRoutes.home),
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
