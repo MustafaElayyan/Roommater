@@ -29,22 +29,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     context.push(AppRoutes.authChoice);
   }
 
-  Future<bool> _handleWillPop(int currentIndex) async {
-    if (currentIndex == 0) return true;
-
-    await _pageController.previousPage(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeInOut,
-    );
-    return false;
-  }
-
   Widget _buildIllustration(int index) {
     const icons = [
       Icons.home_outlined,
       Icons.assignment_turned_in_outlined,
       Icons.trending_up_outlined,
     ];
+    final icon = icons[index % icons.length];
 
     return Stack(
       alignment: Alignment.center,
@@ -76,7 +67,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ),
           child: Icon(
-            icons[index],
+            icon,
             size: 72,
             color: AppColors.primaryDark,
           ),
@@ -90,8 +81,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final currentIndex = ref.watch(onboardingPageIndexProvider);
     final pages = ref.watch(onboardingPagesProvider);
     final isLastPage = currentIndex == pages.length - 1;
-    return WillPopScope(
-      onWillPop: () => _handleWillPop(currentIndex),
+    return PopScope(
+      canPop: currentIndex == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && currentIndex > 0) {
+          _pageController.previousPage(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+          );
+        }
+      },
       child: Scaffold(
         body: SafeArea(
           child: Padding(
