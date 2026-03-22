@@ -9,8 +9,8 @@ import '../controllers/guest_provider.dart';
 class AuthChoiceScreen extends ConsumerWidget {
   const AuthChoiceScreen({super.key});
 
-  static const Color _darkTealBackground = Color(0xFF13524A);
   static const Color _darkTeal = Color(0xFF13524A);
+  static const String _logoAsset = 'Logo.png';
   static const double _maxActionsWidth = 420;
 
   Widget _buildActionButton({
@@ -69,7 +69,7 @@ class AuthChoiceScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: _darkTealBackground,
+      backgroundColor: _darkTeal,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -79,7 +79,7 @@ class AuthChoiceScreen extends ConsumerWidget {
               const SizedBox(height: 32),
               Center(
                 child: Image.asset(
-                  'Logo.png',
+                  _logoAsset,
                   height: 120,
                 ),
               ),

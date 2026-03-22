@@ -15,6 +15,8 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
+  static const Color _activeDotColor = Colors.white;
+  static const Color _inactiveDotColor = Color(0x66FFFFFF);
 
   @override
   void dispose() {
@@ -94,8 +96,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
                       color: currentIndex == index
-                          ? Colors.white
-                          : Colors.white.withOpacity(0.4),
+                          ? _activeDotColor
+                          : _inactiveDotColor,
                       shape: BoxShape.circle,
                     ),
                   ),
