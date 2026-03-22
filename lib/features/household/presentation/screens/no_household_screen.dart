@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class NoHouseholdScreen extends StatelessWidget {
   const NoHouseholdScreen({super.key});
@@ -16,25 +17,81 @@ class NoHouseholdScreen extends StatelessWidget {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Household')),
-        body: Center(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go(AppRoutes.authChoice),
+          ),
+          title: const Text('Household'),
+        ),
+        body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.home_work_outlined, size: 60),
-                const SizedBox(height: 16),
-                const Text("You're not in a household"),
+                const SizedBox(height: 8),
+                Center(
+                  child: Image.asset(
+                    'Logo.png',
+                    height: 100,
+                    fit: BoxFit.contain,
+                  ),
+                ),
                 const SizedBox(height: 20),
-                FilledButton(
-                  onPressed: () => context.go(AppRoutes.createHousehold),
-                  child: const Text('Create Household'),
+                const Icon(
+                  Icons.home_work_outlined,
+                  size: 80,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  "You're not in a household",
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                OutlinedButton(
-                  onPressed: () => context.go(AppRoutes.joinHousehold),
-                  child: const Text('Join Household'),
+                Text(
+                  'Create a new household or join an existing one to get started.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: FilledButton.icon(
+                    onPressed: () => context.go(AppRoutes.createHousehold),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.add_home_outlined),
+                    label: const Text('Create Household'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: OutlinedButton.icon(
+                    onPressed: () => context.go(AppRoutes.joinHousehold),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.group_add_outlined),
+                    label: const Text('Join Household'),
+                  ),
                 ),
               ],
             ),
