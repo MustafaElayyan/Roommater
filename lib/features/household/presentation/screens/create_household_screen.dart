@@ -8,19 +8,29 @@ class CreateHouseholdScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Create Household')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const TextField(decoration: InputDecoration(labelText: 'Household Name')),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => context.go(AppRoutes.home),
-              child: const Text('Create'),
-            ),
-          ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          context.go(AppRoutes.noHousehold);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Create Household')),
+        body: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              const TextField(
+                decoration: InputDecoration(labelText: 'Household Name'),
+              ),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: () => context.go(AppRoutes.home),
+                child: const Text('Create'),
+              ),
+            ],
+          ),
         ),
       ),
     );
