@@ -33,11 +33,16 @@ class AuthRemoteDataSource {
   Future<UserModel> signUp({
     required String email,
     required String password,
+    String? displayName,
   }) async {
     try {
       final response = await _apiClient.postJson(
         'auth/signup',
-        body: {'email': email, 'password': password},
+        body: {
+          'email': email,
+          'password': password,
+          if (displayName != null) 'displayName': displayName,
+        },
         requiresAuth: false,
       );
       final token = response['token'] as String?;

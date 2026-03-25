@@ -37,12 +37,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
     if (!mounted) return;
     final authState = ref.read(authControllerProvider);
-    authState.whenOrNull(
-      error: (e, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      ),
-      data: (_) => context.go(AppRoutes.noHousehold),
-    );
+    if (authState.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(authState.error.toString())),
+      );
+      return;
+    }
+    final user = await ref.refresh(authStateProvider.future);
+    if (!mounted) return;
+    final hasDisplayName = user?.displayName?.trim().isNotEmpty ?? false;
+    context.go(hasDisplayName ? AppRoutes.noHousehold : AppRoutes.profileSetup);
   }
 
   @override

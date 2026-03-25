@@ -18,6 +18,7 @@ abstract interface class AuthRepository {
   Future<UserEntity> signUp({
     required String email,
     required String password,
+    String? displayName,
   });
 
   /// Signs out the current user.
