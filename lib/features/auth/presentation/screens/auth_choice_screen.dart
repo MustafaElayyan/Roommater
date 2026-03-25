@@ -41,27 +41,23 @@ class AuthChoiceScreen extends ConsumerWidget {
   }
 
   Widget _buildOrDivider() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          const Expanded(
-            child: Divider(color: Colors.white70, thickness: 1),
-          ),
+          Expanded(child: Divider(color: Colors.white70, thickness: 1)),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: EdgeInsets.symmetric(horizontal: 12),
             child: Text(
               'OR',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white70,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 1,
               ),
             ),
           ),
-          const Expanded(
-            child: Divider(color: Colors.white70, thickness: 1),
-          ),
+          Expanded(child: Divider(color: Colors.white70, thickness: 1)),
         ],
       ),
     );

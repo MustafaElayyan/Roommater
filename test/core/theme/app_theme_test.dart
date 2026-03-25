@@ -14,11 +14,11 @@ void main() {
     final darkStyle = AppTheme.dark.elevatedButtonTheme.style;
 
     expect(
-      lightStyle?.backgroundColor?.resolve(<MaterialState>{}),
+      lightStyle?.backgroundColor?.resolve(<WidgetState>{}),
       AppColors.primaryLight,
     );
     expect(
-      darkStyle?.backgroundColor?.resolve(<MaterialState>{}),
+      darkStyle?.backgroundColor?.resolve(<WidgetState>{}),
       AppColors.primaryLight,
     );
   });
