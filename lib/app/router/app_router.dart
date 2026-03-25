@@ -156,7 +156,7 @@ class _MainShell extends StatelessWidget {
       case 1:
         return 'Tasks';
       case 2:
-        return 'Grocery';
+        return 'Grocery List';
       case 3:
         return 'Events';
       case 4:
@@ -223,7 +223,7 @@ class _MainShell extends StatelessWidget {
                   onTap: () => goToShellRoute(AppRoutes.grocery),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.event_outlined),
+                  leading: const Icon(Icons.calendar_month_outlined),
                   title: const Text('Events'),
                   onTap: () => goToShellRoute(AppRoutes.events),
                 ),
