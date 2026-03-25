@@ -99,7 +99,7 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
           const SizedBox(height: 24),
           FilledButton(
             onPressed: hasSplitMembers ? () => Navigator.of(context).pop() : null,
-            child: const Text('Submit'),
+            child: const Text('Create Expense'),
           ),
         ],
       ),

@@ -18,6 +18,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   static const Color _activeDotColor = AppColors.primary;
   static const Color _inactiveDotColor = Color(0x441D7B6F);
+  static const double _skipButtonReplacementHeight = 40;
 
   @override
   void dispose() {
@@ -98,13 +99,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: _goToAuthChoice,
-                    child: const Text('Skip'),
+                if (isLastPage)
+                  const SizedBox(height: _skipButtonReplacementHeight)
+                else
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _goToAuthChoice,
+                      child: const Text('Skip'),
+                    ),
                   ),
-                ),
                 Expanded(
                   child: PageView.builder(
                     controller: _pageController,

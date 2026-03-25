@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/screens/auth_choice_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -49,9 +50,33 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.profileSetup,
         builder: (context, state) => const ProfileSetupScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.home,
-        builder: (context, state) => const HomeScreen(),
+      ShellRoute(
+        builder: (context, state, child) => _MainShell(
+          location: state.matchedLocation,
+          child: child,
+        ),
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            builder: (context, state) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.tasks,
+            builder: (context, state) => const TasksScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.grocery,
+            builder: (context, state) => const GroceryScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.events,
+            builder: (context, state) => const EventsScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.expenses,
+            builder: (context, state) => const ExpensesScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: AppRoutes.noHousehold,
@@ -70,20 +95,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ManageMembersScreen(),
       ),
       GoRoute(
-        path: AppRoutes.tasks,
-        builder: (context, state) => const TasksScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.createTask,
         builder: (context, state) => const CreateTaskScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.grocery,
-        builder: (context, state) => const GroceryScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.events,
-        builder: (context, state) => const EventsScreen(),
       ),
       GoRoute(
         path: AppRoutes.createEvent,
@@ -95,10 +108,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final id = state.pathParameters['id'] ?? '';
           return EventDetailScreen(eventId: id);
         },
-      ),
-      GoRoute(
-        path: AppRoutes.expenses,
-        builder: (context, state) => const ExpensesScreen(),
       ),
       GoRoute(
         path: AppRoutes.createExpense,
@@ -119,3 +128,168 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+class _MainShell extends StatelessWidget {
+  const _MainShell({required this.location, required this.child});
+
+  final String location;
+  final Widget child;
+
+  static const _tabs = <String>[
+    AppRoutes.home,
+    AppRoutes.tasks,
+    AppRoutes.grocery,
+    AppRoutes.events,
+    AppRoutes.expenses,
+  ];
+
+  int _selectedIndex() {
+    if (location.startsWith(AppRoutes.tasks)) return 1;
+    if (location.startsWith(AppRoutes.grocery)) return 2;
+    if (location.startsWith(AppRoutes.events)) return 3;
+    if (location.startsWith(AppRoutes.expenses)) return 4;
+    return 0;
+  }
+
+  String _title() {
+    switch (_selectedIndex()) {
+      case 1:
+        return 'Tasks';
+      case 2:
+        return 'Grocery List';
+      case 3:
+        return 'Events';
+      case 4:
+        return 'Expenses';
+      default:
+        return 'Dashboard';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedIndex = _selectedIndex();
+
+    void goToShellRoute(String route) {
+      Navigator.of(context).pop();
+      context.go(route);
+    }
+
+    void pushToTopLevelRoute(String route) {
+      Navigator.of(context).pop();
+      context.push(route);
+    }
+
+    return PopScope(
+      canPop: selectedIndex == 0,
+      onPopInvoked: (didPop) {
+        if (!didPop && selectedIndex != 0) {
+          context.go(AppRoutes.home);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_title()),
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+          ),
+        ),
+        drawer: Drawer(
+          child: SafeArea(
+            child: ListView(
+              children: [
+                const DrawerHeader(
+                  child: Text(
+                    'Menu',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.home_outlined),
+                  title: const Text('Dashboard / Home'),
+                  onTap: () => goToShellRoute(AppRoutes.home),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.checklist_outlined),
+                  title: const Text('Tasks'),
+                  onTap: () => goToShellRoute(AppRoutes.tasks),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.shopping_cart_outlined),
+                  title: const Text('Grocery'),
+                  onTap: () => goToShellRoute(AppRoutes.grocery),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.calendar_month_outlined),
+                  title: const Text('Events'),
+                  onTap: () => goToShellRoute(AppRoutes.events),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.account_balance_wallet_outlined),
+                  title: const Text('Expenses'),
+                  onTap: () => goToShellRoute(AppRoutes.expenses),
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.person_outline),
+                  title: const Text('Profile'),
+                  onTap: () => pushToTopLevelRoute(AppRoutes.profile),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.settings_outlined),
+                  title: const Text('Settings'),
+                  onTap: () => pushToTopLevelRoute(AppRoutes.settings),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.group_outlined),
+                  title: const Text('Manage Members'),
+                  onTap: () => pushToTopLevelRoute(AppRoutes.manageMembers),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.notifications_outlined),
+                  title: const Text('Notifications'),
+                  onTap: () => pushToTopLevelRoute(AppRoutes.notifications),
+                ),
+              ],
+            ),
+          ),
+        ),
+        body: child,
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: selectedIndex,
+          onDestinationSelected: (i) => context.go(_tabs[i]),
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.checklist_outlined),
+              selectedIcon: Icon(Icons.checklist),
+              label: 'Tasks',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.shopping_cart_outlined),
+              selectedIcon: Icon(Icons.shopping_cart),
+              label: 'Grocery',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.calendar_month_outlined),
+              selectedIcon: Icon(Icons.calendar_month),
+              label: 'Events',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.account_balance_wallet_outlined),
+              selectedIcon: Icon(Icons.account_balance_wallet),
+              label: 'Expenses',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
