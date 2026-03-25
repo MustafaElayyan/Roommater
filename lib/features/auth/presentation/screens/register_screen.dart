@@ -39,12 +39,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         );
     if (!mounted) return;
     final authState = ref.read(authControllerProvider);
-    authState.whenOrNull(
-      error: (e, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      ),
-      data: (_) => context.go(AppRoutes.noHousehold),
-    );
+    if (authState.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(authState.error.toString())),
+      );
+      return;
+    }
+    await ref.refresh(authStateProvider.future);
+    if (!mounted) return;
+    context.go(AppRoutes.noHousehold);
   }
 
   @override

@@ -166,14 +166,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
+/// Bridges Riverpod auth state updates to GoRouter via [refreshListenable].
 class _RouterNotifier extends ChangeNotifier {
   _RouterNotifier(this._ref) {
-    _ref.listen<AsyncValue<UserEntity?>>(authStateProvider, (_, __) {
-      notifyListeners();
-    });
+    _subscription = _ref.listenManual<AsyncValue<UserEntity?>>(
+      authStateProvider,
+      (previous, next) {
+        notifyListeners();
+      },
+    );
   }
 
   final Ref _ref;
+  late final ProviderSubscription<AsyncValue<UserEntity?>> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.close();
+    super.dispose();
+  }
 }
 
 class _MainShell extends StatelessWidget {
