@@ -24,10 +24,15 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 
 class ApiClientConfig {
   const ApiClientConfig({
-    this.baseUrl = 'http://localhost:5000/api/',
+    this.baseUrl = androidEmulatorBaseUrl,
     this.jwtTokenKey = 'auth_jwt',
     this.timeout = const Duration(seconds: 30),
   });
+
+  static const String androidEmulatorBaseUrl = 'http://10.0.2.2:5073/api/';
+  // For physical devices, replace with your machine LAN IP (example below).
+  static const String physicalDeviceBaseUrlExample =
+      'http://192.168.1.100:5073/api/';
 
   final String baseUrl;
   final String jwtTokenKey;
