@@ -72,9 +72,9 @@ class _DashboardTab extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         Text('Upcoming Events', style: Theme.of(context).textTheme.titleMedium),
-        Card(
+        const Card(
           child: Column(
-            children: const [
+            children: [
               ListTile(
                 leading: Icon(Icons.event),
                 title: Text('House Meeting'),
@@ -93,9 +93,9 @@ class _DashboardTab extends ConsumerWidget {
           'Recent Notifications',
           style: Theme.of(context).textTheme.titleMedium,
         ),
-        Card(
+        const Card(
           child: Column(
-            children: const [
+            children: [
               ListTile(
                 leading: Icon(Icons.notifications_none),
                 title: Text('Ahmad completed Kitchen cleaning task'),

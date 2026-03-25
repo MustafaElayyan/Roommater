@@ -43,14 +43,14 @@ class ExpensesScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
+          const Card(
             child: ListTile(
               title: const Text('You owe Ahmad'),
               subtitle: const Text('5 JOD'),
               leading: const Icon(Icons.arrow_upward, color: Colors.red),
             ),
           ),
-          Card(
+          const Card(
             child: ListTile(
               title: const Text('Lana owes you'),
               subtitle: const Text('3 JOD'),

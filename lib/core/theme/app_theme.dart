@@ -46,7 +46,7 @@ abstract final class AppTheme {
             ),
           ),
         ),
-        inputDecorationTheme: InputDecorationTheme(
+        inputDecorationTheme: const InputDecorationTheme(
           border: _lightDefaultInputBorder,
           enabledBorder: _lightDefaultInputBorder,
           labelStyle: const TextStyle(
@@ -110,7 +110,7 @@ abstract final class AppTheme {
             ),
           ),
         ),
-        inputDecorationTheme: InputDecorationTheme(
+        inputDecorationTheme: const InputDecorationTheme(
           border: _darkDefaultInputBorder,
           enabledBorder: _darkDefaultInputBorder,
           labelStyle: const TextStyle(
