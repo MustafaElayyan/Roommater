@@ -3,7 +3,7 @@ import '../../domain/repositories/listing_repository.dart';
 import '../datasources/listing_remote_datasource.dart';
 import '../models/listing_model.dart';
 
-/// Firebase-backed implementation of [ListingRepository].
+/// API-backed implementation of [ListingRepository].
 class ListingRepositoryImpl implements ListingRepository {
   const ListingRepositoryImpl(this._dataSource);
 

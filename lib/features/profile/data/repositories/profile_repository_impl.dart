@@ -3,7 +3,7 @@ import '../../domain/repositories/profile_repository.dart';
 import '../datasources/profile_remote_datasource.dart';
 import '../models/profile_model.dart';
 
-/// Firebase-backed implementation of [ProfileRepository].
+/// API-backed implementation of [ProfileRepository].
 class ProfileRepositoryImpl implements ProfileRepository {
   const ProfileRepositoryImpl(this._dataSource);
 

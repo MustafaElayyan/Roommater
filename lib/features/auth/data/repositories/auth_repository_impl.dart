@@ -3,7 +3,7 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
 
-/// Concrete implementation of [AuthRepository] backed by Firebase Auth.
+/// Concrete implementation of [AuthRepository] backed by the API datasource.
 class AuthRepositoryImpl implements AuthRepository {
   const AuthRepositoryImpl(this._dataSource);
 
@@ -42,8 +42,6 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  @override
-  Stream<UserEntity?> get authStateChanges => _dataSource.authStateChanges;
   @override
   Stream<UserEntity?> get authStateChanges async* {
     yield await _dataSource.getCurrentUser();

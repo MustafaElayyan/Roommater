@@ -26,7 +26,7 @@ class AuthRemoteDataSource {
       await _apiClient.writeToken(token);
       return UserModel.fromJson(userJson);
     } on AppException catch (e) {
-      throw AuthException(e.message ?? 'Sign-in failed.', e);
+      throw AuthException(e.message, e);
     }
   }
 
@@ -48,7 +48,7 @@ class AuthRemoteDataSource {
       await _apiClient.writeToken(token);
       return UserModel.fromJson(userJson);
     } on AppException catch (e) {
-      throw AuthException(e.message ?? 'Sign-up failed.', e);
+      throw AuthException(e.message, e);
     }
   }
 
@@ -56,7 +56,7 @@ class AuthRemoteDataSource {
     try {
       await _apiClient.clearToken();
     } on AppException catch (e) {
-      throw AuthException(e.message ?? 'Sign-out failed.', e);
+      throw AuthException(e.message, e);
     }
   }
 

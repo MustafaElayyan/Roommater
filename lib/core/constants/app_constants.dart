@@ -8,13 +8,13 @@ abstract final class AppConstants {
   static const String appName = 'Roommater';
   static const String appVersion = '0.1.0';
 
-  // Firestore collection names
+  // API resource names
   static const String usersCollection = 'users';
   static const String listingsCollection = 'listings';
   static const String chatsCollection = 'chats';
   static const String messagesSubcollection = 'messages';
 
-  // Firebase Storage paths
+  // Media resource paths
   static const String avatarStoragePath = 'avatars';
   static const String listingImagesStoragePath = 'listing_images';
 
