@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-
-import '../../../../app/router/app_routes.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../../../shared/widgets/confirmation_dialog.dart';
 import '../controllers/home_controller.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -13,132 +7,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabIndex = ref.watch(homeTabIndexProvider);
-
-    return Scaffold(
-      drawer: Drawer(
-        child: SafeArea(
-          child: ListView(
-            children: [
-              const DrawerHeader(
-                margin: EdgeInsets.zero,
-                decoration: BoxDecoration(color: AppColors.primaryDark),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Image(
-                      image: AssetImage('Logo.png'),
-                      height: 56,
-                      fit: BoxFit.contain,
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Household Menu',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1, thickness: 1),
-              ListTile(
-                leading: const Icon(Icons.person_outline),
-                title: const Text('Profile'),
-                onTap: () => context.go(AppRoutes.profile),
-              ),
-              ListTile(
-                leading: const Icon(Icons.settings_outlined),
-                title: const Text('Settings'),
-                onTap: () => context.go(AppRoutes.settings),
-              ),
-              ListTile(
-                leading: const Icon(Icons.group_outlined),
-                title: const Text('Manage Members'),
-                onTap: () => context.go(AppRoutes.manageMembers),
-              ),
-              ListTile(
-                leading: const Icon(Icons.exit_to_app),
-                title: const Text('Leave Household'),
-                onTap: () async {
-                  final shouldLeave = await showDialog<bool>(
-                    context: context,
-                    builder: (_) => const ConfirmationDialog(
-                      title: 'Leave Household',
-                      message: 'Are you sure you want to leave this household?',
-                      confirmLabel: 'Leave',
-                    ),
-                  );
-                  if (context.mounted && (shouldLeave ?? false)) {
-                    context.go(AppRoutes.noHousehold);
-                  }
-                },
-              ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.logout, color: AppColors.error),
-                title: const Text(
-                  'Logout',
-                  style: TextStyle(color: AppColors.error),
-                ),
-                onTap: () async {
-                  Navigator.of(context).pop();
-                  await ref.read(authControllerProvider.notifier).signOut();
-                  if (context.mounted) {
-                    context.go(AppRoutes.authChoice);
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-      body: IndexedStack(
-        index: tabIndex,
-        children: const [
-          _DashboardTab(),
-          _RouteTab(title: 'Tasks', route: AppRoutes.tasks),
-          _RouteTab(title: 'Grocery', route: AppRoutes.grocery),
-          _RouteTab(title: 'Events', route: AppRoutes.events),
-          _RouteTab(title: 'Expenses', route: AppRoutes.expenses),
-        ],
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: tabIndex,
-        onDestinationSelected: (i) =>
-            ref.read(homeTabIndexProvider.notifier).state = i,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.checklist_outlined),
-            selectedIcon: Icon(Icons.checklist),
-            label: 'Tasks',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.shopping_cart_outlined),
-            selectedIcon: Icon(Icons.shopping_cart),
-            label: 'Grocery',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_month_outlined),
-            selectedIcon: Icon(Icons.calendar_month),
-            label: 'Events',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: Icon(Icons.account_balance_wallet),
-            label: 'Expenses',
-          ),
-        ],
-      ),
-    );
+    return const _DashboardTab();
   }
 }
 
@@ -250,23 +119,5 @@ class _DashboardTab extends ConsumerWidget {
     final next = [...ref.read(homeTaskChecksProvider)];
     next[index] = value ?? false;
     ref.read(homeTaskChecksProvider.notifier).state = next;
-  }
-}
-
-class _RouteTab extends StatelessWidget {
-  const _RouteTab({required this.title, required this.route});
-
-  final String title;
-  final String route;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: FilledButton.icon(
-        onPressed: () => context.go(route),
-        icon: const Icon(Icons.open_in_new),
-        label: Text('Open $title'),
-      ),
-    );
   }
 }

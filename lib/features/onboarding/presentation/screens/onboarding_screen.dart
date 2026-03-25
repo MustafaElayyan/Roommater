@@ -98,13 +98,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: _goToAuthChoice,
-                    child: const Text('Skip'),
+                if (isLastPage)
+                  const SizedBox(height: 40)
+                else
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _goToAuthChoice,
+                      child: const Text('Skip'),
+                    ),
                   ),
-                ),
                 Expanded(
                   child: PageView.builder(
                     controller: _pageController,
