@@ -1,64 +1,60 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/app_exception.dart';
+import '../../../../core/network/api_client.dart';
 import '../models/listing_model.dart';
 
-/// Handles all Firestore calls related to listings.
+/// Handles all listings API calls.
 class ListingRemoteDataSource {
-  const ListingRemoteDataSource(this._firestore);
+  const ListingRemoteDataSource(this._apiClient);
 
-  final FirebaseFirestore _firestore;
-
-  CollectionReference<Map<String, dynamic>> get _col =>
-      _firestore.collection(AppConstants.listingsCollection);
+  final ApiClient _apiClient;
 
   Future<List<ListingModel>> getListings({
     int limit = 20,
     String? startAfterId,
   }) async {
     try {
-      Query<Map<String, dynamic>> query =
-          _col.where('isAvailable', isEqualTo: true).limit(limit);
-      if (startAfterId != null) {
-        final snapshot = await _col.doc(startAfterId).get();
-        query = query.startAfterDocument(snapshot);
-      }
-      final result = await query.get();
-      return result.docs
-          .map((d) => ListingModel.fromFirestore(d.id, d.data()))
+      final response = await _apiClient.getJsonList(
+        'listings',
+        queryParameters: {
+          'limit': limit,
+          if (startAfterId != null) 'startAfterId': startAfterId,
+        },
+      );
+      return response
+          .whereType<Map<String, dynamic>>()
+          .map(ListingModel.fromJson)
           .toList();
-    } catch (e) {
-      throw FirestoreException('Failed to load listings.', e);
+    } on AppException catch (e) {
+      throw ApiException('Failed to load listings.', e);
     }
   }
 
   Future<ListingModel> getListingById(String id) async {
     try {
-      final doc = await _col.doc(id).get();
-      if (!doc.exists) {
-        throw const FirestoreException('Listing not found.');
-      }
-      return ListingModel.fromFirestore(doc.id, doc.data()!);
-    } catch (e) {
-      throw FirestoreException('Failed to load listing.', e);
+      final response = await _apiClient.getJson('listings/$id');
+      return ListingModel.fromJson(response);
+    } on AppException catch (e) {
+      throw ApiException('Failed to load listing.', e);
     }
   }
 
   Future<ListingModel> createListing(ListingModel listing) async {
     try {
-      final ref = await _col.add(listing.toFirestore());
-      return ListingModel.fromFirestore(ref.id, listing.toFirestore());
-    } catch (e) {
-      throw FirestoreException('Failed to create listing.', e);
+      final response = await _apiClient.postJson(
+        'listings',
+        body: listing.toJson(),
+      );
+      return ListingModel.fromJson(response);
+    } on AppException catch (e) {
+      throw ApiException('Failed to create listing.', e);
     }
   }
 
   Future<void> deleteListing(String id) async {
     try {
-      await _col.doc(id).delete();
-    } catch (e) {
-      throw FirestoreException('Failed to delete listing.', e);
+      await _apiClient.delete('listings/$id');
+    } on AppException catch (e) {
+      throw ApiException('Failed to delete listing.', e);
     }
   }
 }
