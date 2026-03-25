@@ -44,4 +44,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Stream<UserEntity?> get authStateChanges => _dataSource.authStateChanges;
+  @override
+  Stream<UserEntity?> get authStateChanges async* {
+    yield await _dataSource.getCurrentUser();
+  }
 }

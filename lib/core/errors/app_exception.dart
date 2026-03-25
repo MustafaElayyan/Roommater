@@ -12,17 +12,17 @@ class AppException implements Exception {
   String toString() => 'AppException: $message';
 }
 
-/// Thrown when Firebase Auth operations fail.
+/// Thrown when authentication operations fail.
 class AuthException extends AppException {
   const AuthException(super.message, [super.original]);
 }
 
-/// Thrown when Firestore operations fail.
-class FirestoreException extends AppException {
-  const FirestoreException(super.message, [super.original]);
+/// Thrown when API request operations fail.
+class ApiException extends AppException {
+  const ApiException(super.message, [super.original]);
 }
 
-/// Thrown when Firebase Storage operations fail.
-class StorageException extends AppException {
-  const StorageException(super.message, [super.original]);
+/// Thrown when local secure token storage operations fail.
+class TokenStorageException extends AppException {
+  const TokenStorageException(super.message, [super.original]);
 }
