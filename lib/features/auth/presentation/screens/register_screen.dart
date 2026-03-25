@@ -18,11 +18,13 @@ class RegisterScreen extends ConsumerStatefulWidget {
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _displayNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
   void dispose() {
+    _displayNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -31,6 +33,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     await ref.read(authControllerProvider.notifier).signUp(
+          displayName: _displayNameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
@@ -66,6 +69,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 32),
+              AuthFormField(
+                label: 'Display Name',
+                controller: _displayNameController,
+                prefixIcon: const Icon(Icons.person_outline),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
+              ),
+              const SizedBox(height: 16),
               AuthFormField(
                 label: 'Email',
                 controller: _emailController,

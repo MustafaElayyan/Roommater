@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
+import '../../features/auth/domain/entities/user_entity.dart';
+import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/screens/auth_choice_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/profile_setup_screen.dart';
@@ -26,9 +28,44 @@ import '../../features/tasks/presentation/screens/tasks_screen.dart';
 import 'app_routes.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  final routerNotifier = _RouterNotifier(ref);
+  ref.onDispose(routerNotifier.dispose);
+
+  const publicRoutes = <String>{
+    AppRoutes.onboarding,
+    AppRoutes.authChoice,
+    AppRoutes.login,
+    AppRoutes.register,
+  };
+  const authOnlyRoutes = <String>{
+    AppRoutes.authChoice,
+    AppRoutes.login,
+    AppRoutes.register,
+  };
+
   return GoRouter(
     initialLocation: AppRoutes.onboarding,
     debugLogDiagnostics: false,
+    refreshListenable: routerNotifier,
+    redirect: (context, state) {
+      final authState = ref.read(authStateProvider);
+      if (authState.isLoading) return null;
+
+      final isLoggedIn = authState.asData?.value != null;
+      final location = state.matchedLocation;
+      final isPublicRoute = publicRoutes.contains(location);
+      final isAuthRoute = authOnlyRoutes.contains(location);
+
+      if (!isLoggedIn && !isPublicRoute) {
+        return AppRoutes.authChoice;
+      }
+
+      if (isLoggedIn && isAuthRoute) {
+        return AppRoutes.home;
+      }
+
+      return null;
+    },
     routes: [
       GoRoute(
         path: AppRoutes.onboarding,
@@ -128,6 +165,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+class _RouterNotifier extends ChangeNotifier {
+  _RouterNotifier(this._ref) {
+    _ref.listen<AsyncValue<UserEntity?>>(authStateProvider, (_, __) {
+      notifyListeners();
+    });
+  }
+
+  final Ref _ref;
+}
 
 class _MainShell extends StatelessWidget {
   const _MainShell({required this.location, required this.child});

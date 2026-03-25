@@ -10,7 +10,12 @@ class SignUpUseCase {
   Future<UserEntity> call({
     required String email,
     required String password,
+    String? displayName,
   }) {
-    return _repository.signUp(email: email, password: password);
+    return _repository.signUp(
+      email: email,
+      password: password,
+      displayName: displayName,
+    );
   }
 }

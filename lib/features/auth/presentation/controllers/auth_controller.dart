@@ -56,10 +56,15 @@ class AuthController extends AsyncNotifier<void> {
   Future<void> signUp({
     required String email,
     required String password,
+    String? displayName,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => ref.read(_signUpUseCaseProvider)(email: email, password: password),
+      () => ref.read(_signUpUseCaseProvider)(
+            email: email,
+            password: password,
+            displayName: displayName,
+          ),
     );
   }
 
