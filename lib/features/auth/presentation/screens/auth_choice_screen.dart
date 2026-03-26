@@ -89,9 +89,11 @@ class AuthChoiceScreen extends ConsumerWidget {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: _maxActionsWidth),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
                   children: [
+                    const SizedBox(height: 12),
                     Center(
                       child: Image.asset(
                         _logoAsset,
@@ -119,22 +121,31 @@ class AuthChoiceScreen extends ConsumerWidget {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
-                    _buildActionButton(
-                      label: 'SIGN IN',
-                      onPressed: () => context.push(AppRoutes.login),
+                    SizedBox(
+                      width: double.infinity,
+                      child: _buildActionButton(
+                        label: 'SIGN IN',
+                        onPressed: () => context.push(AppRoutes.login),
+                      ),
                     ),
                     const SizedBox(height: 12),
-                    _buildActionButton(
-                      label: 'SIGN UP',
-                      onPressed: () => context.push(AppRoutes.register),
+                    SizedBox(
+                      width: double.infinity,
+                      child: _buildActionButton(
+                        label: 'SIGN UP',
+                        onPressed: () => context.push(AppRoutes.register),
+                      ),
                     ),
                     _buildOrDivider(),
-                    _buildActionButton(
-                      label: 'CONTINUE AS GUEST',
-                      onPressed: () {
-                        ref.read(isGuestProvider.notifier).state = true;
-                        context.go(AppRoutes.noHousehold);
-                      },
+                    SizedBox(
+                      width: double.infinity,
+                      child: _buildActionButton(
+                        label: 'CONTINUE AS GUEST',
+                        onPressed: () {
+                          ref.read(isGuestProvider.notifier).state = true;
+                          context.go(AppRoutes.noHousehold);
+                        },
+                      ),
                     ),
                   ],
                 ),

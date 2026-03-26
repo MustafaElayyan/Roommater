@@ -48,6 +48,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     AppRoutes.noHousehold,
     AppRoutes.createHousehold,
     AppRoutes.joinHousehold,
+    AppRoutes.home,
   };
 
   return GoRouter(

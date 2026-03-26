@@ -242,6 +242,38 @@ void main() {
 
     expect(find.text('Home'), findsOneWidget);
   });
+
+  testWidgets(
+    'guest can create household and reach home without auth redirect',
+    (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: _RouterHarness(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Skip'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('CONTINUE AS GUEST'));
+      await tester.pumpAndSettle();
+
+      expect(find.text("You're not in a household"), findsOneWidget);
+      await tester.tap(find.text('Create Household'));
+      await tester.pumpAndSettle();
+      expect(find.text('Name your household'), findsOneWidget);
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Household Name'),
+        'Guest Household',
+      );
+      await tester.tap(find.text('Create'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('SIGN IN'), findsNothing);
+    },
+  );
 }
 
 class _RouterHarness extends ConsumerWidget {
