@@ -95,7 +95,7 @@ class AuthChoiceScreen extends ConsumerWidget {
                     Center(
                       child: Image.asset(
                         _logoAsset,
-                        height: 200,
+                        height: 280,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -116,16 +116,6 @@ class AuthChoiceScreen extends ConsumerWidget {
                           .textTheme
                           .bodyLarge
                           ?.copyWith(color: Colors.white70),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Choose how you want to continue',
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),

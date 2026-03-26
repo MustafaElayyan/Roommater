@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
+import '../../features/auth/presentation/controllers/guest_provider.dart';
 import '../../features/auth/presentation/screens/auth_choice_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/profile_setup_screen.dart';
@@ -43,6 +44,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     AppRoutes.login,
     AppRoutes.register,
   };
+  const guestAccessibleRoutes = <String>{
+    AppRoutes.noHousehold,
+    AppRoutes.createHousehold,
+    AppRoutes.joinHousehold,
+  };
 
   return GoRouter(
     initialLocation: AppRoutes.onboarding,
@@ -53,11 +59,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (authState.isLoading) return null;
 
       final isLoggedIn = authState.asData?.value != null;
+      final isGuest = ref.read(isGuestProvider);
       final location = state.matchedLocation;
       final isPublicRoute = publicRoutes.contains(location);
       final isAuthRoute = authOnlyRoutes.contains(location);
+      final isGuestAccessibleRoute = guestAccessibleRoutes.contains(location);
 
       if (!isLoggedIn && !isPublicRoute) {
+        if (isGuest && isGuestAccessibleRoute) {
+          return null;
+        }
         return AppRoutes.authChoice;
       }
 
