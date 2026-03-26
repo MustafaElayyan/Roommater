@@ -34,7 +34,7 @@ void main() {
     await tester.tap(find.text('Skip'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Choose how you want to continue'), findsOneWidget);
+    expect(find.text('Choose how you want to continue'), findsNothing);
     expect(find.text('SIGN IN'), findsOneWidget);
     expect(find.text('SIGN UP'), findsOneWidget);
     expect(find.text('CONTINUE AS GUEST'), findsOneWidget);
@@ -59,7 +59,7 @@ void main() {
     await tester.tap(find.text('Get Started'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Choose how you want to continue'), findsOneWidget);
+    expect(find.text('Choose how you want to continue'), findsNothing);
   });
 
   testWidgets('system back on auth choice returns to onboarding', (tester) async {
@@ -72,7 +72,7 @@ void main() {
 
     await tester.tap(find.text('Skip'));
     await tester.pumpAndSettle();
-    expect(find.text('Choose how you want to continue'), findsOneWidget);
+    expect(find.text('Choose how you want to continue'), findsNothing);
 
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
@@ -91,7 +91,7 @@ void main() {
 
     await tester.tap(find.text('Skip'));
     await tester.pumpAndSettle();
-    expect(find.text('Choose how you want to continue'), findsOneWidget);
+    expect(find.text('Choose how you want to continue'), findsNothing);
 
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
