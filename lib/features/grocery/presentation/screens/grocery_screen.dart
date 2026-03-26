@@ -28,6 +28,14 @@ class _GroceryScreenState extends State<GroceryScreen> {
     super.dispose();
   }
 
+  int _parseQuantity(String text) {
+    final parsedQty = int.tryParse(text.trim());
+    if (parsedQty == null || parsedQty <= 0) {
+      return 1;
+    }
+    return parsedQty;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,10 +63,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
               FilledButton(
                 onPressed: () {
                   if (_controller.text.trim().isEmpty) return;
-                  final parsedQty = int.tryParse(_qtyController.text.trim());
-                  final qty = (parsedQty == null || parsedQty <= 0)
-                      ? 1
-                      : parsedQty;
+                  final qty = _parseQuantity(_qtyController.text);
                   setState(() {
                     _toBuy.add({
                       'id': '${_controller.text.trim()}-${DateTime.now().microsecondsSinceEpoch}',

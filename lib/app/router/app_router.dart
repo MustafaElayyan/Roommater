@@ -259,9 +259,11 @@ class _MainShell extends ConsumerWidget {
           actions: [
             IconButton(
               icon: Icon(
-                themeMode == ThemeMode.dark
-                    ? Icons.dark_mode
-                    : Icons.light_mode,
+                switch (themeMode) {
+                  ThemeMode.system => Icons.brightness_auto,
+                  ThemeMode.dark => Icons.dark_mode,
+                  ThemeMode.light => Icons.light_mode,
+                },
               ),
               onPressed: () =>
                   ref.read(themeModeProvider.notifier).toggleDarkMode(),
