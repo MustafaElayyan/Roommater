@@ -29,10 +29,9 @@ class ApiClientConfig {
     this.timeout = const Duration(seconds: 30),
   });
 
-  static const String androidEmulatorBaseUrl = 'http://10.0.2.2:5073/api/';
+  static const String androidEmulatorBaseUrl = 'http://192.168.0.118:5280/api/';
   // For physical devices, replace with your machine LAN IP (example below).
-  static const String physicalDeviceBaseUrlExample =
-      'http://192.168.1.100:5073/api/';
+  static const String physicalDeviceBaseUrlExample = '192.168.0.118:5280/api/';
 
   final String baseUrl;
   final String jwtTokenKey;
@@ -142,9 +141,8 @@ class ApiClient {
     final headers = await _buildHeaders(requiresAuth);
 
     final response = switch (method) {
-      'GET' => await _httpClient
-          .get(uri, headers: headers)
-          .timeout(_config.timeout),
+      'GET' =>
+        await _httpClient.get(uri, headers: headers).timeout(_config.timeout),
       'POST' => await _httpClient
           .post(uri, headers: headers, body: jsonEncode(body ?? const {}))
           .timeout(_config.timeout),
