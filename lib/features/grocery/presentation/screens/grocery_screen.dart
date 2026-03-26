@@ -28,6 +28,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
     super.dispose();
   }
 
+  /// Parses quantity input and defaults to 1 for invalid or non-positive values.
   int _parseQuantity(String text) {
     final parsedQty = int.tryParse(text.trim());
     if (parsedQty == null || parsedQty <= 0) {

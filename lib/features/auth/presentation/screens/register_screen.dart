@@ -17,7 +17,7 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
-  static final RegExp _alphabeticWithSpacesRegex = RegExp(r'^[a-zA-Z\s]+$');
+  static final RegExp _namePattern = RegExp(r'^[a-zA-Z\s]+$');
   final _formKey = GlobalKey<FormState>();
   final _displayNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -85,7 +85,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   if (name.length < 3) {
                     return 'Name must be at least 3 characters';
                   }
-                  if (!_alphabeticWithSpacesRegex.hasMatch(name)) {
+                  if (!_namePattern.hasMatch(name)) {
                     return 'Name can only contain letters and spaces';
                   }
                   return null;
