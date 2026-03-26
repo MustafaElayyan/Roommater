@@ -49,10 +49,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     AppRoutes.createHousehold,
     AppRoutes.joinHousehold,
     AppRoutes.home,
-    AppRoutes.tasks,
-    AppRoutes.grocery,
-    AppRoutes.events,
-    AppRoutes.expenses,
   };
 
   return GoRouter(

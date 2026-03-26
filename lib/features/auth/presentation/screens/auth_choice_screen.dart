@@ -136,10 +136,7 @@ class AuthChoiceScreen extends ConsumerWidget {
                         onPressed: () => context.push(AppRoutes.register),
                       ),
                     ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: _buildOrDivider(),
-                    ),
+                    _buildOrDivider(),
                     SizedBox(
                       width: double.infinity,
                       child: _buildActionButton(
