@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../auth/presentation/controllers/guest_provider.dart';
 
-class CreateHouseholdScreen extends StatefulWidget {
+class CreateHouseholdScreen extends ConsumerStatefulWidget {
   const CreateHouseholdScreen({super.key});
 
   @override
-  State<CreateHouseholdScreen> createState() => _CreateHouseholdScreenState();
+  ConsumerState<CreateHouseholdScreen> createState() =>
+      _CreateHouseholdScreenState();
 }
 
-class _CreateHouseholdScreenState extends State<CreateHouseholdScreen> {
+class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
   static final RegExp _namePattern = RegExp(r'^[a-zA-Z0-9\s]+$');
   final _formKey = GlobalKey<FormState>();
   final _householdNameController = TextEditingController();
@@ -111,6 +114,7 @@ class _CreateHouseholdScreenState extends State<CreateHouseholdScreen> {
                     child: FilledButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
+                          ref.read(isGuestProvider.notifier).state = false;
                           context.go(AppRoutes.home);
                         }
                       },

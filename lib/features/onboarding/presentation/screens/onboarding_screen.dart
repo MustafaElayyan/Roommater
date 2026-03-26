@@ -119,6 +119,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: _goToAuthChoice,
+                      style: TextButton.styleFrom(
+                        foregroundColor: colorScheme.onSurface,
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       child: const Text('Skip'),
                     ),
                   ),
@@ -133,15 +140,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     itemBuilder: (context, index) {
                       final page = pages[index];
                       return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 24),
+                              padding: const EdgeInsets.only(top: 8, bottom: 8),
                               child: _buildIllustration(index),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 8),
                           Text(
                             page.title,
                             style: Theme.of(context)
@@ -153,7 +160,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 8),
                           Text(
                             page.description,
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -161,7 +168,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 12),
                         ],
                       );
                     },
