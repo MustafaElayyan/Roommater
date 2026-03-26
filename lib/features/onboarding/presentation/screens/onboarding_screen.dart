@@ -37,6 +37,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       Icons.trending_up_outlined,
     ];
     final icon = icons[index % icons.length];
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final gradientTopColor = AppColors.primaryLight.withOpacity(
+      isDarkMode ? 0.35 : 0.18,
+    );
+    final gradientBottomColor = AppColors.primary.withOpacity(
+      isDarkMode ? 0.25 : 0.12,
+    );
+    final cardColor = AppColors.primary.withOpacity(isDarkMode ? 0.28 : 0.14);
+    final borderColor = AppColors.primaryDark.withOpacity(isDarkMode ? 0.5 : 0.32);
+    final iconColor = isDarkMode ? AppColors.primaryLight : AppColors.primaryDark;
 
     return Stack(
       alignment: Alignment.center,
@@ -50,8 +60,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppColors.primaryLight.withOpacity(0.18),
-                AppColors.primary.withOpacity(0.12),
+                gradientTopColor,
+                gradientBottomColor,
               ],
             ),
           ),
@@ -60,17 +70,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           width: 160,
           height: 160,
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.14),
+            color: cardColor,
             borderRadius: BorderRadius.circular(32),
             border: Border.all(
-              color: AppColors.primaryDark.withOpacity(0.32),
+              color: borderColor,
               width: 2,
             ),
           ),
           child: Icon(
             icon,
             size: 72,
-            color: AppColors.primaryDark,
+            color: iconColor,
           ),
         ),
       ],
@@ -82,6 +92,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final currentIndex = ref.watch(onboardingPageIndexProvider);
     final pages = ref.watch(onboardingPagesProvider);
     final isLastPage = currentIndex == pages.length - 1;
+    final colorScheme = Theme.of(context).colorScheme;
+    final titleColor = colorScheme.onSurface;
+    final descriptionColor = colorScheme.onSurface.withOpacity(0.7);
     return PopScope(
       canPop: currentIndex == 0,
       // Change this line:
@@ -134,13 +147,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             style: Theme.of(context)
                                 .textTheme
                                 .headlineSmall
-                                ?.copyWith(fontWeight: FontWeight.bold),
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: titleColor,
+                                ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 12),
                           Text(
                             page.description,
-                            style: Theme.of(context).textTheme.bodyLarge,
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  color: descriptionColor,
+                                ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 24),
