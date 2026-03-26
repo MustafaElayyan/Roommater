@@ -90,8 +90,16 @@ class _CreateHouseholdScreenState extends State<CreateHouseholdScreen> {
                       ),
                     ),
                     validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
+                      final householdName = value?.trim() ?? '';
+                      if (householdName.isEmpty) {
                         return 'Household name is required';
+                      }
+                      if (householdName.length < 3) {
+                        return 'Name must be at least 3 characters';
+                      }
+                      if (!RegExp(r'^[a-zA-Z0-9\s]+$')
+                          .hasMatch(householdName)) {
+                        return 'Name can only contain letters, numbers, and spaces';
                       }
                       return null;
                     },

@@ -95,7 +95,7 @@ class AuthChoiceScreen extends ConsumerWidget {
                     Center(
                       child: Image.asset(
                         _logoAsset,
-                        height: 140,
+                        height: 200,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -126,15 +126,6 @@ class AuthChoiceScreen extends ConsumerWidget {
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Create a new team account or sign in to keep organizing your shared lifestyle together.',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(color: Colors.white70),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),

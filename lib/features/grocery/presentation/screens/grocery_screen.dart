@@ -9,6 +9,7 @@ class GroceryScreen extends StatefulWidget {
 
 class _GroceryScreenState extends State<GroceryScreen> {
   final _controller = TextEditingController();
+  final _qtyController = TextEditingController();
   final List<Map<String, dynamic>> _toBuy = [
     {'id': 'milk', 'name': 'Milk', 'qty': 2, 'checked': false},
     {'id': 'eggs', 'name': 'Eggs', 'qty': 12, 'checked': false},
@@ -23,6 +24,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
   @override
   void dispose() {
     _controller.dispose();
+    _qtyController.dispose();
     super.dispose();
   }
 
@@ -41,17 +43,31 @@ class _GroceryScreenState extends State<GroceryScreen> {
                 ),
               ),
               const SizedBox(width: 8),
+              SizedBox(
+                width: 60,
+                child: TextField(
+                  controller: _qtyController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(hintText: 'Qty'),
+                ),
+              ),
+              const SizedBox(width: 8),
               FilledButton(
                 onPressed: () {
                   if (_controller.text.trim().isEmpty) return;
+                  final parsedQty = int.tryParse(_qtyController.text.trim());
+                  final qty = (parsedQty == null || parsedQty <= 0)
+                      ? 1
+                      : parsedQty;
                   setState(() {
                     _toBuy.add({
                       'id': '${_controller.text.trim()}-${DateTime.now().microsecondsSinceEpoch}',
                       'name': _controller.text.trim(),
-                      'qty': 1,
+                      'qty': qty,
                       'checked': false,
                     });
                     _controller.clear();
+                    _qtyController.clear();
                   });
                 },
                 child: const Text('Add'),
@@ -70,9 +86,28 @@ class _GroceryScreenState extends State<GroceryScreen> {
                 value: item['checked'] as bool,
                 onChanged: (value) => setState(() => item['checked'] = value),
                 title: Text(item['name'] as String),
-                secondary: CircleAvatar(
-                  radius: 12,
-                  child: Text('${item['qty']}'),
+                secondary: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.remove),
+                      onPressed: () => setState(() {
+                        final currentQty = item['qty'] as int;
+                        item['qty'] = currentQty > 1 ? currentQty - 1 : 1;
+                      }),
+                    ),
+                    CircleAvatar(
+                      radius: 12,
+                      child: Text('${item['qty']}'),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: () => setState(() {
+                        final currentQty = item['qty'] as int;
+                        item['qty'] = currentQty + 1;
+                      }),
+                    ),
+                  ],
                 ),
               ),
             );

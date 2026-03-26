@@ -76,8 +76,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 label: 'Display Name',
                 controller: _displayNameController,
                 prefixIcon: const Icon(Icons.person_outline),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
+                validator: (v) {
+                  final name = v?.trim() ?? '';
+                  if (name.isEmpty) {
+                    return 'Enter your name';
+                  }
+                  if (name.length < 3) {
+                    return 'Name must be at least 3 characters';
+                  }
+                  if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(name)) {
+                    return 'Name can only contain letters and spaces';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               AuthFormField(
