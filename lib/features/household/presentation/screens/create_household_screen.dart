@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../auth/presentation/controllers/guest_provider.dart';
 
 class CreateHouseholdScreen extends ConsumerStatefulWidget {
   const CreateHouseholdScreen({super.key});
@@ -114,7 +113,6 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
                     child: FilledButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          ref.read(isGuestProvider.notifier).state = false;
                           context.go(AppRoutes.home);
                         }
                       },

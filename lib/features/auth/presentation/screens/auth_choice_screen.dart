@@ -74,15 +74,7 @@ class AuthChoiceScreen extends ConsumerWidget {
       },
       child: Scaffold(
         backgroundColor: _primaryDark,
-        appBar: AppBar(
-          backgroundColor: _primaryDark,
-          elevation: 0,
-          leading: IconButton(
-            onPressed: () => context.go(AppRoutes.onboarding),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-          ),
-        ),
-        body: SingleChildScrollView(
+        body: SafeArea(
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -90,16 +82,19 @@ class AuthChoiceScreen extends ConsumerWidget {
                 constraints: const BoxConstraints(maxWidth: _maxActionsWidth),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.max,
                   children: [
-                    const SizedBox(height: 12),
-                    Center(
-                      child: Image.asset(
-                        _logoAsset,
-                        height: 280,
-                        fit: BoxFit.contain,
-                      ),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => context.go(AppRoutes.onboarding),
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    Image.asset(
+                      _logoAsset,
+                      height: 280,
+                      fit: BoxFit.contain,
                     ),
                     const SizedBox(height: 10),
                     Text(
@@ -120,7 +115,7 @@ class AuthChoiceScreen extends ConsumerWidget {
                           ?.copyWith(color: Colors.white70),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 20),
+                    const Spacer(),
                     SizedBox(
                       width: double.infinity,
                       child: _buildActionButton(
