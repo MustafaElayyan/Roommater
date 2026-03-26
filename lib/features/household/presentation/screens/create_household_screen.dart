@@ -12,6 +12,7 @@ class CreateHouseholdScreen extends StatefulWidget {
 }
 
 class _CreateHouseholdScreenState extends State<CreateHouseholdScreen> {
+  static final RegExp _namePattern = RegExp(r'^[a-zA-Z0-9\s]+$');
   final _formKey = GlobalKey<FormState>();
   final _householdNameController = TextEditingController();
 
@@ -90,8 +91,15 @@ class _CreateHouseholdScreenState extends State<CreateHouseholdScreen> {
                       ),
                     ),
                     validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
+                      final householdName = value?.trim() ?? '';
+                      if (householdName.isEmpty) {
                         return 'Household name is required';
+                      }
+                      if (householdName.length < 3) {
+                        return 'Name must be at least 3 characters';
+                      }
+                      if (!_namePattern.hasMatch(householdName)) {
+                        return 'Name can only contain letters, numbers, and spaces';
                       }
                       return null;
                     },

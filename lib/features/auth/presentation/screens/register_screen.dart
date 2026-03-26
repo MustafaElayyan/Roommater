@@ -17,6 +17,7 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  static final RegExp _namePattern = RegExp(r'^[a-zA-Z\s]+$');
   final _formKey = GlobalKey<FormState>();
   final _displayNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -76,8 +77,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 label: 'Display Name',
                 controller: _displayNameController,
                 prefixIcon: const Icon(Icons.person_outline),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
+                validator: (v) {
+                  final name = v?.trim() ?? '';
+                  if (name.isEmpty) {
+                    return 'Enter your name';
+                  }
+                  if (name.length < 3) {
+                    return 'Name must be at least 3 characters';
+                  }
+                  if (!_namePattern.hasMatch(name)) {
+                    return 'Name can only contain letters and spaces';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               AuthFormField(
