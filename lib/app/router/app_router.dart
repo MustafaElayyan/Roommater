@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/theme/theme_provider.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/screens/auth_choice_screen.dart';
@@ -187,7 +188,7 @@ class _RouterNotifier extends ChangeNotifier {
   }
 }
 
-class _MainShell extends StatelessWidget {
+class _MainShell extends ConsumerWidget {
   const _MainShell({required this.location, required this.child});
 
   final String location;
@@ -225,8 +226,9 @@ class _MainShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = _selectedIndex();
+    final themeMode = ref.watch(themeModeProvider);
 
     void goToShellRoute(String route) {
       Navigator.of(context).pop();
@@ -254,6 +256,19 @@ class _MainShell extends StatelessWidget {
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
           ),
+          actions: [
+            IconButton(
+              icon: Icon(
+                switch (themeMode) {
+                  ThemeMode.system => Icons.brightness_auto,
+                  ThemeMode.dark => Icons.dark_mode,
+                  ThemeMode.light => Icons.light_mode,
+                },
+              ),
+              onPressed: () =>
+                  ref.read(themeModeProvider.notifier).toggleDarkMode(),
+            ),
+          ],
         ),
         drawer: Drawer(
           child: SafeArea(
