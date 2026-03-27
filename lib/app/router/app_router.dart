@@ -317,9 +317,9 @@ class _MainShell extends ConsumerWidget {
                 ListTile(
                   leading: const Icon(Icons.logout),
                   title: const Text('Logout'),
-                  onTap: () {
+                  onTap: () async {
                     Navigator.of(context).pop();
-                    ref.read(authControllerProvider.notifier).signOut();
+                    await ref.read(authControllerProvider.notifier).signOut();
                     context.go(AppRoutes.authChoice);
                   },
                 ),
