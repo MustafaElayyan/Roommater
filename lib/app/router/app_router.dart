@@ -58,8 +58,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authStateProvider);
       if (authState.isLoading) return null;
+      if (authState is AsyncError<UserEntity?>) return null;
 
-      final isLoggedIn = authState.asData?.value != null;
+      final isLoggedIn = authState.valueOrNull != null;
       final isGuest = ref.read(isGuestProvider);
       final location = state.matchedLocation;
       final isPublicRoute = publicRoutes.contains(location);
@@ -293,32 +294,6 @@ class _MainShell extends ConsumerWidget {
                   ),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.home_outlined),
-                  title: const Text('Dashboard / Home'),
-                  onTap: () => goToShellRoute(AppRoutes.home),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.checklist_outlined),
-                  title: const Text('Tasks'),
-                  onTap: () => goToShellRoute(AppRoutes.tasks),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.shopping_cart_outlined),
-                  title: const Text('Grocery'),
-                  onTap: () => goToShellRoute(AppRoutes.grocery),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.calendar_month_outlined),
-                  title: const Text('Events'),
-                  onTap: () => goToShellRoute(AppRoutes.events),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.account_balance_wallet_outlined),
-                  title: const Text('Expenses'),
-                  onTap: () => goToShellRoute(AppRoutes.expenses),
-                ),
-                const Divider(),
-                ListTile(
                   leading: const Icon(Icons.person_outline),
                   title: const Text('Profile'),
                   onTap: () => pushToTopLevelRoute(AppRoutes.profile),
@@ -337,6 +312,16 @@ class _MainShell extends ConsumerWidget {
                   leading: const Icon(Icons.notifications_outlined),
                   title: const Text('Notifications'),
                   onTap: () => pushToTopLevelRoute(AppRoutes.notifications),
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: const Text('Logout'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    ref.read(authControllerProvider.notifier).signOut();
+                    context.go(AppRoutes.authChoice);
+                  },
                 ),
               ],
             ),
