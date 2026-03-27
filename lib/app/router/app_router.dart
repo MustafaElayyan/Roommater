@@ -319,8 +319,15 @@ class _MainShell extends ConsumerWidget {
                   title: const Text('Logout'),
                   onTap: () async {
                     Navigator.of(context).pop();
-                    await ref.read(authControllerProvider.notifier).signOut();
-                    context.go(AppRoutes.authChoice);
+                    try {
+                      await ref.read(authControllerProvider.notifier).signOut();
+                      if (context.mounted) context.go(AppRoutes.authChoice);
+                    } catch (_) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Failed to sign out')),
+                      );
+                    }
                   },
                 ),
               ],
