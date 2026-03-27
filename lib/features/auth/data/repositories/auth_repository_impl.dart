@@ -1,8 +1,9 @@
+import 'dart:async';
+
 import '../../../../core/errors/app_exception.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
-import 'dart:async';
 
 /// Concrete implementation of [AuthRepository] backed by the API datasource.
 class AuthRepositoryImpl implements AuthRepository {
@@ -11,7 +12,6 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _dataSource;
   final StreamController<UserEntity?> _authStateController =
       StreamController<UserEntity?>.broadcast();
-  bool _isInitialized = false;
 
   @override
   Future<UserEntity> signIn({
@@ -58,10 +58,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Stream<UserEntity?> get authStateChanges async* {
-    if (!_isInitialized) {
-      _isInitialized = true;
-      yield await _dataSource.getCurrentUser();
-    }
+    yield await _dataSource.getCurrentUser();
     yield* _authStateController.stream;
   }
 }
