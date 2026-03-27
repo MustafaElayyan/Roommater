@@ -16,7 +16,9 @@ final _authDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepositoryImpl(ref.watch(_authDataSourceProvider));
+  final repository = AuthRepositoryImpl(ref.watch(_authDataSourceProvider));
+  ref.onDispose(repository.dispose);
+  return repository;
 });
 
 final _signInUseCaseProvider = Provider<SignInUseCase>((ref) {

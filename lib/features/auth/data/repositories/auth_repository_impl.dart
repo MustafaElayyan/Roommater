@@ -10,8 +10,10 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._dataSource);
 
   final AuthRemoteDataSource _dataSource;
-  final StreamController<UserEntity?> _authStateController =
-      StreamController<UserEntity?>.broadcast();
+  StreamController<UserEntity?>? _authStateController;
+
+  StreamController<UserEntity?> get _controller =>
+      _authStateController ??= StreamController<UserEntity?>.broadcast();
 
   @override
   Future<UserEntity> signIn({
@@ -20,7 +22,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       final user = await _dataSource.signIn(email: email, password: password);
-      _authStateController.add(user);
+      _controller.add(user);
       return user;
     } on AuthException {
       rethrow;
@@ -39,7 +41,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
         displayName: displayName,
       );
-      _authStateController.add(user);
+      _controller.add(user);
       return user;
     } on AuthException {
       rethrow;
@@ -50,7 +52,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> signOut() async {
     try {
       await _dataSource.signOut();
-      _authStateController.add(null);
+      _controller.add(null);
     } on AuthException {
       rethrow;
     }
@@ -59,6 +61,12 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Stream<UserEntity?> get authStateChanges async* {
     yield await _dataSource.getCurrentUser();
-    yield* _authStateController.stream;
+    yield* _controller.stream;
+  }
+
+  @override
+  void dispose() {
+    _authStateController?.close();
+    _authStateController = null;
   }
 }
