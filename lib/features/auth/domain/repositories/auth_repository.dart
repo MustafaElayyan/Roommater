@@ -26,4 +26,7 @@ abstract interface class AuthRepository {
 
   /// Emits the currently authenticated user, or `null` when signed out.
   Stream<UserEntity?> get authStateChanges;
+
+  /// Disposes any resources held by the repository.
+  void dispose();
 }
