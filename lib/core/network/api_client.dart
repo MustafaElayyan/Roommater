@@ -33,16 +33,16 @@ class ApiClientConfig {
   });
 
   static const String androidEmulatorBaseUrl = 'http://10.0.2.2:5073/api/';
-  static const String webBaseUrl = 'http://localhost:5073/api/';
+  static const String localhostBaseUrl = 'http://localhost:5073/api/';
   // For physical devices, replace with your machine LAN IP (example below).
   static const String physicalDeviceBaseUrlExample =
       'http://192.168.1.100:5073/api/';
 
   static String defaultBaseUrlForCurrentPlatform() {
-    if (kIsWeb) return webBaseUrl;
+    if (kIsWeb) return localhostBaseUrl;
     return switch (defaultTargetPlatform) {
       TargetPlatform.android => androidEmulatorBaseUrl,
-      _ => webBaseUrl,
+      _ => localhostBaseUrl,
     };
   }
 
