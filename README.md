@@ -273,9 +273,9 @@ lib/
 **Why feature-first for Roommater?**
 
 - **Parallel development** — each of the 3 developers can own one or more features (`auth`, `chat`, `roommate_listing`) without touching the same files, minimising merge conflicts.
-- **Clean separation** — the domain layer contains zero Flutter or Firebase imports, making business rules independently unit-testable.
+- **Clean separation** — the domain layer contains zero Flutter or backend-specific imports, making business rules independently unit-testable.
 - **Riverpod DI** — every datasource, repository, and use-case is exposed as an overridable `Provider`, enabling widget-test-level mocking with `ProviderScope(overrides: [...])` without a separate DI framework.
-- **Firebase-ready without hardcoded secrets** — sensitive configuration lives in `appsettings.json` (overridable via environment variables) and `google-services.json`; Dart code accesses the API through a single `ApiClient` with JWT auth.
+- **Configuration without hardcoded secrets** — sensitive configuration lives in `appsettings.json` (overridable via environment variables); Dart code accesses the API through a single `ApiClient` with JWT auth.
 - **go_router** — declarative URL-based routing ensures deep-link support (required for sharing listing URLs) and simplifies guarded navigation for authenticated routes.
 - **Scalability** — adding a new feature (e.g. `roommate_matching`) requires only a new `lib/features/roommate_matching/` subtree with no changes to existing features.
 
