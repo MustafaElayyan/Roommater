@@ -48,7 +48,7 @@ Set values in `appsettings.json`:
 Example MySQL connection string (`ConnectionStrings:DefaultConnection`):
 
 ```text
-Server=localhost;Port=3306;Database=RoommaterDb;User=roommater_dev;Password=;
+Server=localhost;Port=3306;Database=RoommaterDb;User=roommater_dev;Password=<your-dev-password>;
 ```
 
 Optional MySQL server version setting used by EF Core provider:
@@ -92,7 +92,7 @@ dotnet run --project Roommater.API/Roommater.API.csproj
 If you want to use different local database credentials without editing tracked files, override the connection string at runtime:
 
 ```bash
-ConnectionStrings__DefaultConnection="Server=localhost;Port=3306;Database=RoommaterDb;User=root;Password=<your-password>;" \
+ConnectionStrings__DefaultConnection="Server=localhost;Port=3306;Database=RoommaterDb;User=roommater_dev;Password=<your-dev-password>;" \
 dotnet run --project Roommater.API/Roommater.API.csproj
 ```
 
