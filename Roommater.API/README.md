@@ -89,6 +89,13 @@ dotnet ef database update --project Roommater.API/Roommater.API.csproj
 dotnet run --project Roommater.API/Roommater.API.csproj
 ```
 
+If you want to use different local database credentials without editing tracked files, override the connection string at runtime:
+
+```bash
+ConnectionStrings__DefaultConnection="Server=localhost;Port=3306;Database=RoommaterDb;User=root;Password=<your-password>;" \
+dotnet run --project Roommater.API/Roommater.API.csproj
+```
+
 API runs on:
 
 - `http://localhost:5073`
