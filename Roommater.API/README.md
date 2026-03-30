@@ -96,6 +96,13 @@ ConnectionStrings__DefaultConnection="Server=localhost;Port=3306;Database=Roomma
 dotnet run --project Roommater.API/Roommater.API.csproj
 ```
 
+PowerShell equivalent:
+
+```powershell
+$env:ConnectionStrings__DefaultConnection="Server=localhost;Port=3306;Database=RoommaterDb;User=roommater_dev;Password=<your-dev-password>;"
+dotnet run --project Roommater.API/Roommater.API.csproj
+```
+
 API runs on:
 
 - `http://localhost:5073`

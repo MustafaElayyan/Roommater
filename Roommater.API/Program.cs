@@ -53,6 +53,11 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Database connection string 'DefaultConnection' is not configured.");
+if (connectionString.Contains("REPLACE_WITH_SECURE_PASSWORD", StringComparison.OrdinalIgnoreCase))
+{
+    throw new InvalidOperationException(
+        "Database connection string 'DefaultConnection' contains a placeholder password. Override it with a real value (for example via ConnectionStrings__DefaultConnection).");
+}
 var mySqlServerVersion = builder.Configuration["MySql:ServerVersion"] ?? "8.0.36-mysql";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
