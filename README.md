@@ -1,6 +1,66 @@
 # Roommater
 
-A Flutter application for finding and listing roommates, built for Android-first with a cross-platform ready feature-first architecture.
+A Flutter application for finding and listing roommates, built for Android-first with a cross-platform ready feature-first architecture. The backend is an **ASP.NET Core 8 Web API** with a **MySQL** database.
+
+---
+
+## Prerequisites
+
+| Tool | Version | Purpose |
+|---|---|---|
+| [Flutter SDK](https://docs.flutter.dev/get-started/install) | ≥ 3.4.3 | Mobile & web client |
+| [.NET SDK](https://dotnet.microsoft.com/download) | 8.0 | Backend API |
+| [MySQL](https://dev.mysql.com/downloads/) | 8.0+ | Database |
+| [Visual Studio Code](https://code.visualstudio.com/) | Latest | Recommended editor |
+| [Android Studio / Android SDK](https://developer.android.com/studio) | Latest | Android emulator & SDK |
+| JDK | 11 – 19 | Gradle builds (JDK 17 for Gradle 8.x) |
+
+---
+
+## VS Code Setup
+
+### 1) Install recommended extensions
+
+Open the project in VS Code and accept the prompt to install recommended extensions, or run:
+
+```
+code --install-extension Dart-Code.dart-code
+code --install-extension Dart-Code.flutter
+code --install-extension ms-dotnettools.csharp
+code --install-extension ms-dotnettools.csdevkit
+code --install-extension ms-dotnettools.vscode-dotnet-runtime
+```
+
+### 2) Verify SDK paths
+
+If VS Code does not auto-detect your Flutter SDK, open **Settings** (Ctrl+,) and set `dart.flutterSdkPath` to your Flutter install directory in `.vscode/settings.json`.
+
+### 3) Launch configurations
+
+The repo includes pre-configured launch profiles in `.vscode/launch.json`:
+
+| Name | Description |
+|---|---|
+| **Flutter: Android Emulator** | Run the Flutter app on an Android emulator |
+| **Flutter: Chrome (Web)** | Run the Flutter app in Chrome |
+| **Flutter: Debug (auto device)** | Run on whichever device is connected |
+| **.NET API** | Build and launch the ASP.NET Core backend |
+| **Full Stack (API + Flutter)** | Launch both the API and Flutter app together |
+
+Press **F5** or open the **Run and Debug** panel (Ctrl+Shift+D) to select a configuration.
+
+### 4) Build tasks
+
+Available via **Terminal → Run Task…** (Ctrl+Shift+B for default build):
+
+- `flutter: pub get` – install Flutter dependencies
+- `flutter: build` – build debug APK
+- `flutter: analyze` – run Dart static analysis
+- `flutter: test` – run Flutter tests
+- `dotnet: restore API` – restore NuGet packages
+- `dotnet: build API` – build the backend (default build task)
+- `dotnet: run API` – start the API server
+- `dotnet: ef update database` – apply EF Core migrations
 
 ---
 
@@ -12,7 +72,7 @@ Roommater uses a **feature-first clean architecture** powered by [Riverpod](http
 
 ```
 lib/
-├── main.dart                          # App entry point: Firebase init + ProviderScope + App widget
+├── main.dart                          # App entry point: ProviderScope + App widget
 │
 ├── app/                               # Bootstrap & global wiring
 │   ├── app.dart                       # Root MaterialApp.router with theme & router config
@@ -26,8 +86,8 @@ lib/
 │   ├── errors/
 │   │   ├── app_exception.dart         # Typed exceptions thrown by data-layer datasources
 │   │   └── failure.dart               # Sealed domain-layer failure types
-│   ├── firebase/
-│   │   └── firebase_providers.dart    # Riverpod providers for FirebaseAuth, Firestore, Storage
+│   ├── network/
+│   │   └── api_client.dart            # HTTP client for the ASP.NET Core API
 │   ├── theme/
 │   │   ├── app_colors.dart            # Brand colour palette constants
 │   │   └── app_theme.dart             # Light and dark ThemeData definitions
@@ -193,17 +253,17 @@ lib/
 | Path | Responsibility |
 |---|---|
 | `lib/app/` | Bootstraps the app: mounts the root `App` widget, wires `ProviderScope`, and configures `GoRouter`. |
-| `lib/core/` | Houses cross-cutting concerns (theme, constants, error types, Firebase provider wrappers, and utilities) consumed by multiple features. |
+| `lib/core/` | Houses cross-cutting concerns (theme, constants, error types, HTTP API client, and utilities) consumed by multiple features. |
 | `lib/features/<name>/presentation/` | Contains Riverpod controllers, screens (pages), and feature-scoped widgets — no business logic. |
 | `lib/features/<name>/domain/` | Pure Dart: entities, abstract repository interfaces, and use-case classes that hold business rules. |
-| `lib/features/<name>/data/` | Implements repository interfaces with Firebase datasources and converts Firestore/Auth data to domain models. |
+| `lib/features/<name>/data/` | Implements repository interfaces with API datasources and converts JSON responses to domain models. |
 | `lib/shared/` | Generic, feature-agnostic UI components (`AppButton`, `AppTextField`, `LoadingIndicator`) and `BuildContext` extensions. |
-| **auth** | Handles email/password sign-in and sign-up via Firebase Auth; exposes auth-state stream. |
+| **auth** | Handles email/password sign-in and sign-up via the REST API; stores JWT for authenticated requests. |
 | **onboarding** | Renders a first-launch carousel from static page data; navigates to auth choice when dismissed. |
 | **home** | Provides the bottom-navigation shell that composes the listings, chats, and profile tabs. |
-| **roommate_listing** | Enables users to browse paginated Firestore listings and publish new listings with photos. |
-| **chat** | Delivers real-time Firestore messaging between two users with live message streams. |
-| **profile** | Reads and writes a user's public profile document in Firestore, including avatar upload. |
+| **roommate_listing** | Enables users to browse paginated listings and publish new listings with photos. |
+| **chat** | Delivers messaging between users via the API. |
+| **profile** | Reads and writes a user's public profile, including avatar upload. |
 | **settings** | Manages in-app preferences (dark mode, notifications, locale) with an easily swappable storage backend. |
 
 ---
@@ -215,7 +275,7 @@ lib/
 - **Parallel development** — each of the 3 developers can own one or more features (`auth`, `chat`, `roommate_listing`) without touching the same files, minimising merge conflicts.
 - **Clean separation** — the domain layer contains zero Flutter or Firebase imports, making business rules independently unit-testable.
 - **Riverpod DI** — every datasource, repository, and use-case is exposed as an overridable `Provider`, enabling widget-test-level mocking with `ProviderScope(overrides: [...])` without a separate DI framework.
-- **Firebase-ready without hardcoded secrets** — `google-services.json` / `GoogleService-Info.plist` are consumed by the native build system; Dart code only calls `Firebase.initializeApp()` with no API keys.
+- **Firebase-ready without hardcoded secrets** — sensitive configuration lives in `appsettings.json` (overridable via environment variables) and `google-services.json`; Dart code accesses the API through a single `ApiClient` with JWT auth.
 - **go_router** — declarative URL-based routing ensures deep-link support (required for sharing listing URLs) and simplifies guarded navigation for authenticated routes.
 - **Scalability** — adding a new feature (e.g. `roommate_matching`) requires only a new `lib/features/roommate_matching/` subtree with no changes to existing features.
 
@@ -229,12 +289,35 @@ lib/
 flutter pub get
 ```
 
-### 2) Add Firebase config files
+### 2) Set up the backend API
 
-- Android: place `google-services.json` in `android/app/`
-- iOS: place `GoogleService-Info.plist` in `ios/Runner/`
+The backend is an ASP.NET Core 8 Web API that uses MySQL. See [`Roommater.API/README.md`](Roommater.API/README.md) for full details.
 
-### 3) Create `android/local.properties` (required)
+**Quick start:**
+
+```bash
+# Restore .NET tools (EF Core CLI)
+dotnet tool restore
+
+# Restore NuGet packages
+dotnet restore Roommater.API/Roommater.API.csproj
+
+# Build
+dotnet build Roommater.API/Roommater.API.csproj
+```
+
+Before running, create a MySQL database and user, then update the connection string:
+
+```bash
+# Option A: edit appsettings.json directly
+# Option B: override via environment variable
+ConnectionStrings__DefaultConnection="Server=localhost;Port=3306;Database=RoommaterDb;User=roommater_dev;Password=<your-password>;" \
+dotnet run --project Roommater.API/Roommater.API.csproj
+```
+
+The API starts at `http://localhost:5073` with Swagger at `http://localhost:5073/swagger`.
+
+### 3) Create `android/local.properties` (required for Android builds)
 
 The Android build reads `flutter.sdk` from `android/local.properties`.
 That file is machine-specific and intentionally not committed.
@@ -297,5 +380,4 @@ flutter emulators --launch <emulator_id>
 - **`android/local.properties is missing`**: create it from `android/local.properties.example`.
 - **`flutter.sdk not set in local.properties`**: verify `flutter.sdk` points to your Flutter SDK root.
 - **`SDK location not found`**: verify `sdk.dir` points to your Android SDK directory.
-- **Google Services plugin errors**: confirm `android/app/google-services.json` exists and package name matches.
 - **Gradle/JDK mismatch**: use JDK 17 when building with Gradle 8.x.

@@ -1,0 +1,41 @@
+{
+  // Dart / Flutter
+  "dart.flutterSdkPath": "",
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "Dart-Code.dart-code",
+    "editor.rulers": [80],
+    "editor.selectionHighlight": false,
+    "editor.suggestSelection": "first",
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off"
+  },
+  "dart.lineLength": 80,
+
+  // C# / .NET
+  "dotnet.defaultSolution": "disable",
+  "omnisharp.projectLoadTimeout": 120,
+
+  // File associations
+  "files.associations": {
+    "*.dart": "dart"
+  },
+
+  // Hide generated / build artefacts from the explorer
+  "files.exclude": {
+    "**/.dart_tool": true,
+    "**/.packages": true,
+    "**/build": true,
+    "Roommater.API/bin": true,
+    "Roommater.API/obj": true
+  },
+
+  // Search exclusions
+  "search.exclude": {
+    "**/.dart_tool": true,
+    "**/build": true,
+    "Roommater.API/bin": true,
+    "Roommater.API/obj": true,
+    "pubspec.lock": true
+  }
+}
