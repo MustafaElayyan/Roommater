@@ -43,6 +43,8 @@ Set values in `appsettings.json`:
 - `Jwt:Audience`
 - `Jwt:ExpiryDays`
 
+> Important: replace the default `Jwt:Secret` before running in any shared or production environment. Prefer overriding it with environment variables or secret stores.
+
 ## Run Locally
 
 From repository root:
@@ -58,13 +60,13 @@ dotnet build Roommater.API/Roommater.API.csproj
 Create migration:
 
 ```bash
-dotnet dotnet-ef migrations add <MigrationName> --project Roommater.API/Roommater.API.csproj --output-dir Data/Migrations
+dotnet ef migrations add <MigrationName> --project Roommater.API/Roommater.API.csproj --output-dir Data/Migrations
 ```
 
 Apply migration:
 
 ```bash
-dotnet dotnet-ef database update --project Roommater.API/Roommater.API.csproj
+dotnet ef database update --project Roommater.API/Roommater.API.csproj
 ```
 
 ### Start API
