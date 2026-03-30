@@ -40,7 +40,10 @@ class ApiClientConfig {
 
   static String defaultBaseUrlForCurrentPlatform() {
     if (kIsWeb) return webBaseUrl;
-    return androidEmulatorBaseUrl;
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => androidEmulatorBaseUrl,
+      _ => webBaseUrl,
+    };
   }
 
   final String baseUrl;
