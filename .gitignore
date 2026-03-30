@@ -35,3 +35,7 @@ build/
 /build/
 **/generated_plugin_registrant.dart
 flutter_**
+
+# .NET build artifacts
+Roommater.API/bin/
+Roommater.API/obj/
