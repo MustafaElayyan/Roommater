@@ -8,7 +8,7 @@ Base URL: `http://localhost:5073/api/`
 
 - ASP.NET Core 8 Web API
 - Entity Framework Core 8 (Code First)
-- SQL Server provider (can be switched to PostgreSQL)
+- MySQL provider (Pomelo Entity Framework Core)
 - JWT authentication
 - AutoMapper
 - Data Annotations validation
@@ -44,6 +44,12 @@ Set values in `appsettings.json`:
 - `Jwt:ExpiryDays`
 
 > Important: replace the default `Jwt:Secret` before running in any shared or production environment. Prefer overriding it with environment variables or secret stores.
+
+Example MySQL connection string (`ConnectionStrings:DefaultConnection`):
+
+```text
+Server=localhost;Port=3306;Database=RoommaterDb;User=root;Password=;
+```
 
 ## Run Locally
 
