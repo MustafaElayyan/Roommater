@@ -48,8 +48,16 @@ Set values in `appsettings.json`:
 Example MySQL connection string (`ConnectionStrings:DefaultConnection`):
 
 ```text
-Server=localhost;Port=3306;Database=RoommaterDb;User=root;Password=;
+Server=localhost;Port=3306;Database=RoommaterDb;User=roommater_dev;Password=;
 ```
+
+Optional MySQL server version setting used by EF Core provider:
+
+```text
+MySql:ServerVersion=8.0.36-mysql
+```
+
+Use a local development user with limited permissions (not root), and override credentials via environment variables or user secrets outside source control.
 
 ## Run Locally
 
