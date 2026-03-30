@@ -34,7 +34,7 @@ public class AuthController : ControllerBase
 
     [HttpDelete("signout")]
     [Authorize]
-    public async Task<IActionResult> SignOut()
+    public async Task<IActionResult> SignOutCurrentUser()
     {
         var userId = CurrentUser.GetUserId(User);
         await _authService.SignOutAsync(userId);

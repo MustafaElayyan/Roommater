@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Roommater.API.Models;
 
@@ -86,10 +87,15 @@ public class AppDbContext : DbContext
         var imageUrlsConverter = new ValueConverter<List<string>, string>(
             v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
             v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>());
+        var imageUrlsComparer = new ValueComparer<List<string>>(
+            (left, right) => left!.SequenceEqual(right!),
+            value => value.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
+            value => value.ToList());
 
         modelBuilder.Entity<Listing>()
             .Property(l => l.ImageUrls)
-            .HasConversion(imageUrlsConverter);
+            .HasConversion(imageUrlsConverter)
+            .Metadata.SetValueComparer(imageUrlsComparer);
 
         modelBuilder.Entity<ChatParticipant>()
             .HasKey(cp => new { cp.ChatId, cp.UserId });
