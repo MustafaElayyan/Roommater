@@ -142,4 +142,9 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedAsync(dbContext);
 }
 
-app.Run("http://localhost:5073");
+// Development: listen on all interfaces so the Android emulator (10.0.2.2) can reach the API.
+// Production: restrict to localhost; use a reverse-proxy for external traffic.
+var listenUrl = app.Environment.IsDevelopment()
+    ? "http://0.0.0.0:5073"
+    : "http://localhost:5073";
+app.Run(listenUrl);
