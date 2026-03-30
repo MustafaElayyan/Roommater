@@ -8,7 +8,7 @@ Base URL: `http://localhost:5073/api/`
 
 - ASP.NET Core 8 Web API
 - Entity Framework Core 8 (Code First)
-- SQL Server provider (can be switched to PostgreSQL)
+- MySQL provider (Pomelo Entity Framework Core)
 - JWT authentication
 - AutoMapper
 - Data Annotations validation
@@ -45,6 +45,20 @@ Set values in `appsettings.json`:
 
 > Important: replace the default `Jwt:Secret` before running in any shared or production environment. Prefer overriding it with environment variables or secret stores.
 
+Example MySQL connection string (`ConnectionStrings:DefaultConnection`):
+
+```text
+Server=localhost;Port=3306;Database=RoommaterDb;User=roommater_dev;Password=<your-dev-password>;
+```
+
+Optional MySQL server version setting used by EF Core provider:
+
+```text
+MySql:ServerVersion=8.0.36-mysql
+```
+
+Use a local development user with limited permissions (not root), and override credentials via environment variables or user secrets outside source control.
+
 ## Run Locally
 
 From repository root:
@@ -72,6 +86,20 @@ dotnet ef database update --project Roommater.API/Roommater.API.csproj
 ### Start API
 
 ```bash
+dotnet run --project Roommater.API/Roommater.API.csproj
+```
+
+If you want to use different local database credentials without editing tracked files, override the connection string at runtime:
+
+```bash
+ConnectionStrings__DefaultConnection="Server=localhost;Port=3306;Database=RoommaterDb;User=roommater_dev;Password=<your-dev-password>;" \
+dotnet run --project Roommater.API/Roommater.API.csproj
+```
+
+PowerShell equivalent:
+
+```powershell
+$env:ConnectionStrings__DefaultConnection="Server=localhost;Port=3306;Database=RoommaterDb;User=roommater_dev;Password=<your-dev-password>;"
 dotnet run --project Roommater.API/Roommater.API.csproj
 ```
 
