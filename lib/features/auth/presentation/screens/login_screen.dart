@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,7 @@ import '../../../../app/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../controllers/auth_controller.dart';
+import '../controllers/guest_provider.dart';
 import '../widgets/auth_form_field.dart';
 
 /// Screen that allows existing users to sign in with email and password.
@@ -47,6 +49,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!mounted) return;
     final hasDisplayName = user?.displayName?.trim().isNotEmpty ?? false;
     context.go(hasDisplayName ? AppRoutes.noHousehold : AppRoutes.profileSetup);
+  }
+
+  // TODO: REMOVE - Temporary guest login for dev testing
+  void _continueAsGuest() {
+    if (!mounted) return;
+    ref.read(isGuestProvider.notifier).state = true;
+    context.go(AppRoutes.home);
   }
 
   @override
@@ -125,6 +134,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 child: const Text("Don't have account? Register"),
               ),
+              // TODO: REMOVE - Temporary guest login for dev testing
+              if (kDebugMode) ...[
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: _continueAsGuest,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: _actionTextColor,
+                  ),
+                  child: const Text('Continue as Guest (Dev Testing)'),
+                ),
+              ],
             ],
           ),
         ),
