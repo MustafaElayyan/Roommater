@@ -54,6 +54,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   // TODO: REMOVE - Temporary guest login for dev testing
   void _continueAsGuest() {
     ref.read(isGuestProvider.notifier).state = true;
+    if (!mounted) return;
     context.go(AppRoutes.home);
   }
 
