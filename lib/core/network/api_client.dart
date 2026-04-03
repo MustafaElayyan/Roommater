@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -18,7 +19,9 @@ final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(
     httpClient: httpClient,
     secureStorage: ref.watch(secureStorageProvider),
-    config: const ApiClientConfig(),
+    config: ApiClientConfig(
+      baseUrl: ApiClientConfig.defaultBaseUrlForCurrentPlatform(),
+    ),
   );
 });
 
@@ -29,9 +32,22 @@ class ApiClientConfig {
     this.timeout = const Duration(seconds: 30),
   });
 
+<<<<<<< HEAD
   static const String androidEmulatorBaseUrl = 'http://192.168.0.118:5280/api/';
+=======
+  static const String androidEmulatorBaseUrl = 'http://10.0.2.2:5073/api/';
+  static const String localhostBaseUrl = 'http://localhost:5073/api/';
+>>>>>>> 808fd7a117060c6d92234ae77605018fcafd5d2a
   // For physical devices, replace with your machine LAN IP (example below).
   static const String physicalDeviceBaseUrlExample = '192.168.0.118:5280/api/';
+
+  static String defaultBaseUrlForCurrentPlatform() {
+    if (kIsWeb) return localhostBaseUrl;
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => androidEmulatorBaseUrl,
+      _ => localhostBaseUrl,
+    };
+  }
 
   final String baseUrl;
   final String jwtTokenKey;
