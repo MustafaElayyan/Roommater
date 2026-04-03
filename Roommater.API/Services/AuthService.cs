@@ -12,10 +12,10 @@ namespace Roommater.API.Services;
 public class AuthService : IAuthService
 {
     private readonly AppDbContext _db;
-    private readonly JwtService _jwtService;
+    private readonly IJwtTokenService _jwtService;
     private readonly IMapper _mapper;
 
-    public AuthService(AppDbContext db, JwtService jwtService, IMapper mapper)
+    public AuthService(AppDbContext db, IJwtTokenService jwtService, IMapper mapper)
     {
         _db = db;
         _jwtService = jwtService;
