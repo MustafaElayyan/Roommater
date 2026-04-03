@@ -54,17 +54,24 @@ builder.Services.AddAutoMapper(typeof(Program));
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException(
         "Database connection string 'DefaultConnection' is not configured. Set 'ConnectionStrings:DefaultConnection' in appsettings or override with environment variable 'ConnectionStrings__DefaultConnection'.");
-if (connectionString.Contains("REPLACE_WITH_SECURE_PASSWORD", StringComparison.OrdinalIgnoreCase))
+if (builder.Environment.IsDevelopment())
 {
-    throw new InvalidOperationException(
-        "Database connection string 'DefaultConnection' contains a placeholder password. Replace 'ConnectionStrings:DefaultConnection' in appsettings or override it with environment variable 'ConnectionStrings__DefaultConnection'.");
+    builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 }
-var mySqlServerVersion = builder.Configuration["MySql:ServerVersion"] ?? "8.0.36-mysql";
+else
+{
+    if (connectionString.Contains("REPLACE_WITH_SECURE_PASSWORD", StringComparison.OrdinalIgnoreCase))
+    {
+        throw new InvalidOperationException(
+            "Database connection string 'DefaultConnection' contains a placeholder password. Replace 'ConnectionStrings:DefaultConnection' in appsettings or override it with environment variable 'ConnectionStrings__DefaultConnection'.");
+    }
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(
-        connectionString,
-        ServerVersion.Parse(mySqlServerVersion)));
+    var mySqlServerVersion = builder.Configuration["MySql:ServerVersion"] ?? "8.0.36-mysql";
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseMySql(
+            connectionString,
+            ServerVersion.Parse(mySqlServerVersion)));
+}
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
