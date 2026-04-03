@@ -12,11 +12,13 @@ public class EventService : IEventService
 {
     private readonly AppDbContext _db;
     private readonly IMapper _mapper;
+    private readonly INotificationService _notifications;
 
-    public EventService(AppDbContext db, IMapper mapper)
+    public EventService(AppDbContext db, IMapper mapper, INotificationService notifications)
     {
         _db = db;
         _mapper = mapper;
+        _notifications = notifications;
     }
 
     public async Task<List<EventDto>> GetEventsAsync(Guid householdId, Guid userId, int page = 1, int pageSize = 50)
@@ -63,6 +65,9 @@ public class EventService : IEventService
 
         _db.Events.Add(@event);
         await _db.SaveChangesAsync();
+
+        await _notifications.CreateForHouseholdAsync(householdId,
+            "New Event", $"{@event.Title} has been scheduled.", excludeUserId: userId);
 
         return ToEventDto(@event);
     }

@@ -1,111 +1,134 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../household/presentation/controllers/household_controller.dart';
+import '../../../household/domain/entities/member_entity.dart';
+import '../../domain/entities/task_entity.dart';
+import '../controllers/task_controller.dart';
 
-class TasksScreen extends StatefulWidget {
+class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
 
   @override
-  State<TasksScreen> createState() => _TasksScreenState();
+  ConsumerState<TasksScreen> createState() => _TasksScreenState();
 }
 
-class _TasksScreenState extends State<TasksScreen> {
-  bool myTasks = true;
-  static const String _currentUser = 'Mustafa';
-  final List<Map<String, dynamic>> _tasks = [
-    {
-      'title': 'Wash dishes',
-      'assignees': ['Ahmad'],
-      'due': 'Today',
-      'done': false,
-    },
-    {
-      'title': 'Clean kitchen',
-      'assignees': ['Lana', 'Mustafa'],
-      'due': 'Tomorrow',
-      'done': true,
-    },
-    {
-      'title': 'Vacuum hallway',
-      'assignees': ['Sama'],
-      'due': 'Mar 22',
-      'done': false,
-    },
-    {
-      'title': 'Laundry rotation',
-      'assignees': ['Ahmad', 'Sama'],
-      'due': 'Mar 23',
-      'done': false,
-    },
-    {
-      'title': 'Bathroom check',
-      'assignees': ['Mustafa'],
-      'due': 'Mar 24',
-      'done': true,
-    },
-  ];
+class _TasksScreenState extends ConsumerState<TasksScreen> {
+  bool _myTasks = true;
 
   @override
   Widget build(BuildContext context) {
-    final visibleTasks = myTasks
-        ? _tasks
-            .where(
-              (task) => (task['assignees'] as List<String>).contains(_currentUser),
-            )
-            .toList()
-        : _tasks;
+    final tasksAsync = ref.watch(tasksProvider);
+    final authState = ref.watch(authStateProvider);
+    final currentUid = authState.valueOrNull?.uid;
+
+    final household = ref.watch(currentHouseholdProvider);
+    final membersAsync = household != null
+        ? ref.watch(householdMembersProvider(household.id))
+        : const AsyncValue<List<MemberEntity>>.data([]);
+
+    final members = membersAsync.valueOrNull ?? [];
 
     return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          SegmentedButton<bool>(
-            segments: const [
-              ButtonSegment<bool>(value: true, label: Text('My Tasks')),
-              ButtonSegment<bool>(value: false, label: Text('All Tasks')),
-            ],
-            selected: <bool>{myTasks},
-            onSelectionChanged: (selection) {
-              setState(() => myTasks = selection.first);
-            },
-          ),
-          const SizedBox(height: 16),
-          ...visibleTasks.map((task) {
-            final done = task['done'] as bool;
-            return Card(
-              child: CheckboxListTile(
-                value: done,
-                onChanged: (value) {
-                  setState(() => task['done'] = value ?? false);
+      body: tasksAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(child: Text('Error: $error')),
+        data: (tasks) {
+          final visibleTasks = _myTasks && currentUid != null
+              ? tasks
+                  .where((t) => t.assignedToUserId == currentUid)
+                  .toList()
+              : tasks;
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              SegmentedButton<bool>(
+                segments: const [
+                  ButtonSegment<bool>(value: true, label: Text('My Tasks')),
+                  ButtonSegment<bool>(value: false, label: Text('All Tasks')),
+                ],
+                selected: <bool>{_myTasks},
+                onSelectionChanged: (selection) {
+                  setState(() => _myTasks = selection.first);
                 },
-                title: Text(
-                  task['title'] as String,
-                  style: TextStyle(
-                    decoration: done ? TextDecoration.lineThrough : null,
-                  ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      spacing: 6,
-                      children: (task['assignees'] as List<String>)
-                          .map((a) => Chip(label: Text(a)))
-                          .toList(),
-                    ),
-                    Text('Due: ${task['due']}'),
-                  ],
-                ),
               ),
-            );
-          }),
-        ],
+              const SizedBox(height: 16),
+              if (visibleTasks.isEmpty)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 64),
+                    child: Text(
+                      'No tasks yet',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  ),
+                )
+              else
+                ...visibleTasks.map((task) {
+                  final done = task.isCompleted;
+                  final assigneeName = _resolveAssignee(task, members);
+                  final dueText = _formatDueDate(task.dueDate);
+                  return Card(
+                    child: CheckboxListTile(
+                      value: done,
+                      onChanged: (_) {
+                        ref
+                            .read(taskControllerProvider.notifier)
+                            .toggleComplete(task);
+                      },
+                      title: Text(
+                        task.title,
+                        style: TextStyle(
+                          decoration:
+                              done ? TextDecoration.lineThrough : null,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (assigneeName != null)
+                            Chip(label: Text(assigneeName)),
+                          if (dueText != null) Text('Due: $dueText'),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+            ],
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go(AppRoutes.createTask),
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  String? _resolveAssignee(TaskEntity task, List<MemberEntity> members) {
+    if (task.assignedToUserId == null) return null;
+    final match = members
+        .where((m) => m.uid == task.assignedToUserId)
+        .toList();
+    return match.isNotEmpty ? match.first.displayName : task.assignedToUserId;
+  }
+
+  String? _formatDueDate(DateTime? dueDate) {
+    if (dueDate == null) return null;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final due = DateTime(dueDate.year, dueDate.month, dueDate.day);
+    if (due == today) return 'Today';
+    if (due == tomorrow) return 'Tomorrow';
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${months[dueDate.month - 1]} ${dueDate.day}';
   }
 }

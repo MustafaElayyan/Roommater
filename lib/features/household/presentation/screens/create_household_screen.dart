@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../controllers/household_controller.dart';
 
 class CreateHouseholdScreen extends ConsumerStatefulWidget {
   const CreateHouseholdScreen({super.key});
@@ -17,6 +19,7 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
   static final RegExp _namePattern = RegExp(r'^[a-zA-Z0-9\s]+$');
   final _formKey = GlobalKey<FormState>();
   final _householdNameController = TextEditingController();
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -24,11 +27,90 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
     super.dispose();
   }
 
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate() || _isSubmitting) return;
+
+    setState(() => _isSubmitting = true);
+
+    final name = _householdNameController.text.trim();
+    await ref.read(householdControllerProvider.notifier).createHousehold(name);
+
+    if (!mounted) return;
+
+    final state = ref.read(householdControllerProvider);
+    if (state.hasError) {
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(state.error.toString())),
+      );
+      return;
+    }
+
+    final household = ref.read(currentHouseholdProvider);
+    final inviteCode = household?.inviteCode ?? '';
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Household Created!'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Share this invite code with your roommates:'),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    inviteCode,
+                    style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 4,
+                        ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.copy, size: 20),
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: inviteCode));
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(content: Text('Code copied!')),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              context.go(AppRoutes.home);
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+            ),
+            child: const Text('Go to Home'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, _) {
         if (!didPop) {
           context.go(AppRoutes.noHousehold);
         }
@@ -84,6 +166,7 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _householdNameController,
+                    enabled: !_isSubmitting,
                     decoration: InputDecoration(
                       labelText: 'Household Name',
                       hintText: 'e.g., Sunset Apartment 4B',
@@ -111,18 +194,23 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
                     width: double.infinity,
                     height: 52,
                     child: FilledButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          context.go(AppRoutes.home);
-                        }
-                      },
+                      onPressed: _isSubmitting ? null : _submit,
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Create'),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Create'),
                     ),
                   ),
                 ],

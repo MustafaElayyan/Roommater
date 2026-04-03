@@ -13,11 +13,13 @@ public class HouseholdService : IHouseholdService
 {
     private readonly AppDbContext _db;
     private readonly IMapper _mapper;
+    private readonly INotificationService _notifications;
 
-    public HouseholdService(AppDbContext db, IMapper mapper)
+    public HouseholdService(AppDbContext db, IMapper mapper, INotificationService notifications)
     {
         _db = db;
         _mapper = mapper;
+        _notifications = notifications;
     }
 
     public async Task<HouseholdDto> CreateAsync(Guid userId, CreateHouseholdDto dto)
@@ -49,6 +51,9 @@ public class HouseholdService : IHouseholdService
 
         user.HouseholdId = household.Id;
         await _db.SaveChangesAsync();
+
+        await _notifications.CreateForHouseholdAsync(household.Id,
+            "Member Joined", $"{user.DisplayName} joined the household.", excludeUserId: userId);
 
         return await GetByIdAsync(household.Id, userId);
     }
