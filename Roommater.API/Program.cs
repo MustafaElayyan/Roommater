@@ -83,7 +83,7 @@ builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IListingService, ListingService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddSingleton<JwtService>();
+builder.Services.AddSingleton<IJwtTokenService, JwtService>();
 
 var jwtSecret = builder.Configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT secret is not configured.");
 var jwtKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
@@ -147,13 +147,14 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     if (app.Environment.IsDevelopment())
     {
+        dbContext.Database.EnsureDeleted();
         dbContext.Database.EnsureCreated();
     }
     else
     {
         dbContext.Database.Migrate();
+        await DbSeeder.SeedAsync(dbContext);
     }
-    await DbSeeder.SeedAsync(dbContext);
 }
 
 // Development: listen on all interfaces so the Android emulator (10.0.2.2) can reach the API.

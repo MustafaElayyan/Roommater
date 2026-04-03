@@ -39,3 +39,6 @@ flutter_**
 # .NET build artifacts
 Roommater.API/bin/
 Roommater.API/obj/
+Roommater.API/*.db
+Roommater.API/*.db-shm
+Roommater.API/*.db-wal

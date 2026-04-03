@@ -12,13 +12,13 @@ namespace Roommater.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
-    private readonly JwtService _jwtService;
+    private readonly IJwtTokenService _jwtTokenService;
     private readonly IWebHostEnvironment _env;
 
-    public AuthController(IAuthService authService, JwtService jwtService, IWebHostEnvironment env)
+    public AuthController(IAuthService authService, IJwtTokenService jwtTokenService, IWebHostEnvironment env)
     {
         _authService = authService;
-        _jwtService = jwtService;
+        _jwtTokenService = jwtTokenService;
         _env = env;
     }
 
@@ -56,7 +56,7 @@ public class AuthController : ControllerBase
 
         var response = new AuthResponseDto
         {
-            Token = _jwtService.GenerateToken(devUser),
+            Token = _jwtTokenService.GenerateToken(devUser),
             User = new UserDto
             {
                 Uid = devUser.Id,
