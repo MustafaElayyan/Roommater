@@ -6,7 +6,7 @@ using Roommater.API.Models;
 
 namespace Roommater.API.Services;
 
-public class JwtService
+public class JwtService : IJwtTokenService
 {
     private readonly IConfiguration _configuration;
 
