@@ -12,11 +12,13 @@ public class ExpenseService : IExpenseService
 {
     private readonly AppDbContext _db;
     private readonly IMapper _mapper;
+    private readonly INotificationService _notifications;
 
-    public ExpenseService(AppDbContext db, IMapper mapper)
+    public ExpenseService(AppDbContext db, IMapper mapper, INotificationService notifications)
     {
         _db = db;
         _mapper = mapper;
+        _notifications = notifications;
     }
 
     public async Task<List<ExpenseDto>> GetExpensesAsync(Guid householdId, Guid userId, int page = 1, int pageSize = 50)
@@ -114,6 +116,9 @@ public class ExpenseService : IExpenseService
 
         _db.Expenses.Add(expense);
         await _db.SaveChangesAsync();
+
+        await _notifications.CreateForHouseholdAsync(householdId,
+            "Expense Added", $"{expense.Title} – {expense.Amount} {expense.Currency}", excludeUserId: userId);
 
         return ToExpenseDto(expense);
     }

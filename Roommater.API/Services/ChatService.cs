@@ -23,6 +23,7 @@ public class ChatService : IChatService
     {
         var query = _db.Chats
             .Include(c => c.Participants)
+            .Include(c => c.Messages.OrderByDescending(m => m.SentAt).Take(1))
             .Where(c => c.Participants.Any(p => p.UserId == userId));
 
         if (targetUserId.HasValue)
@@ -36,11 +37,17 @@ public class ChatService : IChatService
             .Take(Math.Clamp(pageSize, 1, 100))
             .ToListAsync();
 
-        return chats.Select(c => new ChatDto
+        return chats.Select(c =>
         {
-            Id = c.Id,
-            CreatedAt = c.CreatedAt,
-            ParticipantIds = c.Participants.Select(p => p.UserId).ToList()
+            var lastMsg = c.Messages.FirstOrDefault();
+            return new ChatDto
+            {
+                Id = c.Id,
+                CreatedAt = c.CreatedAt,
+                ParticipantIds = c.Participants.Select(p => p.UserId).ToList(),
+                LastMessage = lastMsg?.Text,
+                LastMessageAt = lastMsg?.SentAt
+            };
         }).ToList();
     }
 

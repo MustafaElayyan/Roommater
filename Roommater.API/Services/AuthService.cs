@@ -64,6 +64,10 @@ public class AuthService : IAuthService
         };
     }
 
+    /// Sign-out is a no-op for stateless JWT authentication.
+    /// The client clears its stored token locally; the server-issued JWT
+    /// remains cryptographically valid until its expiry but can no longer
+    /// be used once the client discards it.
     public Task SignOutAsync(Guid userId)
     {
         return Task.CompletedTask;

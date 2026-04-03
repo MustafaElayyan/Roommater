@@ -12,11 +12,13 @@ public class TaskService : ITaskService
 {
     private readonly AppDbContext _db;
     private readonly IMapper _mapper;
+    private readonly INotificationService _notifications;
 
-    public TaskService(AppDbContext db, IMapper mapper)
+    public TaskService(AppDbContext db, IMapper mapper, INotificationService notifications)
     {
         _db = db;
         _mapper = mapper;
+        _notifications = notifications;
     }
 
     public async Task<List<TaskDto>> GetTasksAsync(Guid householdId, Guid userId, bool myTasks = false, int page = 1, int pageSize = 50)
@@ -64,6 +66,12 @@ public class TaskService : ITaskService
 
         _db.HouseholdTasks.Add(task);
         await _db.SaveChangesAsync();
+
+        if (task.AssignedToUserId.HasValue && task.AssignedToUserId != userId)
+        {
+            await _notifications.CreateAsync(task.AssignedToUserId.Value,
+                "Task Assigned", $"You have been assigned: {task.Title}");
+        }
 
         return _mapper.Map<TaskDto>(task);
     }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Roommater.API.Data;
 using Roommater.API.DTOs.Notification;
 using Roommater.API.Middleware;
+using Roommater.API.Models;
 
 namespace Roommater.API.Services;
 
@@ -47,6 +48,37 @@ public class NotificationService : INotificationService
             item.IsRead = true;
         }
 
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task CreateAsync(Guid userId, string title, string body)
+    {
+        _db.Notifications.Add(new Notification
+        {
+            UserId = userId,
+            Title = title,
+            Body = body
+        });
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task CreateForHouseholdAsync(Guid householdId, string title, string body, Guid? excludeUserId = null)
+    {
+        var memberIds = await _db.Users
+            .Where(u => u.HouseholdId == householdId)
+            .Select(u => u.Id)
+            .ToListAsync();
+
+        foreach (var memberId in memberIds)
+        {
+            if (excludeUserId.HasValue && memberId == excludeUserId.Value) continue;
+            _db.Notifications.Add(new Notification
+            {
+                UserId = memberId,
+                Title = title,
+                Body = body
+            });
+        }
         await _db.SaveChangesAsync();
     }
 }

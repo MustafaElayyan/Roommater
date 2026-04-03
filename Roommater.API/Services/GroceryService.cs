@@ -61,6 +61,10 @@ public class GroceryService : IGroceryService
 
         item.Quantity = dto.Quantity;
         item.IsPurchased = dto.IsPurchased;
+        if (!string.IsNullOrWhiteSpace(dto.Name))
+        {
+            item.Name = dto.Name.Trim();
+        }
 
         await _db.SaveChangesAsync();
 
