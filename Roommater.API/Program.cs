@@ -145,14 +145,16 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     if (app.Environment.IsDevelopment())
     {
         try
         {
             dbContext.Database.EnsureCreated();
         }
-        catch
+        catch (Exception ex)
         {
+            logger.LogWarning(ex, "SQLite development database initialization failed; recreating the local dev database.");
             dbContext.Database.EnsureDeleted();
             dbContext.Database.EnsureCreated();
         }
