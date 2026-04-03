@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -132,15 +133,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 child: const Text("Don't have account? Register"),
               ),
-              const SizedBox(height: 8),
               // TODO: REMOVE - Temporary guest login for dev testing
-              OutlinedButton(
-                onPressed: _continueAsGuest,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: _actionTextColor,
+              if (kDebugMode) ...[
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: _continueAsGuest,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: _actionTextColor,
+                  ),
+                  child: const Text('Continue as Guest (Dev Testing)'),
                 ),
-                child: const Text('Continue as Guest (Dev Testing)'),
-              ),
+              ],
             ],
           ),
         ),
