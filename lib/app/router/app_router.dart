@@ -320,6 +320,7 @@ class _MainShell extends ConsumerWidget {
                   onTap: () async {
                     Navigator.of(context).pop();
                     try {
+                      ref.read(isGuestProvider.notifier).state = false;
                       await ref.read(authControllerProvider.notifier).signOut();
                       if (context.mounted) context.go(AppRoutes.authChoice);
                     } catch (_) {

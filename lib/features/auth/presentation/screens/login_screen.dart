@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -33,6 +32,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    ref.read(isGuestProvider.notifier).state = false;
     await ref.read(authControllerProvider.notifier).signIn(
           email: _emailController.text.trim(),
           password: _passwordController.text,
@@ -51,7 +51,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     context.go(hasDisplayName ? AppRoutes.noHousehold : AppRoutes.profileSetup);
   }
 
-  // TODO: REMOVE - Temporary guest login for dev testing
   void _continueAsGuest() {
     if (!mounted) return;
     ref.read(isGuestProvider.notifier).state = true;
@@ -134,17 +133,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 child: const Text("Don't have account? Register"),
               ),
-              // TODO: REMOVE - Temporary guest login for dev testing
-              if (kDebugMode) ...[
-                const SizedBox(height: 8),
-                OutlinedButton(
-                  onPressed: _continueAsGuest,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: _actionTextColor,
-                  ),
-                  child: const Text('Continue as Guest (Dev Testing)'),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: _continueAsGuest,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _actionTextColor,
                 ),
-              ],
+                child: const Text('Continue as Guest'),
+              ),
             ],
           ),
         ),
