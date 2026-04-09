@@ -1,6 +1,6 @@
 {
   // Launch configurations for the Roommater project.
-  // Requires: Flutter & Dart extensions, C# extension.
+  // Requires: Flutter & Dart extensions.
   "version": "0.2.0",
   "configurations": [
     {
@@ -28,28 +28,6 @@
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart"
-    },
-    {
-      "name": ".NET API",
-      "type": "coreclr",
-      "request": "launch",
-      "preLaunchTask": "dotnet: build API",
-      "program": "${workspaceFolder}/Roommater.API/bin/Debug/net8.0/Roommater.API.dll",
-      "args": [],
-      "cwd": "${workspaceFolder}/Roommater.API",
-      "stopAtEntry": false,
-      "env": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Full Stack (API + Flutter)",
-      "configurations": [
-        ".NET API",
-        "Flutter: Android Emulator"
-      ]
     }
   ]
 }

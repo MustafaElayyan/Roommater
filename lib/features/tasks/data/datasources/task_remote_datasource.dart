@@ -1,12 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../../../core/errors/app_exception.dart';
-import '../../../../core/network/api_client.dart';
 import '../models/task_model.dart';
 
-/// Handles task API reads/writes.
+/// Handles task Firestore reads/writes.
 class TaskRemoteDataSource {
-  const TaskRemoteDataSource(this._apiClient);
+  const TaskRemoteDataSource(this._firestore, this._firebaseAuth);
 
-  final ApiClient _apiClient;
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _firebaseAuth;
 
   Future<List<TaskModel>> getTasks(
     String householdId, {
@@ -15,19 +18,26 @@ class TaskRemoteDataSource {
     int? pageSize,
   }) async {
     try {
-      final queryParameters = <String, dynamic>{
-        if (myTasks != null) 'myTasks': myTasks,
-        if (page != null) 'page': page,
-        if (pageSize != null) 'pageSize': pageSize,
-      };
-      final response = await _apiClient.getJsonList(
-        'households/$householdId/tasks',
-        queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
-      );
-      return response
-          .map((e) => TaskModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } on AppException catch (e) {
+      Query<Map<String, dynamic>> query = _firestore
+          .collection('households')
+          .doc(householdId)
+          .collection('tasks')
+          .orderBy('createdAt', descending: true);
+
+      if (myTasks == true) {
+        final uid = _firebaseAuth.currentUser?.uid;
+        if (uid != null) {
+          query = query.where('assignedToUserId', isEqualTo: uid);
+        }
+      }
+
+      if (pageSize != null && pageSize > 0) {
+        query = query.limit(pageSize);
+      }
+
+      final snapshot = await query.get();
+      return snapshot.docs.map(TaskModel.fromFirestore).toList();
+    } on FirebaseException catch (e) {
       throw ApiException('Failed to load tasks.', e);
     }
   }
@@ -40,17 +50,26 @@ class TaskRemoteDataSource {
     String? assignedToUserId,
   }) async {
     try {
-      final response = await _apiClient.postJson(
-        'households/$householdId/tasks',
-        body: {
-          'title': title,
-          if (description != null) 'description': description,
-          if (dueDate != null) 'dueDate': dueDate.toIso8601String(),
-          if (assignedToUserId != null) 'assignedToUserId': assignedToUserId,
-        },
+      final taskRef = _firestore
+          .collection('households')
+          .doc(householdId)
+          .collection('tasks')
+          .doc();
+      final model = TaskModel(
+        id: taskRef.id,
+        householdId: householdId,
+        title: title,
+        description: description,
+        isCompleted: false,
+        dueDate: dueDate,
+        createdByUserId: _firebaseAuth.currentUser?.uid ?? 'guest',
+        assignedToUserId: assignedToUserId,
+        createdAt: DateTime.now(),
       );
-      return TaskModel.fromJson(response);
-    } on AppException catch (e) {
+      await taskRef.set(model.toFirestore(), SetOptions(merge: true));
+      final created = await taskRef.get();
+      return TaskModel.fromFirestore(created);
+    } on FirebaseException catch (e) {
       throw ApiException('Failed to create task.', e);
     }
   }
@@ -65,26 +84,39 @@ class TaskRemoteDataSource {
     String? assignedToUserId,
   }) async {
     try {
-      final response = await _apiClient.putJson(
-        'households/$householdId/tasks/$taskId',
-        body: {
-          'title': title,
-          if (description != null) 'description': description,
-          'isCompleted': isCompleted,
-          if (dueDate != null) 'dueDate': dueDate.toIso8601String(),
-          if (assignedToUserId != null) 'assignedToUserId': assignedToUserId,
-        },
-      );
-      return TaskModel.fromJson(response);
-    } on AppException catch (e) {
+      final taskRef = _firestore
+          .collection('households')
+          .doc(householdId)
+          .collection('tasks')
+          .doc(taskId);
+      await taskRef.set({
+        'id': taskId,
+        'householdId': householdId,
+        'title': title,
+        if (description != null) 'description': description else 'description': null,
+        'isCompleted': isCompleted,
+        if (dueDate != null) 'dueDate': Timestamp.fromDate(dueDate!) else 'dueDate': null,
+        if (assignedToUserId != null)
+          'assignedToUserId': assignedToUserId
+        else
+          'assignedToUserId': null,
+      }, SetOptions(merge: true));
+      final updated = await taskRef.get();
+      return TaskModel.fromFirestore(updated);
+    } on FirebaseException catch (e) {
       throw ApiException('Failed to update task.', e);
     }
   }
 
   Future<void> deleteTask(String householdId, String taskId) async {
     try {
-      await _apiClient.delete('households/$householdId/tasks/$taskId');
-    } on AppException catch (e) {
+      await _firestore
+          .collection('households')
+          .doc(householdId)
+          .collection('tasks')
+          .doc(taskId)
+          .delete();
+    } on FirebaseException catch (e) {
       throw ApiException('Failed to delete task.', e);
     }
   }

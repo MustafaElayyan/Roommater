@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/chat_entity.dart';
 
 /// Data-layer model for a chat payload.
@@ -9,24 +11,29 @@ class ChatModel extends ChatEntity {
     super.lastMessageAt,
   });
 
-  factory ChatModel.fromJson(Map<String, dynamic> data) {
+  factory ChatModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data() ?? const <String, dynamic>{};
+    final lastMessageAtRaw = data['lastMessageAt'];
     return ChatModel(
-      id: data['id'] as String? ?? '',
+      id: data['id'] as String? ?? doc.id,
       participantIds: List<String>.from(data['participantIds'] as List? ?? []),
       lastMessage: data['lastMessage'] as String?,
-      lastMessageAt: data['lastMessageAt'] != null
-          ? DateTime.tryParse(data['lastMessageAt'] as String? ?? '')
-          : null,
+      lastMessageAt: switch (lastMessageAtRaw) {
+        Timestamp() => lastMessageAtRaw.toDate(),
+        String() => DateTime.tryParse(lastMessageAtRaw),
+        _ => null,
+      },
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toFirestore() {
     return {
       'id': id,
       'participantIds': participantIds,
       if (lastMessage != null) 'lastMessage': lastMessage,
-      if (lastMessageAt != null)
-        'lastMessageAt': lastMessageAt!.toIso8601String(),
+      if (lastMessageAt != null) 'lastMessageAt': Timestamp.fromDate(lastMessageAt!),
     };
   }
 }

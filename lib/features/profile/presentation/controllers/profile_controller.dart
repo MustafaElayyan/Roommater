@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/network/api_client.dart';
+import '../../../../core/network/firestore_service.dart';
 import '../../data/datasources/profile_remote_datasource.dart';
 import '../../data/repositories/profile_repository_impl.dart';
 import '../../domain/entities/profile_entity.dart';
@@ -12,7 +12,7 @@ import '../../domain/usecases/update_profile_usecase.dart';
 
 final _profileDataSourceProvider =
     Provider<ProfileRemoteDataSource>((ref) {
-  return ProfileRemoteDataSource(ref.watch(apiClientProvider));
+  return ProfileRemoteDataSource(ref.watch(firestoreProvider));
 });
 
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {

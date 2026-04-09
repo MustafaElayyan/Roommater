@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/listing_entity.dart';
 
 /// Data-layer model for a listing payload.
@@ -14,22 +16,32 @@ class ListingModel extends ListingEntity {
     super.isAvailable,
   });
 
-  factory ListingModel.fromJson(Map<String, dynamic> data) {
+  factory ListingModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data() ?? const <String, dynamic>{};
+    final postedAtRaw = data['postedAt'];
+    final postedAt = switch (postedAtRaw) {
+      Timestamp() => postedAtRaw.toDate(),
+      String() =>
+        DateTime.tryParse(postedAtRaw) ?? DateTime.fromMillisecondsSinceEpoch(0),
+      _ => DateTime.fromMillisecondsSinceEpoch(0),
+    };
+
     return ListingModel(
-      id: data['id'] as String? ?? '',
+      id: data['id'] as String? ?? doc.id,
       ownerId: data['ownerId'] as String? ?? '',
       title: data['title'] as String? ?? '',
       description: data['description'] as String? ?? '',
       rent: (data['rent'] as num? ?? 0).toDouble(),
       location: data['location'] as String? ?? '',
       imageUrls: List<String>.from(data['imageUrls'] as List? ?? []),
-      postedAt: DateTime.tryParse(data['postedAt'] as String? ?? '') ??
-          DateTime.fromMillisecondsSinceEpoch(0),
+      postedAt: postedAt,
       isAvailable: data['isAvailable'] as bool? ?? true,
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toFirestore() {
     return {
       'id': id,
       'ownerId': ownerId,
@@ -38,7 +50,7 @@ class ListingModel extends ListingEntity {
       'rent': rent,
       'location': location,
       'imageUrls': imageUrls,
-      'postedAt': postedAt.toIso8601String(),
+      'postedAt': Timestamp.fromDate(postedAt),
       'isAvailable': isAvailable,
     };
   }

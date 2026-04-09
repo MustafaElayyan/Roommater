@@ -18,7 +18,25 @@ class MemberModel extends MemberEntity {
     );
   }
 
+  factory MemberModel.fromFirestore(Map<String, dynamic> data) {
+    return MemberModel(
+      uid: data['uid'] as String? ?? '',
+      displayName: data['displayName'] as String? ?? '',
+      email: data['email'] as String? ?? '',
+      photoUrl: data['photoUrl'] as String?,
+    );
+  }
+
   Map<String, dynamic> toJson() {
+    return {
+      'uid': uid,
+      'displayName': displayName,
+      'email': email,
+      if (photoUrl != null) 'photoUrl': photoUrl,
+    };
+  }
+
+  Map<String, dynamic> toFirestore() {
     return {
       'uid': uid,
       'displayName': displayName,

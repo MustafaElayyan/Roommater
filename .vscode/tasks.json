@@ -28,38 +28,6 @@
       "command": "flutter test",
       "group": "test",
       "problemMatcher": []
-    },
-    {
-      "label": "dotnet: restore API",
-      "type": "shell",
-      "command": "dotnet restore Roommater.API/Roommater.API.csproj",
-      "group": "build",
-      "problemMatcher": "$msCompile"
-    },
-    {
-      "label": "dotnet: build API",
-      "type": "shell",
-      "command": "dotnet build Roommater.API/Roommater.API.csproj",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "problemMatcher": "$msCompile"
-    },
-    {
-      "label": "dotnet: run API",
-      "type": "shell",
-      "command": "dotnet run --project Roommater.API/Roommater.API.csproj",
-      "group": "none",
-      "isBackground": true,
-      "problemMatcher": []
-    },
-    {
-      "label": "dotnet: ef update database",
-      "type": "shell",
-      "command": "dotnet ef database update --project Roommater.API/Roommater.API.csproj",
-      "group": "none",
-      "problemMatcher": []
     }
   ]
 }

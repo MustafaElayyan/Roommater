@@ -12,10 +12,6 @@
   },
   "dart.lineLength": 80,
 
-  // C# / .NET
-  "dotnet.defaultSolution": "disable",
-  "omnisharp.projectLoadTimeout": 120,
-
   // File associations
   "files.associations": {
     "*.dart": "dart"
@@ -25,17 +21,13 @@
   "files.exclude": {
     "**/.dart_tool": true,
     "**/.packages": true,
-    "**/build": true,
-    "Roommater.API/bin": true,
-    "Roommater.API/obj": true
+    "**/build": true
   },
 
   // Search exclusions
   "search.exclude": {
     "**/.dart_tool": true,
     "**/build": true,
-    "Roommater.API/bin": true,
-    "Roommater.API/obj": true,
     "pubspec.lock": true
   }
 }

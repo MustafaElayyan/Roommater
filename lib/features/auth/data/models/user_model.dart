@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/user_entity.dart';
 
 /// Data-layer representation of a Roommater user.
@@ -9,16 +11,19 @@ class UserModel extends UserEntity {
     super.photoUrl,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> data) {
+  factory UserModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data() ?? const <String, dynamic>{};
     return UserModel(
-      uid: data['uid'] as String? ?? '',
+      uid: data['uid'] as String? ?? doc.id,
       email: data['email'] as String? ?? '',
       displayName: data['displayName'] as String?,
       photoUrl: data['photoUrl'] as String?,
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toFirestore() {
     return {
       'uid': uid,
       'email': email,

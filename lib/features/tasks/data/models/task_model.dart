@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/task_entity.dart';
 
 /// Data-layer model for a task payload.
@@ -32,6 +34,34 @@ class TaskModel extends TaskEntity {
     );
   }
 
+  factory TaskModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data() ?? const <String, dynamic>{};
+    final dueDateRaw = data['dueDate'];
+    final createdAtRaw = data['createdAt'];
+
+    return TaskModel(
+      id: data['id'] as String? ?? doc.id,
+      householdId: data['householdId'] as String? ?? '',
+      title: data['title'] as String? ?? '',
+      description: data['description'] as String?,
+      isCompleted: data['isCompleted'] as bool? ?? false,
+      dueDate: switch (dueDateRaw) {
+        Timestamp() => dueDateRaw.toDate(),
+        String() => DateTime.tryParse(dueDateRaw),
+        _ => null,
+      },
+      createdByUserId: data['createdByUserId'] as String? ?? '',
+      assignedToUserId: data['assignedToUserId'] as String?,
+      createdAt: switch (createdAtRaw) {
+        Timestamp() => createdAtRaw.toDate(),
+        String() => DateTime.tryParse(createdAtRaw) ?? DateTime.now(),
+        _ => DateTime.now(),
+      },
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -43,6 +73,20 @@ class TaskModel extends TaskEntity {
       'createdByUserId': createdByUserId,
       if (assignedToUserId != null) 'assignedToUserId': assignedToUserId,
       'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'id': id,
+      'householdId': householdId,
+      'title': title,
+      if (description != null) 'description': description,
+      'isCompleted': isCompleted,
+      if (dueDate != null) 'dueDate': Timestamp.fromDate(dueDate!),
+      'createdByUserId': createdByUserId,
+      if (assignedToUserId != null) 'assignedToUserId': assignedToUserId,
+      'createdAt': Timestamp.fromDate(createdAt),
     };
   }
 }
