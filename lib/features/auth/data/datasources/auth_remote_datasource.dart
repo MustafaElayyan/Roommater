@@ -49,13 +49,15 @@ class AuthRemoteDataSource {
       if (displayName != null && displayName.trim().isNotEmpty) {
         await user.updateDisplayName(displayName.trim());
       }
+      final trimmedDisplayName = displayName?.trim();
       final userDoc = _firestore.collection('users').doc(user.uid);
       await userDoc.set({
         'uid': user.uid,
         'email': user.email ?? email,
-        'displayName': displayName?.trim().isEmpty ?? true
-            ? null
-            : displayName?.trim(),
+        'displayName':
+            trimmedDisplayName == null || trimmedDisplayName.isEmpty
+                ? null
+                : trimmedDisplayName,
         'photoUrl': user.photoURL,
         'createdAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
