@@ -46,10 +46,10 @@ class AuthRemoteDataSource {
       if (user == null) {
         throw const AuthException('No Firebase user returned after sign-up.');
       }
-      if (displayName != null && displayName.trim().isNotEmpty) {
-        await user.updateDisplayName(displayName.trim());
-      }
       final trimmedDisplayName = displayName?.trim();
+      if (trimmedDisplayName != null && trimmedDisplayName.isNotEmpty) {
+        await user.updateDisplayName(trimmedDisplayName);
+      }
       final userDoc = _firestore.collection('users').doc(user.uid);
       await userDoc.set({
         'uid': user.uid,

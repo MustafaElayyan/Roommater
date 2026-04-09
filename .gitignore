@@ -37,6 +37,5 @@ build/
 flutter_**
 
 # Firebase
-# Keep this ignored only if your team manages it outside source control.
 google-services.json
 **/firebase_app_id_file.json
