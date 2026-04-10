@@ -60,8 +60,6 @@ class ProfileRemoteDataSource {
       await userDoc.set({
         'uid': uid,
         'createdAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-      await userDoc.set({
         'photoUrl': photoUrl,
       }, SetOptions(merge: true));
       final user = _firebaseAuth.currentUser;
