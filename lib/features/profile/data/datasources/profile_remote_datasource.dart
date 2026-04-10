@@ -59,11 +59,8 @@ class ProfileRemoteDataSource {
       final userDoc = _firestore.collection('users').doc(uid);
       final userSnapshot = await userDoc.get();
       if (!userSnapshot.exists) {
-        final currentUser = _firebaseAuth.currentUser;
         await userDoc.set({
           'uid': uid,
-          'email': currentUser?.email,
-          'displayName': currentUser?.displayName,
           'createdAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
       }
@@ -86,6 +83,7 @@ class ProfileRemoteDataSource {
     Reference ref, {
     int maxAttempts = 3,
   }) async {
+    FirebaseException? objectNotFoundError;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         return await ref.getDownloadURL();
@@ -93,13 +91,16 @@ class ProfileRemoteDataSource {
         if (e.code != 'object-not-found') {
           rethrow;
         }
-        if (attempt == maxAttempts) {
-          throw ApiException(e.message ?? 'Failed to update profile photo.', e);
+        objectNotFoundError = e;
+        if (attempt < maxAttempts) {
+          await Future<void>.delayed(Duration(milliseconds: 250 * attempt));
         }
-        await Future<void>.delayed(Duration(milliseconds: 250 * attempt));
       }
     }
-    throw const ApiException('Failed to update profile photo.');
+    throw ApiException(
+      objectNotFoundError?.message ?? 'Failed to retrieve download URL for profile photo.',
+      objectNotFoundError,
+    );
   }
 
   Future<void> changePassword({
