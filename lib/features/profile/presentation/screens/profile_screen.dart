@@ -15,6 +15,10 @@ class ProfileScreen extends ConsumerWidget {
     final hasName = displayName.isNotEmpty;
     final photoUrl = user?.photoUrl;
     final hasPhoto = photoUrl?.isNotEmpty ?? false;
+    var avatarInitial = '?';
+    if (displayName.isNotEmpty) {
+      avatarInitial = displayName.substring(0, 1).toUpperCase();
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -34,7 +38,7 @@ class ProfileScreen extends ConsumerWidget {
               child: hasPhoto
                   ? null
                   : Text(
-                      hasName ? displayName[0].toUpperCase() : '?',
+                      avatarInitial,
                       style: const TextStyle(fontSize: 32),
                     ),
             ),

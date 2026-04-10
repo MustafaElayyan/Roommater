@@ -83,7 +83,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
+        const SnackBar(content: Text('Failed to upload profile photo. Please try again.')),
       );
     }
   }

@@ -54,18 +54,20 @@ class _DashboardTab extends ConsumerWidget {
                       runSpacing: 8,
                       children: members
                           .map(
-                            (member) => CircleAvatar(
-                              backgroundImage: (member.photoUrl?.isNotEmpty ?? false)
-                                  ? NetworkImage(member.photoUrl!)
-                                  : null,
-                              child: (member.photoUrl?.isNotEmpty ?? false)
-                                  ? null
-                                  : Text(
-                                      member.displayName.isNotEmpty
-                                          ? member.displayName[0].toUpperCase()
-                                          : '?',
-                                    ),
-                            ),
+                            (member) {
+                              final hasPhoto = member.photoUrl?.isNotEmpty ?? false;
+                              return CircleAvatar(
+                                backgroundImage:
+                                    hasPhoto ? NetworkImage(member.photoUrl!) : null,
+                                child: hasPhoto
+                                    ? null
+                                    : Text(
+                                        member.displayName.isNotEmpty
+                                            ? member.displayName[0].toUpperCase()
+                                            : '?',
+                                      ),
+                              );
+                            },
                           )
                           .toList(),
                     );

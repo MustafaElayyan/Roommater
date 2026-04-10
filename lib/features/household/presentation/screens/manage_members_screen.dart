@@ -82,14 +82,13 @@ class ManageMembersScreen extends ConsumerWidget {
               final member = members[index];
               final isSelf = member.uid == currentUser?.uid;
               final isOwner = member.uid == household.createdByUserId;
+              final hasPhoto = member.photoUrl?.isNotEmpty ?? false;
 
               return Card(
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: (member.photoUrl?.isNotEmpty ?? false)
-                        ? NetworkImage(member.photoUrl!)
-                        : null,
-                    child: (member.photoUrl?.isNotEmpty ?? false)
+                    backgroundImage: hasPhoto ? NetworkImage(member.photoUrl!) : null,
+                    child: hasPhoto
                         ? null
                         : Text(
                             member.displayName.isNotEmpty
