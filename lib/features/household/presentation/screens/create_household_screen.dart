@@ -62,7 +62,7 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -110,7 +110,7 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, _) {
         if (!didPop) {
           context.go(AppRoutes.noHousehold);
         }
@@ -138,7 +138,7 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
                       height: 110,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                       ),
                       child: const Icon(
                         Icons.home_outlined,

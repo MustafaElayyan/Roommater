@@ -161,7 +161,7 @@ class _GroceryList extends ConsumerWidget {
             return Dismissible(
               key: ValueKey(item.id),
               background: Container(
-                color: Colors.red.withOpacity(0.2),
+                color: Colors.red.withValues(alpha: 0.2),
                 alignment: Alignment.centerRight,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: const Icon(Icons.delete_outline),

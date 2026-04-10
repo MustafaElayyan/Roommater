@@ -51,7 +51,7 @@ class _JoinHouseholdScreenState extends ConsumerState<JoinHouseholdScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, _) {
         if (!didPop) {
           context.go(AppRoutes.noHousehold);
         }
@@ -79,7 +79,7 @@ class _JoinHouseholdScreenState extends ConsumerState<JoinHouseholdScreen> {
                       height: 110,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                       ),
                       child: const Icon(
                         Icons.group_add_outlined,

@@ -36,7 +36,7 @@ class NotificationsScreen extends ConsumerWidget {
                 child: ListTile(
                   tileColor: item.isRead
                       ? null
-                      : Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                      : Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
                   title: Text(item.title),
                   subtitle: item.body == null ? null : Text(item.body!),
                   trailing: item.isRead

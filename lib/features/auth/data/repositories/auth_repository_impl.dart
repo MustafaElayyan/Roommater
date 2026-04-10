@@ -18,6 +18,8 @@ class AuthRepositoryImpl implements AuthRepository {
       return await _dataSource.signIn(email: email, password: password);
     } on AuthException {
       rethrow;
+    } on Exception catch (e) {
+      throw AuthException('Failed to sign in.', e);
     }
   }
 
@@ -35,6 +37,8 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     } on AuthException {
       rethrow;
+    } on Exception catch (e) {
+      throw AuthException('Failed to sign up.', e);
     }
   }
 
@@ -44,6 +48,8 @@ class AuthRepositoryImpl implements AuthRepository {
       await _dataSource.signOut();
     } on AuthException {
       rethrow;
+    } on Exception catch (e) {
+      throw AuthException('Failed to sign out.', e);
     }
   }
 
@@ -53,6 +59,8 @@ class AuthRepositoryImpl implements AuthRepository {
       await _dataSource.sendPasswordResetEmail(email);
     } on AuthException {
       rethrow;
+    } on Exception catch (e) {
+      throw AuthException('Failed to send password reset email.', e);
     }
   }
 
@@ -62,6 +70,8 @@ class AuthRepositoryImpl implements AuthRepository {
       await _dataSource.sendEmailVerification();
     } on AuthException {
       rethrow;
+    } on Exception catch (e) {
+      throw AuthException('Failed to send verification email.', e);
     }
   }
 
@@ -71,6 +81,8 @@ class AuthRepositoryImpl implements AuthRepository {
       await _dataSource.resendEmailVerification();
     } on AuthException {
       rethrow;
+    } on Exception catch (e) {
+      throw AuthException('Failed to resend verification email.', e);
     }
   }
 
@@ -80,6 +92,8 @@ class AuthRepositoryImpl implements AuthRepository {
       await _dataSource.updateProfilePhoto(photoUrl);
     } on AuthException {
       rethrow;
+    } on Exception catch (e) {
+      throw AuthException('Failed to update profile photo.', e);
     }
   }
 

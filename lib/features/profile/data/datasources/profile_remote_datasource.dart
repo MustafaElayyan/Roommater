@@ -16,6 +16,11 @@ class ProfileRemoteDataSource {
     this._firebaseStorage,
   );
 
+  // Storage objects may be briefly unavailable for read-after-write; this
+  // allows up to ~8.4s total backoff (0.4 + 0.8 + ... + 2.0) before failing.
+  static const int _downloadUrlRetryAttempts = 6;
+  static const int _downloadUrlRetryBaseDelayMs = 400;
+
   final FirebaseFirestore _firestore;
   final FirebaseAuth _firebaseAuth;
   final FirebaseStorage _firebaseStorage;
@@ -58,8 +63,6 @@ class ProfileRemoteDataSource {
       final photoUrl = await _getDownloadUrlWithRetry(ref);
       final userDoc = _firestore.collection('users').doc(uid);
       await userDoc.set({
-        'uid': uid,
-        'createdAt': FieldValue.serverTimestamp(),
         'photoUrl': photoUrl,
       }, SetOptions(merge: true));
       final user = _firebaseAuth.currentUser;
@@ -76,7 +79,7 @@ class ProfileRemoteDataSource {
 
   Future<String> _getDownloadUrlWithRetry(
     Reference ref, {
-    int maxAttempts = 3,
+    int maxAttempts = _downloadUrlRetryAttempts,
   }) async {
     FirebaseException? objectNotFoundError;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -88,7 +91,9 @@ class ProfileRemoteDataSource {
         }
         objectNotFoundError = e;
         if (attempt < maxAttempts) {
-          await Future<void>.delayed(Duration(milliseconds: 250 * attempt));
+          await Future<void>.delayed(
+            Duration(milliseconds: _downloadUrlRetryBaseDelayMs * attempt),
+          );
         }
       }
     }
