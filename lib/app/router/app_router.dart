@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/theme_provider.dart';
+import '../../core/network/firestore_service.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/screens/auth_choice_screen.dart';
@@ -62,13 +63,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final location = state.matchedLocation;
       final isPublicRoute = publicRoutes.contains(location);
       final isAuthRoute = authOnlyRoutes.contains(location);
+      final isEmailVerified =
+          !isLoggedIn || (ref.read(firebaseAuthProvider).currentUser?.emailVerified == true);
 
       if (!isLoggedIn && !isPublicRoute) {
         return AppRoutes.authChoice;
       }
 
+      if (isLoggedIn && !isEmailVerified && !isPublicRoute) {
+        return AppRoutes.emailVerification;
+      }
+
       if (isLoggedIn && isAuthRoute) {
-        return AppRoutes.home;
+        final household = ref.read(currentHouseholdProvider);
+        return household == null ? AppRoutes.noHousehold : AppRoutes.home;
       }
 
       return null;
@@ -244,6 +252,16 @@ class _MainShell extends ConsumerWidget {
     final selectedIndex = _selectedIndex();
     final themeMode = ref.watch(themeModeProvider);
     final household = ref.watch(currentHouseholdProvider);
+    final user = ref.watch(authStateProvider).valueOrNull;
+    final hasPhoto = user?.photoUrl?.isNotEmpty ?? false;
+    final avatarLabel = (user?.displayName?.trim().isNotEmpty ?? false)
+        ? user!.displayName!.trim()[0]
+        : (user?.email.isNotEmpty ?? false)
+            ? user!.email[0]
+            : '?';
+    final profileTitle = (user?.displayName?.trim().isNotEmpty ?? false)
+        ? user!.displayName!.trim()
+        : 'Profile';
 
     void goToShellRoute(String route) {
       Navigator.of(context).pop();
@@ -289,17 +307,52 @@ class _MainShell extends ConsumerWidget {
           child: SafeArea(
             child: ListView(
               children: [
-                const DrawerHeader(
-                  child: Text(
-                    'Menu',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                InkWell(
+                  onTap: () => pushToTopLevelRoute(AppRoutes.profile),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 28,
+                          backgroundImage: hasPhoto ? NetworkImage(user!.photoUrl!) : null,
+                          child: hasPhoto
+                              ? null
+                              : Text(
+                                  avatarLabel.toUpperCase(),
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                profileTitle,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                user?.email ?? '',
+                                style: Theme.of(context).textTheme.bodySmall,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.person_outline),
-                  title: const Text('Profile'),
-                  onTap: () => pushToTopLevelRoute(AppRoutes.profile),
-                ),
+                const Divider(),
                 ListTile(
                   leading: const Icon(Icons.settings_outlined),
                   title: const Text('Settings'),

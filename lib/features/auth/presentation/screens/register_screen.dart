@@ -1,8 +1,13 @@
+import 'dart:typed_data';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../core/network/firestore_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../controllers/auth_controller.dart';
@@ -22,6 +27,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _displayNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _picker = ImagePicker();
+  Uint8List? _imageBytes;
+  String _imageExtension = 'jpg';
+  String _contentType = 'image/jpeg';
 
   @override
   void dispose() {
@@ -48,7 +57,78 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
     await ref.refresh(authStateProvider.future);
     if (!mounted) return;
+    await _uploadProfilePhotoIfNeeded();
+    if (!mounted) return;
     context.go(AppRoutes.emailVerification);
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final image = await _picker.pickImage(source: source, imageQuality: 80);
+    if (image == null) return;
+    final bytes = await image.readAsBytes();
+    final extension = image.path.contains('.')
+        ? image.path.split('.').last.toLowerCase()
+        : 'jpg';
+    final contentType = switch (extension) {
+      'png' => 'image/png',
+      'webp' => 'image/webp',
+      _ => 'image/jpeg',
+    };
+    if (!mounted) return;
+    setState(() {
+      _imageBytes = bytes;
+      _imageExtension = extension;
+      _contentType = contentType;
+    });
+  }
+
+  Future<void> _showImageSourcePicker() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Choose from Gallery'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text('Take a Photo'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _uploadProfilePhotoIfNeeded() async {
+    if (_imageBytes == null) return;
+    final user = ref.read(firebaseAuthProvider).currentUser;
+    if (user == null) return;
+    try {
+      final refPath =
+          FirebaseStorage.instance.ref().child('avatars/${user.uid}.$_imageExtension');
+      await refPath.putData(
+        _imageBytes!,
+        SettableMetadata(contentType: _contentType),
+      );
+      final downloadUrl = await refPath.getDownloadURL();
+      await ref.read(authControllerProvider.notifier).updateProfilePhoto(downloadUrl);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to upload profile photo.')),
+      );
+    }
   }
 
   @override
@@ -73,6 +153,34 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 32),
+              Center(
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 44,
+                      backgroundImage:
+                          _imageBytes != null ? MemoryImage(_imageBytes!) : null,
+                      child: _imageBytes == null
+                          ? const Icon(Icons.person, size: 40)
+                          : null,
+                    ),
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: CircleAvatar(
+                        radius: 16,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          iconSize: 16,
+                          icon: const Icon(Icons.camera_alt),
+                          onPressed: _showImageSourcePicker,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
               AuthFormField(
                 label: 'Display Name',
                 controller: _displayNameController,

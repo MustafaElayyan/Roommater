@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class CreateEventScreen extends StatefulWidget {
+import '../controllers/event_controller.dart';
+
+class CreateEventScreen extends ConsumerStatefulWidget {
   const CreateEventScreen({super.key});
 
   @override
-  State<CreateEventScreen> createState() => _CreateEventScreenState();
+  ConsumerState<CreateEventScreen> createState() => _CreateEventScreenState();
 }
 
-class _CreateEventScreenState extends State<CreateEventScreen> {
+class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _locationController = TextEditingController();
   DateTime? _date;
   TimeOfDay? _time;
-  String _type = 'Meeting';
+  String _type = 'meeting';
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -34,15 +39,20 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          TextField(
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            TextFormField(
             controller: _titleController,
             decoration: const InputDecoration(labelText: 'Title'),
+            validator: (value) => (value == null || value.trim().isEmpty)
+                ? 'Title is required'
+                : null,
           ),
           const SizedBox(height: 12),
-          TextField(
+          TextFormField(
             controller: _descController,
             maxLines: 3,
             decoration: const InputDecoration(labelText: 'Description'),
@@ -87,21 +97,65 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             value: _type,
             decoration: const InputDecoration(labelText: 'Event Type'),
             items: const [
-              DropdownMenuItem(value: 'Meeting', child: Text('Meeting')),
-              DropdownMenuItem(value: 'Dinner', child: Text('Dinner')),
-              DropdownMenuItem(value: 'Party', child: Text('Party')),
-              DropdownMenuItem(value: 'Quiet Hours', child: Text('Quiet Hours')),
-              DropdownMenuItem(value: 'Other', child: Text('Other')),
+              DropdownMenuItem(value: 'meeting', child: Text('Meeting')),
+              DropdownMenuItem(value: 'dinner', child: Text('Dinner')),
+              DropdownMenuItem(value: 'party', child: Text('Party')),
+              DropdownMenuItem(value: 'quiet_hours', child: Text('Quiet Hours')),
+              DropdownMenuItem(value: 'other', child: Text('Other')),
             ],
-            onChanged: (value) => setState(() => _type = value ?? 'Meeting'),
+            onChanged: (value) => setState(() => _type = value ?? 'meeting'),
           ),
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Submit'),
+            onPressed: _isSubmitting ? null : _submit,
+            child: _isSubmitting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Submit'),
           ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _submit() async {
+    if (!(_formKey.currentState?.validate() ?? false) || _isSubmitting) return;
+    if (_date == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an event date.')),
+      );
+      return;
+    }
+    setState(() => _isSubmitting = true);
+    final eventTime = _time == null
+        ? null
+        : '${_time!.hour.toString().padLeft(2, '0')}:${_time!.minute.toString().padLeft(2, '0')}';
+    await ref.read(eventControllerProvider.notifier).createEvent(
+          title: _titleController.text.trim(),
+          description: _descController.text.trim().isEmpty
+              ? null
+              : _descController.text.trim(),
+          eventDate: _date!,
+          eventTime: eventTime,
+          location: _locationController.text.trim().isEmpty
+              ? null
+              : _locationController.text.trim(),
+          eventType: _type,
+        );
+
+    if (!mounted) return;
+    final state = ref.read(eventControllerProvider);
+    if (state.hasError) {
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${state.error}')),
+      );
+      return;
+    }
+    context.pop();
   }
 }
