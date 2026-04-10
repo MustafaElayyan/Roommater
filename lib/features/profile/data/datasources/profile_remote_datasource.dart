@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import '../../../../core/errors/app_exception.dart';
 import '../models/profile_model.dart';
