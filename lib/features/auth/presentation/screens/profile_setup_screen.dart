@@ -18,15 +18,8 @@ class ProfileSetupScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
-  final _displayNameController = TextEditingController();
   final _picker = ImagePicker();
   Uint8List? _imageBytes;
-
-  @override
-  void dispose() {
-    _displayNameController.dispose();
-    super.dispose();
-  }
 
   Future<void> _pickImage(ImageSource source) async {
     final image = await _picker.pickImage(source: source, imageQuality: 80);
@@ -138,11 +131,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _displayNameController,
-              decoration: const InputDecoration(labelText: 'Display Name'),
             ),
             const SizedBox(height: 24),
             FilledButton(

@@ -34,7 +34,7 @@ class ProfileScreen extends ConsumerWidget {
               child: hasPhoto
                   ? null
                   : Text(
-                      hasName ? displayName.substring(0, 1).toUpperCase() : '?',
+                      hasName ? displayName[0].toUpperCase() : '?',
                       style: const TextStyle(fontSize: 32),
                     ),
             ),

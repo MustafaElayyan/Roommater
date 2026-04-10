@@ -112,7 +112,7 @@ class _DashboardTab extends ConsumerWidget {
         Text('Upcoming Events', style: Theme.of(context).textTheme.titleMedium),
         const Card(
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Text('No upcoming events yet'),
           ),
         ),
@@ -123,7 +123,7 @@ class _DashboardTab extends ConsumerWidget {
         ),
         const Card(
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Text('No notifications yet'),
           ),
         ),
