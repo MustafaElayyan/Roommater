@@ -75,14 +75,15 @@ class ProfileRemoteDataSource {
       try {
         await ref.putData(data, metadata);
       } on FirebaseException catch (e) {
-        if (e.code != 'object-not-found') {
+        if (e.code == 'object-not-found') {
+          const objectNotFoundRetryDelayMillis = 500;
+          await Future<void>.delayed(
+            const Duration(milliseconds: objectNotFoundRetryDelayMillis),
+          );
+          await ref.putData(data, metadata);
+        } else {
           rethrow;
         }
-        const objectNotFoundRetryDelayMs = 500;
-        await Future<void>.delayed(
-          const Duration(milliseconds: objectNotFoundRetryDelayMs),
-        );
-        await ref.putData(data, metadata);
       }
       final photoUrl = await _getDownloadUrlWithRetry(ref);
       final userDoc = _firestore.collection('users').doc(uid);
