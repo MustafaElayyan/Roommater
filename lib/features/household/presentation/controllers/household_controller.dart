@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/firestore_service.dart';
@@ -53,28 +55,35 @@ final _removeMemberUseCaseProvider = Provider<RemoveMemberUseCase>((ref) {
 /// Stores the current user's household, or `null` when not in a household.
 final currentHouseholdProvider = StateProvider<HouseholdEntity?>((ref) => null);
 
+void _setCurrentHouseholdDeferred(Ref ref, HouseholdEntity? household) {
+  Future<void>.microtask(() {
+    if (!ref.mounted) return;
+    ref.read(currentHouseholdProvider.notifier).state = household;
+  });
+}
+
 final householdBootstrapProvider = FutureProvider<HouseholdEntity?>((ref) async {
   final auth = ref.watch(authStateProvider);
   final user = auth.valueOrNull;
   if (user == null) {
-    ref.read(currentHouseholdProvider.notifier).state = null;
+    _setCurrentHouseholdDeferred(ref, null);
     return null;
   }
 
   final householdId = user.householdId?.trim();
   if (householdId == null || householdId.isEmpty) {
-    ref.read(currentHouseholdProvider.notifier).state = null;
+    _setCurrentHouseholdDeferred(ref, null);
     return null;
   }
 
   try {
     final household = await ref.read(_getHouseholdUseCaseProvider)(householdId);
-    ref.read(currentHouseholdProvider.notifier).state = household;
+    _setCurrentHouseholdDeferred(ref, household);
     return household;
   } catch (_) {
     final currentUser = ref.read(authStateProvider).valueOrNull;
     if (currentUser == null || currentUser.uid != user.uid) {
-      ref.read(currentHouseholdProvider.notifier).state = null;
+      _setCurrentHouseholdDeferred(ref, null);
       return null;
     }
     rethrow;
