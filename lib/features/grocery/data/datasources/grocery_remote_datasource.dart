@@ -15,18 +15,26 @@ class GroceryRemoteDataSource {
     String householdId, {
     required bool isPurchased,
   }) {
-    try {
-      return _firestore
-          .collection('households')
-          .doc(householdId)
-          .collection('groceries')
-          .where('isPurchased', isEqualTo: isPurchased)
-          .orderBy('createdAt', descending: true)
-          .snapshots()
-          .map((snapshot) => snapshot.docs.map(GroceryItemModel.fromFirestore).toList());
-    } on FirebaseException catch (e) {
-      throw ApiException('Failed to load groceries.', e);
-    }
+    return _firestore
+        .collection('households')
+        .doc(householdId)
+        .collection('groceries')
+        .where('isPurchased', isEqualTo: isPurchased)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map(GroceryItemModel.fromFirestore).toList())
+        .handleError((error) {
+          if (error is FirebaseException) {
+            throw ApiException('Failed to load groceries.', error);
+          }
+          if (error is Exception) {
+            throw ApiException('Failed to load groceries.', error);
+          }
+          throw ApiException(
+            'Failed to load groceries.',
+            Exception(error.toString()),
+          );
+        });
   }
 
   Future<void> addItem(

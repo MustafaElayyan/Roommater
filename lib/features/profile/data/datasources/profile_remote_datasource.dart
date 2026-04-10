@@ -50,7 +50,7 @@ class ProfileRemoteDataSource {
     required String contentType,
   }) async {
     try {
-      final ref = _firebaseStorage.ref().child('profile_pictures/$uid.$extension');
+      final ref = _firebaseStorage.ref().child('avatars/$uid.$extension');
       await ref.putData(
         Uint8List.fromList(bytes),
         SettableMetadata(contentType: contentType),
@@ -65,6 +65,8 @@ class ProfileRemoteDataSource {
       }
       return photoUrl;
     } on FirebaseException catch (e) {
+      throw ApiException('Failed to update profile photo.', e);
+    } on Exception catch (e) {
       throw ApiException('Failed to update profile photo.', e);
     }
   }
