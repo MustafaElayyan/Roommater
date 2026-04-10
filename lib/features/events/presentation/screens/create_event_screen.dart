@@ -71,6 +71,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                 lastDate: DateTime(2100),
                 initialDate: DateTime.now(),
               );
+              if (!mounted) return;
               if (picked != null) setState(() => _date = picked);
             },
           ),
@@ -85,6 +86,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                 context: context,
                 initialTime: TimeOfDay.now(),
               );
+              if (!mounted) return;
               if (picked != null) setState(() => _time = picked);
             },
           ),

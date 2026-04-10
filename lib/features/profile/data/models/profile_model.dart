@@ -38,12 +38,12 @@ class ProfileModel extends ProfileEntity {
       'uid': uid,
       'displayName': displayName,
       'email': email,
-      if (bio != null) 'bio': bio,
-      if (phone != null) 'phone': phone,
-      if (photoUrl != null) 'photoUrl': photoUrl,
-      if (age != null) 'age': age,
-      if (occupation != null) 'occupation': occupation,
-      if (location != null) 'location': location,
+      'bio': bio,
+      'phone': phone,
+      'photoUrl': photoUrl,
+      'age': age,
+      'occupation': occupation,
+      'location': location,
     };
   }
 }

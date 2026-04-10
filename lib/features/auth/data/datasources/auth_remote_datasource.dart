@@ -150,7 +150,15 @@ class AuthRemoteDataSource {
   Stream<UserModel?> get authStateChanges {
     return _firebaseAuth.authStateChanges().asyncMap((user) async {
       if (user == null) return null;
-      return _readOrCreateUserDocument(user);
+      try {
+        return await _readOrCreateUserDocument(user);
+      } on FirebaseException {
+        final currentUser = _firebaseAuth.currentUser;
+        if (currentUser == null || currentUser.uid != user.uid) {
+          return null;
+        }
+        rethrow;
+      }
     });
   }
 

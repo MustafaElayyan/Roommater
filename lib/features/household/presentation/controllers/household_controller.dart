@@ -67,9 +67,18 @@ final householdBootstrapProvider = FutureProvider<HouseholdEntity?>((ref) async 
     return null;
   }
 
-  final household = await ref.read(_getHouseholdUseCaseProvider)(householdId);
-  ref.read(currentHouseholdProvider.notifier).state = household;
-  return household;
+  try {
+    final household = await ref.read(_getHouseholdUseCaseProvider)(householdId);
+    ref.read(currentHouseholdProvider.notifier).state = household;
+    return household;
+  } catch (_) {
+    final currentUser = ref.read(authStateProvider).valueOrNull;
+    if (currentUser == null || currentUser.uid != user.uid) {
+      ref.read(currentHouseholdProvider.notifier).state = null;
+      return null;
+    }
+    rethrow;
+  }
 });
 
 /// Fetches the members for the household with [householdId].

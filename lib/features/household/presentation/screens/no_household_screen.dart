@@ -1,20 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 
-class NoHouseholdScreen extends StatelessWidget {
+class NoHouseholdScreen extends ConsumerWidget {
   const NoHouseholdScreen({super.key});
 
+  Future<void> _signOutAndReturnToAuth(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(authControllerProvider.notifier).signOut();
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to sign out')),
+      );
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return PopScope(
       canPop: false,
-      // Change the property name and remove the 'result' parameter
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, _) {
         if (!didPop) {
-          context.go(AppRoutes.authChoice);
+          _signOutAndReturnToAuth(context, ref);
         }
       },
       child: Scaffold(
@@ -23,7 +35,7 @@ class NoHouseholdScreen extends StatelessWidget {
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.go(AppRoutes.authChoice),
+            onPressed: () => _signOutAndReturnToAuth(context, ref),
           ),
         ),
         body: SingleChildScrollView(

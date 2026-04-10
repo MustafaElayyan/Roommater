@@ -58,8 +58,6 @@ class ProfileRemoteDataSource {
       final photoUrl = await _getDownloadUrlWithRetry(ref);
       final userDoc = _firestore.collection('users').doc(uid);
       await userDoc.set({
-        'uid': uid,
-        'createdAt': FieldValue.serverTimestamp(),
         'photoUrl': photoUrl,
       }, SetOptions(merge: true));
       final user = _firebaseAuth.currentUser;
@@ -76,7 +74,7 @@ class ProfileRemoteDataSource {
 
   Future<String> _getDownloadUrlWithRetry(
     Reference ref, {
-    int maxAttempts = 3,
+    int maxAttempts = 6,
   }) async {
     FirebaseException? objectNotFoundError;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -88,7 +86,7 @@ class ProfileRemoteDataSource {
         }
         objectNotFoundError = e;
         if (attempt < maxAttempts) {
-          await Future<void>.delayed(Duration(milliseconds: 250 * attempt));
+          await Future<void>.delayed(Duration(milliseconds: 400 * attempt));
         }
       }
     }

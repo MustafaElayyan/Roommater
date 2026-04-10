@@ -42,7 +42,7 @@ class AuthChoiceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, _) {
         if (!didPop) {
           context.go(AppRoutes.onboarding);
         }

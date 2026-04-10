@@ -305,7 +305,7 @@ class _MainShell extends ConsumerWidget {
 
     return PopScope(
       canPop: selectedIndex == 0,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, _) {
         if (!didPop && selectedIndex != 0) {
           context.go(AppRoutes.home);
         }
@@ -430,7 +430,6 @@ class _MainShell extends ConsumerWidget {
                     Navigator.of(context).pop();
                     try {
                       await ref.read(authControllerProvider.notifier).signOut();
-                      if (context.mounted) context.go(AppRoutes.authChoice);
                     } catch (_) {
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(

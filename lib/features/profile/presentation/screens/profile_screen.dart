@@ -109,6 +109,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       await authUser.updateDisplayName(displayName);
       await ref.refresh(authStateProvider.future);
     }
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Profile updated.')),
     );

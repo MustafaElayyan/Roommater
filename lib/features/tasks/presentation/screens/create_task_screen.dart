@@ -150,6 +150,7 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
                   lastDate: DateTime(2100),
                   initialDate: DateTime.now(),
                 );
+                if (!mounted) return;
                 if (picked != null) setState(() => _date = picked);
               },
             ),
@@ -164,6 +165,7 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
                   context: context,
                   initialTime: TimeOfDay.now(),
                 );
+                if (!mounted) return;
                 if (picked != null) setState(() => _time = picked);
               },
             ),

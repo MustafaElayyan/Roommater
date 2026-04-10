@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/firestore_service.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../data/datasources/profile_remote_datasource.dart';
 import '../../data/repositories/profile_repository_impl.dart';
 import '../../domain/entities/profile_entity.dart';
@@ -100,7 +101,8 @@ class ProfileController extends AsyncNotifier<ProfileEntity?> {
         contentType: contentType,
       );
       ref.invalidate(profileProvider(uid));
-      return ref.read(_getProfileUseCaseProvider)(uid);
+      ref.invalidate(authStateProvider);
+      return await ref.read(_getProfileUseCaseProvider)(uid);
     });
   }
 }

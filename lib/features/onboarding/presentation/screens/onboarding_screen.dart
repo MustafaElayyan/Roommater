@@ -38,14 +38,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     ];
     final icon = icons[index % icons.length];
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final gradientTopColor = AppColors.primaryLight.withOpacity(
-      isDarkMode ? 0.35 : 0.18,
-    );
-    final gradientBottomColor = AppColors.primary.withOpacity(
-      isDarkMode ? 0.25 : 0.12,
-    );
-    final cardColor = AppColors.primary.withOpacity(isDarkMode ? 0.28 : 0.14);
-    final borderColor = AppColors.primaryDark.withOpacity(isDarkMode ? 0.5 : 0.32);
+    final gradientTopColor =
+        AppColors.primaryLight.withValues(alpha: isDarkMode ? 0.35 : 0.18);
+    final gradientBottomColor =
+        AppColors.primary.withValues(alpha: isDarkMode ? 0.25 : 0.12);
+    final cardColor = AppColors.primary.withValues(alpha: isDarkMode ? 0.28 : 0.14);
+    final borderColor =
+        AppColors.primaryDark.withValues(alpha: isDarkMode ? 0.5 : 0.32);
     final iconColor = isDarkMode ? AppColors.primaryLight : AppColors.primaryDark;
 
     return Stack(
@@ -94,11 +93,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final isLastPage = currentIndex == pages.length - 1;
     final colorScheme = Theme.of(context).colorScheme;
     final titleColor = colorScheme.onSurface;
-    final descriptionColor = colorScheme.onSurface.withOpacity(0.7);
+    final descriptionColor = colorScheme.onSurface.withValues(alpha: 0.7);
     return PopScope(
       canPop: currentIndex == 0,
       // Change this line:
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, _) {
         if (!didPop && currentIndex > 0) {
           _pageController.previousPage(
             duration: const Duration(milliseconds: 250),
