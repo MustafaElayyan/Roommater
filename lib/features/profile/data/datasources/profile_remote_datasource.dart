@@ -86,19 +86,20 @@ class ProfileRemoteDataSource {
     Reference ref, {
     int maxAttempts = 3,
   }) async {
-    FirebaseException? lastError;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         return await ref.getDownloadURL();
       } on FirebaseException catch (e) {
-        lastError = e;
-        if (e.code != 'object-not-found' || attempt == maxAttempts) {
+        if (e.code != 'object-not-found') {
           rethrow;
+        }
+        if (attempt == maxAttempts) {
+          throw ApiException(e.message ?? 'Failed to update profile photo.', e);
         }
         await Future<void>.delayed(Duration(milliseconds: 250 * attempt));
       }
     }
-    throw lastError!;
+    throw const ApiException('Failed to update profile photo.');
   }
 
   Future<void> changePassword({
