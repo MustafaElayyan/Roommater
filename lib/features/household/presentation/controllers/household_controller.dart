@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/firestore_service.dart';
@@ -53,41 +51,31 @@ final _removeMemberUseCaseProvider = Provider<RemoveMemberUseCase>((ref) {
 // --- State ---
 
 /// Stores the current user's household, or `null` when not in a household.
-final currentHouseholdProvider = StateProvider<HouseholdEntity?>((ref) => null);
-
-void _setCurrentHouseholdDeferred(Ref ref, HouseholdEntity? household) {
-  Future<void>.microtask(() {
-    if (!ref.mounted) return;
-    ref.read(currentHouseholdProvider.notifier).state = household;
-  });
-}
+final _currentHouseholdOverrideProvider =
+    StateProvider<HouseholdEntity?>((ref) => null);
 
 final householdBootstrapProvider = FutureProvider<HouseholdEntity?>((ref) async {
   final auth = ref.watch(authStateProvider);
   final user = auth.valueOrNull;
-  if (user == null) {
-    _setCurrentHouseholdDeferred(ref, null);
-    return null;
-  }
+  if (user == null) return null;
 
   final householdId = user.householdId?.trim();
-  if (householdId == null || householdId.isEmpty) {
-    _setCurrentHouseholdDeferred(ref, null);
-    return null;
-  }
+  if (householdId == null || householdId.isEmpty) return null;
 
   try {
-    final household = await ref.read(_getHouseholdUseCaseProvider)(householdId);
-    _setCurrentHouseholdDeferred(ref, household);
-    return household;
+    return await ref.read(_getHouseholdUseCaseProvider)(householdId);
   } catch (_) {
     final currentUser = ref.read(authStateProvider).valueOrNull;
-    if (currentUser == null || currentUser.uid != user.uid) {
-      _setCurrentHouseholdDeferred(ref, null);
-      return null;
-    }
+    if (currentUser == null || currentUser.uid != user.uid) return null;
     rethrow;
   }
+});
+
+final currentHouseholdProvider = Provider<HouseholdEntity?>((ref) {
+  final auth = ref.watch(authStateProvider).valueOrNull;
+  if (auth == null) return null;
+  return ref.watch(_currentHouseholdOverrideProvider) ??
+      ref.watch(householdBootstrapProvider).valueOrNull;
 });
 
 /// Fetches the members for the household with [householdId].
@@ -107,7 +95,7 @@ class HouseholdController extends AsyncNotifier<void> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final household = await ref.read(_createHouseholdUseCaseProvider)(name);
-      ref.read(currentHouseholdProvider.notifier).state = household;
+      ref.read(_currentHouseholdOverrideProvider.notifier).state = household;
     });
   }
 
@@ -116,7 +104,7 @@ class HouseholdController extends AsyncNotifier<void> {
     state = await AsyncValue.guard(() async {
       final household =
           await ref.read(_joinHouseholdUseCaseProvider)(inviteCode);
-      ref.read(currentHouseholdProvider.notifier).state = household;
+      ref.read(_currentHouseholdOverrideProvider.notifier).state = household;
     });
   }
 
@@ -124,7 +112,7 @@ class HouseholdController extends AsyncNotifier<void> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final household = await ref.read(_getHouseholdUseCaseProvider)(id);
-      ref.read(currentHouseholdProvider.notifier).state = household;
+      ref.read(_currentHouseholdOverrideProvider.notifier).state = household;
     });
   }
 
@@ -146,7 +134,7 @@ class HouseholdController extends AsyncNotifier<void> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(householdRepositoryProvider).deleteHousehold(id);
-      ref.read(currentHouseholdProvider.notifier).state = null;
+      ref.read(_currentHouseholdOverrideProvider.notifier).state = null;
     });
   }
 }
