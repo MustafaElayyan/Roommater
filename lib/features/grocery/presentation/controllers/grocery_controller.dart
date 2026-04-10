@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/firestore_service.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
 import '../../data/datasources/grocery_remote_datasource.dart';
 import '../../data/repositories/grocery_repository_impl.dart';
@@ -39,6 +40,8 @@ final _deleteGroceryItemUseCaseProvider = Provider<DeleteGroceryItemUseCase>((re
 });
 
 final toBuyGroceriesProvider = StreamProvider<List<GroceryItemEntity>>((ref) {
+  final user = ref.watch(authStateProvider).valueOrNull;
+  if (user == null) return const Stream.empty();
   final household = ref.watch(currentHouseholdProvider);
   if (household == null) return const Stream.empty();
   return ref.watch(_getGroceryItemsUseCaseProvider)(
@@ -48,6 +51,8 @@ final toBuyGroceriesProvider = StreamProvider<List<GroceryItemEntity>>((ref) {
 });
 
 final purchasedGroceriesProvider = StreamProvider<List<GroceryItemEntity>>((ref) {
+  final user = ref.watch(authStateProvider).valueOrNull;
+  if (user == null) return const Stream.empty();
   final household = ref.watch(currentHouseholdProvider);
   if (household == null) return const Stream.empty();
   return ref.watch(_getGroceryItemsUseCaseProvider)(
