@@ -16,6 +16,9 @@ class ProfileRemoteDataSource {
     this._firebaseStorage,
   );
 
+  static const int _downloadUrlRetryAttempts = 6;
+  static const int _downloadUrlRetryBaseDelayMs = 400;
+
   final FirebaseFirestore _firestore;
   final FirebaseAuth _firebaseAuth;
   final FirebaseStorage _firebaseStorage;
@@ -74,7 +77,7 @@ class ProfileRemoteDataSource {
 
   Future<String> _getDownloadUrlWithRetry(
     Reference ref, {
-    int maxAttempts = 6,
+    int maxAttempts = _downloadUrlRetryAttempts,
   }) async {
     FirebaseException? objectNotFoundError;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -86,7 +89,9 @@ class ProfileRemoteDataSource {
         }
         objectNotFoundError = e;
         if (attempt < maxAttempts) {
-          await Future<void>.delayed(Duration(milliseconds: 400 * attempt));
+          await Future<void>.delayed(
+            Duration(milliseconds: _downloadUrlRetryBaseDelayMs * attempt),
+          );
         }
       }
     }

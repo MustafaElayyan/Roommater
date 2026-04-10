@@ -9,7 +9,7 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 class NoHouseholdScreen extends ConsumerWidget {
   const NoHouseholdScreen({super.key});
 
-  Future<void> _signOutAndReturnToAuth(BuildContext context, WidgetRef ref) async {
+  Future<void> _signOut(BuildContext context, WidgetRef ref) async {
     try {
       await ref.read(authControllerProvider.notifier).signOut();
     } catch (_) {
@@ -26,7 +26,7 @@ class NoHouseholdScreen extends ConsumerWidget {
       canPop: false,
       onPopInvokedWithResult: (bool didPop, _) {
         if (!didPop) {
-          _signOutAndReturnToAuth(context, ref);
+          _signOut(context, ref);
         }
       },
       child: Scaffold(
@@ -35,7 +35,7 @@ class NoHouseholdScreen extends ConsumerWidget {
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => _signOutAndReturnToAuth(context, ref),
+            onPressed: () => _signOut(context, ref),
           ),
         ),
         body: SingleChildScrollView(
