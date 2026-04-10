@@ -102,7 +102,7 @@ class ProfileController extends AsyncNotifier<ProfileEntity?> {
       );
       ref.invalidate(profileProvider(uid));
       ref.invalidate(authStateProvider);
-      return await ref.read(_getProfileUseCaseProvider)(uid);
+      return ref.read(_getProfileUseCaseProvider)(uid);
     });
   }
 }
