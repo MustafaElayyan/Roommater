@@ -16,6 +16,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  static const int _minPasswordLength = 8;
   final _displayNameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _bioController = TextEditingController();
@@ -114,7 +115,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _changePassword(String email) async {
     final currentPassword = _currentPasswordController.text;
     final newPassword = _newPasswordController.text;
-    if (currentPassword.isEmpty || newPassword.length < 8) {
+    if (currentPassword.isEmpty || newPassword.length < _minPasswordLength) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Enter current password and new password (min 8 chars).')),
       );

@@ -41,6 +41,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     final rememberMe = ref.read(rememberMeProvider);
     final currentUser = ref.read(firebaseAuthProvider).currentUser;
     if (!rememberMe && currentUser != null) {
+      // Intentionally fire-and-forget during app detach.
       unawaited(ref.read(firebaseAuthProvider).signOut());
     }
   }

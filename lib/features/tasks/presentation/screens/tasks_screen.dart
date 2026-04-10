@@ -73,17 +73,17 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   final assigneeName = task.assignedToName ?? _resolveAssignee(task, members);
                   final creatorName = task.createdByName ?? _resolveCreator(task, members);
                   final dueText = _formatDueDate(task.dueDate);
-                  final canComplete = task.assignedToUserId == currentUid;
-                  final canEditDue = task.createdByUserId == currentUid;
+                  final userCanCompleteTask = task.assignedToUserId == currentUid;
+                  final userCanEditDueDate = task.createdByUserId == currentUid;
                   return Card(
                     child: ListTile(
-                      leading: canComplete
+                      leading: userCanCompleteTask
                           ? Checkbox(
                               value: done,
                               onChanged: (_) => _toggleTask(context, ref, task),
                             )
                           : null,
-                      trailing: canEditDue
+                      trailing: userCanEditDueDate
                           ? IconButton(
                               icon: const Icon(Icons.edit_calendar_outlined),
                               onPressed: () => _editDueDate(context, ref, task),
