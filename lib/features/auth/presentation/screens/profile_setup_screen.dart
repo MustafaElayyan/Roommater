@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/network/firestore_service.dart';
-import '../controllers/auth_controller.dart';
+import '../../../../features/profile/presentation/controllers/profile_controller.dart';
 
 class ProfileSetupScreen extends ConsumerStatefulWidget {
   const ProfileSetupScreen({super.key});
@@ -81,15 +80,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
     try {
       if (_imageBytes != null) {
-        final refPath = FirebaseStorage.instance
-            .ref()
-            .child('avatars/${user.uid}.$_imageExtension');
-        await refPath.putData(
-          _imageBytes!,
-          SettableMetadata(contentType: _contentType),
+        await ref.read(profileControllerProvider.notifier).updateProfilePhoto(
+          uid: user.uid,
+          bytes: _imageBytes!,
+          extension: _imageExtension,
+          contentType: _contentType,
         );
-        final downloadUrl = await refPath.getDownloadURL();
-        await ref.read(authControllerProvider.notifier).updateProfilePhoto(downloadUrl);
       }
 
       if (!mounted) return;
@@ -104,7 +100,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(authControllerProvider).isLoading;
+    final isLoading = ref.watch(profileControllerProvider).isLoading;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(

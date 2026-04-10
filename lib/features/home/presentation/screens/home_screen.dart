@@ -173,7 +173,7 @@ class _DashboardTab extends ConsumerWidget {
           'Recent Notifications',
           style: Theme.of(context).textTheme.titleMedium,
         ),
-        const Card(
+        Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Text('No notifications yet'),
