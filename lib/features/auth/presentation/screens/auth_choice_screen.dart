@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../controllers/guest_provider.dart';
 
-/// Screen that lets users explicitly choose sign-up, sign-in, or guest mode.
-class AuthChoiceScreen extends ConsumerWidget {
+/// Screen that lets users explicitly choose sign-up or sign-in.
+class AuthChoiceScreen extends StatelessWidget {
   const AuthChoiceScreen({super.key});
 
   static const Color _primaryDark = AppColors.primaryDark;
@@ -40,31 +38,8 @@ class AuthChoiceScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildOrDivider() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Expanded(child: Divider(color: Colors.white70, thickness: 1)),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
-            child: Text(
-              'OR',
-              style: TextStyle(
-                color: Colors.white70,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1,
-              ),
-            ),
-          ),
-          Expanded(child: Divider(color: Colors.white70, thickness: 1)),
-        ],
-      ),
-    );
-  }
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvoked: (bool didPop) {
@@ -128,38 +103,21 @@ class AuthChoiceScreen extends ConsumerWidget {
                                   children: [
                                      SizedBox(
                                        width: double.infinity,
-                                       child: _buildActionButton(
-                                         label: 'SIGN IN',
-                                         onPressed: () {
-                                           ref.read(isGuestProvider.notifier).state = false;
-                                           context.push(AppRoutes.login);
-                                         },
-                                       ),
-                                     ),
+                                        child: _buildActionButton(
+                                          label: 'SIGN IN',
+                                          onPressed: () => context.push(AppRoutes.login),
+                                        ),
+                                      ),
                                     const SizedBox(height: 12),
                                      SizedBox(
                                        width: double.infinity,
-                                       child: _buildActionButton(
-                                         label: 'SIGN UP',
-                                         onPressed: () {
-                                           ref.read(isGuestProvider.notifier).state = false;
-                                           context.push(AppRoutes.register);
-                                         },
-                                       ),
-                                     ),
-                                    _buildOrDivider(),
-                                    SizedBox(
-                                      width: double.infinity,
-                                       child: _buildActionButton(
-                                         label: 'CONTINUE AS GUEST',
-                                         onPressed: () {
-                                           ref.read(isGuestProvider.notifier).state = true;
-                                           context.go(AppRoutes.home);
-                                         },
-                                       ),
-                                     ),
-                                  ],
-                                ),
+                                        child: _buildActionButton(
+                                          label: 'SIGN UP',
+                                          onPressed: () => context.push(AppRoutes.register),
+                                        ),
+                                      ),
+                                   ],
+                                 ),
                               ],
                             ),
                           ),

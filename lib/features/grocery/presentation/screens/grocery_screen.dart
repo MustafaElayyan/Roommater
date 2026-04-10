@@ -10,16 +10,8 @@ class GroceryScreen extends StatefulWidget {
 class _GroceryScreenState extends State<GroceryScreen> {
   final _controller = TextEditingController();
   final _qtyController = TextEditingController();
-  final List<Map<String, dynamic>> _toBuy = [
-    {'id': 'milk', 'name': 'Milk', 'qty': 2, 'checked': false},
-    {'id': 'eggs', 'name': 'Eggs', 'qty': 12, 'checked': false},
-    {'id': 'bread', 'name': 'Bread', 'qty': 1, 'checked': false},
-    {'id': 'tomatoes', 'name': 'Tomatoes', 'qty': 6, 'checked': false},
-  ];
-  final List<Map<String, dynamic>> _purchased = [
-    {'name': 'Rice', 'qty': 1, 'checked': true},
-    {'name': 'Pasta', 'qty': 2, 'checked': true},
-  ];
+  final List<Map<String, dynamic>> _toBuy = [];
+  final List<Map<String, dynamic>> _purchased = [];
 
   @override
   void dispose() {
@@ -82,6 +74,11 @@ class _GroceryScreenState extends State<GroceryScreen> {
           ),
           const SizedBox(height: 16),
           Text('To Buy', style: Theme.of(context).textTheme.titleMedium),
+          if (_toBuy.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text('No grocery items yet'),
+            ),
           ..._toBuy.asMap().entries.map((entry) {
             final index = entry.key;
             final item = entry.value;
@@ -120,6 +117,11 @@ class _GroceryScreenState extends State<GroceryScreen> {
           }),
           const SizedBox(height: 16),
           Text('Purchased', style: Theme.of(context).textTheme.titleMedium),
+          if (_purchased.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text('No purchased items yet'),
+            ),
           ..._purchased.map(
             (item) => CheckboxListTile(
               value: item['checked'] as bool,

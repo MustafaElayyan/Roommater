@@ -6,7 +6,6 @@ import '../../../../app/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../controllers/auth_controller.dart';
-import '../controllers/guest_provider.dart';
 import '../widgets/auth_form_field.dart';
 
 /// Screen that allows new users to create a Roommater account.
@@ -34,7 +33,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    ref.read(isGuestProvider.notifier).state = false;
     await ref.read(authControllerProvider.notifier).signUp(
           displayName: _displayNameController.text.trim(),
           email: _emailController.text.trim(),
@@ -50,7 +48,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
     await ref.refresh(authStateProvider.future);
     if (!mounted) return;
-    context.go(AppRoutes.noHousehold);
+    context.go(AppRoutes.emailVerification);
   }
 
   @override

@@ -86,11 +86,16 @@ class ManageMembersScreen extends ConsumerWidget {
               return Card(
                 child: ListTile(
                   leading: CircleAvatar(
-                    child: Text(
-                      member.displayName.isNotEmpty
-                          ? member.displayName[0].toUpperCase()
-                          : '?',
-                    ),
+                    backgroundImage: (member.photoUrl?.isNotEmpty ?? false)
+                        ? NetworkImage(member.photoUrl!)
+                        : null,
+                    child: (member.photoUrl?.isNotEmpty ?? false)
+                        ? null
+                        : Text(
+                            member.displayName.isNotEmpty
+                                ? member.displayName[0].toUpperCase()
+                                : '?',
+                          ),
                   ),
                   title: Text(
                     member.displayName +
