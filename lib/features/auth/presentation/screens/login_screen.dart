@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
@@ -45,6 +46,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
     final user = await ref.refresh(authStateProvider.future);
     if (!mounted) return;
+    final isEmailVerified = FirebaseAuth.instance.currentUser?.emailVerified == true;
+    if (!isEmailVerified) {
+      context.go(AppRoutes.emailVerification);
+      return;
+    }
     final hasDisplayName = user?.displayName?.trim().isNotEmpty ?? false;
     context.go(hasDisplayName ? AppRoutes.noHousehold : AppRoutes.profileSetup);
   }
