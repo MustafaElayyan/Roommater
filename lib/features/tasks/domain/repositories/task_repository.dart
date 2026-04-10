@@ -17,6 +17,7 @@ abstract interface class TaskRepository {
     String? description,
     DateTime? dueDate,
     String? assignedToUserId,
+    String? assignedToName,
   });
 
   /// Updates the task with [taskId] in the household with [householdId].
@@ -28,6 +29,8 @@ abstract interface class TaskRepository {
     required bool isCompleted,
     DateTime? dueDate,
     String? assignedToUserId,
+    String? assignedToName,
+    String? completionNote,
   });
 
   /// Deletes the task with [taskId] from the household with [householdId].

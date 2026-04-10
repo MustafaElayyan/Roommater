@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../household/domain/entities/member_entity.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
 import '../../../tasks/domain/entities/task_entity.dart';
@@ -27,6 +28,7 @@ class _DashboardTab extends ConsumerWidget {
         : const AsyncValue<List<MemberEntity>>.data([]);
     final tasksAsync = ref.watch(tasksProvider);
     final taskChecks = ref.watch(homeTaskChecksProvider);
+    final currentUid = ref.watch(authStateProvider).valueOrNull?.uid;
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -103,8 +105,32 @@ class _DashboardTab extends ConsumerWidget {
                     .map(
                       (task) => CheckboxListTile(
                         value: taskChecks[task.id] ?? task.isCompleted,
-                        onChanged: (_) => _toggleTask(ref, task),
+                        onChanged: task.assignedToUserId == currentUid
+                            ? (_) => _toggleTask(context, ref, task)
+                            : null,
                         title: Text(task.title),
+                        subtitle: membersAsync.maybeWhen(
+                          data: (members) {
+                            final creator = task.createdByName ??
+                                members
+                                    .where((m) => m.uid == task.createdByUserId)
+                                    .map((m) => m.displayName)
+                                    .firstWhere(
+                                      (_) => true,
+                                      orElse: () => task.createdByUserId,
+                                    );
+                            final assignee = task.assignedToName ??
+                                members
+                                    .where((m) => m.uid == task.assignedToUserId)
+                                    .map((m) => m.displayName)
+                                    .firstWhere(
+                                      (_) => true,
+                                      orElse: () => task.assignedToUserId ?? 'Unassigned',
+                                    );
+                            return Text('Created by: $creator\nAssigned to: $assignee');
+                          },
+                          orElse: () => null,
+                        ),
                       ),
                     )
                     .toList(),
@@ -135,7 +161,39 @@ class _DashboardTab extends ConsumerWidget {
     );
   }
 
-  void _toggleTask(WidgetRef ref, TaskEntity task) {
-    ref.read(taskControllerProvider.notifier).toggleComplete(task);
+  Future<void> _toggleTask(BuildContext context, WidgetRef ref, TaskEntity task) async {
+    String? note;
+    if (!task.isCompleted) {
+      final controller = TextEditingController();
+      note = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Complete Task'),
+          content: TextField(
+            controller: controller,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              hintText: 'Add completion note (optional)',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(null),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+              child: const Text('Complete'),
+            ),
+          ],
+        ),
+      );
+      controller.dispose();
+      if (note == null) return;
+    }
+    ref.read(taskControllerProvider.notifier).toggleComplete(
+          task,
+          completionNote: note,
+        );
   }
 }

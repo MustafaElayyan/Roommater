@@ -70,9 +70,12 @@ class EventController extends AsyncNotifier<void> {
   }
 
   Future<void> deleteEvent(String eventId) async {
+    final household = ref.read(currentHouseholdProvider);
+    if (household == null) return;
+
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(_deleteEventUseCaseProvider)(eventId);
+      await ref.read(_deleteEventUseCaseProvider)(household.id, eventId);
       ref.invalidate(eventsProvider);
     });
   }

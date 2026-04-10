@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/firestore_service.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../data/datasources/household_remote_datasource.dart';
 import '../../data/repositories/household_repository_impl.dart';
 import '../../domain/entities/household_entity.dart';
@@ -51,6 +52,25 @@ final _removeMemberUseCaseProvider = Provider<RemoveMemberUseCase>((ref) {
 
 /// Stores the current user's household, or `null` when not in a household.
 final currentHouseholdProvider = StateProvider<HouseholdEntity?>((ref) => null);
+
+final householdBootstrapProvider = FutureProvider<HouseholdEntity?>((ref) async {
+  final auth = ref.watch(authStateProvider);
+  final user = auth.valueOrNull;
+  if (user == null) {
+    ref.read(currentHouseholdProvider.notifier).state = null;
+    return null;
+  }
+
+  final householdId = user.householdId?.trim();
+  if (householdId == null || householdId.isEmpty) {
+    ref.read(currentHouseholdProvider.notifier).state = null;
+    return null;
+  }
+
+  final household = await ref.read(_getHouseholdUseCaseProvider)(householdId);
+  ref.read(currentHouseholdProvider.notifier).state = household;
+  return household;
+});
 
 /// Fetches the members for the household with [householdId].
 final householdMembersProvider =

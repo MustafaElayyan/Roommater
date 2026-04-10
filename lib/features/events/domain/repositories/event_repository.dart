@@ -13,5 +13,5 @@ abstract interface class EventRepository {
     required String eventType,
   });
 
-  Future<void> deleteEvent(String eventId);
+  Future<void> deleteEvent(String householdId, String eventId);
 }

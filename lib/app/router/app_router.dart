@@ -56,27 +56,53 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable: routerNotifier,
     redirect: (context, state) {
       final authState = ref.read(authStateProvider);
+      final user = authState.valueOrNull;
       if (authState.isLoading) return null;
       if (authState is AsyncError<UserEntity?>) return null;
 
-      final isLoggedIn = authState.valueOrNull != null;
+      final isLoggedIn = user != null;
       final location = state.matchedLocation;
       final isPublicRoute = publicRoutes.contains(location);
       final isAuthRoute = authOnlyRoutes.contains(location);
       final isEmailVerified =
           !isLoggedIn || (ref.read(firebaseAuthProvider).currentUser?.emailVerified == true);
+      final householdBootstrap = ref.read(householdBootstrapProvider);
+      final hasHousehold = user?.householdId?.trim().isNotEmpty ?? false;
+      final isHouseholdRoute = location == AppRoutes.noHousehold ||
+          location == AppRoutes.createHousehold ||
+          location == AppRoutes.joinHousehold;
+      final isMainRoute = location == AppRoutes.home ||
+          location == AppRoutes.tasks ||
+          location == AppRoutes.grocery ||
+          location == AppRoutes.events ||
+          location == AppRoutes.expenses;
 
       if (!isLoggedIn && !isPublicRoute) {
         return AppRoutes.authChoice;
       }
 
-      if (isLoggedIn && !isEmailVerified && !isPublicRoute) {
+      if (isLoggedIn && !isEmailVerified && location != AppRoutes.emailVerification) {
         return AppRoutes.emailVerification;
       }
 
-      if (isLoggedIn && isAuthRoute) {
-        final household = ref.read(currentHouseholdProvider);
-        return household == null ? AppRoutes.noHousehold : AppRoutes.home;
+      if (isLoggedIn && householdBootstrap.isLoading && !isPublicRoute) {
+        return null;
+      }
+
+      if (isLoggedIn && !hasHousehold && !isHouseholdRoute) {
+        return AppRoutes.noHousehold;
+      }
+
+      if (isLoggedIn && hasHousehold && (isAuthRoute || location == AppRoutes.onboarding)) {
+        return AppRoutes.home;
+      }
+
+      if (isLoggedIn && hasHousehold && location == AppRoutes.noHousehold) {
+        return AppRoutes.home;
+      }
+
+      if (isLoggedIn && !hasHousehold && isMainRoute) {
+        return AppRoutes.noHousehold;
       }
 
       return null;

@@ -43,11 +43,13 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
 
   @override
   Future<ExpenseEntity> settleExpenseSplit(
+    String householdId,
     String expenseId, {
     required String userId,
     required bool isSettled,
   }) {
     return _dataSource.settleExpenseSplit(
+      householdId,
       expenseId,
       userId: userId,
       isSettled: isSettled,
@@ -55,7 +57,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
-  Future<void> deleteExpense(String expenseId) {
-    return _dataSource.deleteExpense(expenseId);
+  Future<void> deleteExpense(String householdId, String expenseId) {
+    return _dataSource.deleteExpense(householdId, expenseId);
   }
 }

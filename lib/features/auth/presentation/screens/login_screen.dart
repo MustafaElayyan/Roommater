@@ -22,6 +22,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   static const Color _actionTextColor = AppColors.primary;
+  bool _rememberMe = true;
 
   @override
   void dispose() {
@@ -32,6 +33,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    ref.read(rememberMeProvider.notifier).state = _rememberMe;
     await ref.read(authControllerProvider.notifier).signIn(
           email: _emailController.text.trim(),
           password: _passwordController.text,
@@ -52,7 +54,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
     final hasDisplayName = user?.displayName?.trim().isNotEmpty ?? false;
-    context.go(hasDisplayName ? AppRoutes.noHousehold : AppRoutes.profileSetup);
+    final hasHousehold = user?.householdId?.trim().isNotEmpty ?? false;
+    if (!hasDisplayName) {
+      context.go(AppRoutes.profileSetup);
+      return;
+    }
+    context.go(hasHousehold ? AppRoutes.home : AppRoutes.noHousehold);
   }
 
   @override
@@ -94,6 +101,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 prefixIcon: const Icon(Icons.lock_outline),
                 validator: (v) =>
                     (v == null || v.length < 8) ? 'Min 8 characters' : null,
+              ),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                value: _rememberMe,
+                onChanged: (value) {
+                  setState(() => _rememberMe = value ?? true);
+                },
+                title: const Text('Remember Me'),
+                controlAffinity: ListTileControlAffinity.leading,
               ),
               Align(
                 alignment: Alignment.centerRight,

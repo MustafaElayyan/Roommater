@@ -34,7 +34,7 @@ class EventRepositoryImpl implements EventRepository {
   }
 
   @override
-  Future<void> deleteEvent(String eventId) {
-    return _dataSource.deleteEvent(eventId);
+  Future<void> deleteEvent(String householdId, String eventId) {
+    return _dataSource.deleteEvent(householdId, eventId);
   }
 }

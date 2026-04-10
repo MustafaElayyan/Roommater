@@ -26,6 +26,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
+          ListTile(
+            leading: const Icon(Icons.person_outline),
+            title: const Text('Profile Settings'),
+            onTap: () => context.go(AppRoutes.profile),
+          ),
           SwitchListTile(
             value: _darkMode,
             onChanged: (value) => setState(() => _darkMode = value),

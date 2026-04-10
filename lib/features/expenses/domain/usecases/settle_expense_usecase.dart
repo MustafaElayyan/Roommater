@@ -7,11 +7,13 @@ class SettleExpenseUseCase {
   final ExpenseRepository _repository;
 
   Future<ExpenseEntity> call(
+    String householdId,
     String expenseId, {
     required String userId,
     required bool isSettled,
   }) {
     return _repository.settleExpenseSplit(
+      householdId,
       expenseId,
       userId: userId,
       isSettled: isSettled,

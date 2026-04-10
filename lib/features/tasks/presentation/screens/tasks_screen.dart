@@ -70,29 +70,40 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               else
                 ...visibleTasks.map((task) {
                   final done = task.isCompleted;
-                  final assigneeName = _resolveAssignee(task, members);
+                  final assigneeName = task.assignedToName ?? _resolveAssignee(task, members);
+                  final creatorName = task.createdByName ?? _resolveCreator(task, members);
                   final dueText = _formatDueDate(task.dueDate);
+                  final canComplete = task.assignedToUserId == currentUid;
+                  final canEditDue = task.createdByUserId == currentUid;
                   return Card(
-                    child: CheckboxListTile(
-                      value: done,
-                      onChanged: (_) {
-                        ref
-                            .read(taskControllerProvider.notifier)
-                            .toggleComplete(task);
-                      },
+                    child: ListTile(
+                      leading: canComplete
+                          ? Checkbox(
+                              value: done,
+                              onChanged: (_) => _toggleTask(context, ref, task),
+                            )
+                          : null,
+                      trailing: canEditDue
+                          ? IconButton(
+                              icon: const Icon(Icons.edit_calendar_outlined),
+                              onPressed: () => _editDueDate(context, ref, task),
+                            )
+                          : null,
                       title: Text(
                         task.title,
                         style: TextStyle(
-                          decoration:
-                              done ? TextDecoration.lineThrough : null,
+                          decoration: done ? TextDecoration.lineThrough : null,
                         ),
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (assigneeName != null)
-                            Chip(label: Text(assigneeName)),
+                          Text('Created by: ${creatorName ?? task.createdByUserId}'),
+                          Text('Assigned to: ${assigneeName ?? 'Unassigned'}'),
                           if (dueText != null) Text('Due: $dueText'),
+                          if (task.completionNote != null &&
+                              task.completionNote!.trim().isNotEmpty)
+                            Text('Completion note: ${task.completionNote}'),
                         ],
                       ),
                     ),
@@ -115,6 +126,89 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         .where((m) => m.uid == task.assignedToUserId)
         .toList();
     return match.isNotEmpty ? match.first.displayName : task.assignedToUserId;
+  }
+
+  String? _resolveCreator(TaskEntity task, List<MemberEntity> members) {
+    final match = members.where((m) => m.uid == task.createdByUserId).toList();
+    return match.isNotEmpty ? match.first.displayName : null;
+  }
+
+  Future<void> _toggleTask(
+    BuildContext context,
+    WidgetRef ref,
+    TaskEntity task,
+  ) async {
+    String? note;
+    if (!task.isCompleted) {
+      note = await _showCompletionNoteDialog(context);
+      if (!context.mounted) return;
+      if (note == null) return;
+    }
+    await ref.read(taskControllerProvider.notifier).toggleComplete(
+          task,
+          completionNote: note,
+        );
+  }
+
+  Future<void> _editDueDate(
+    BuildContext context,
+    WidgetRef ref,
+    TaskEntity task,
+  ) async {
+    final current = task.dueDate ?? DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+      initialDate: current,
+    );
+    if (date == null || !context.mounted) return;
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: current.hour, minute: current.minute),
+    );
+    if (!context.mounted) return;
+    final time = pickedTime ?? TimeOfDay(hour: current.hour, minute: current.minute);
+    final dueDate = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    await ref.read(taskControllerProvider.notifier).updateTask(
+          taskId: task.id,
+          title: task.title,
+          description: task.description,
+          isCompleted: task.isCompleted,
+          dueDate: dueDate,
+          assignedToUserId: task.assignedToUserId,
+          assignedToName: task.assignedToName,
+          completionNote: task.completionNote,
+        );
+  }
+
+  Future<String?> _showCompletionNoteDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Complete Task'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'Add completion note (optional)',
+          ),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(null),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+            child: const Text('Complete'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    return result;
   }
 
   String? _formatDueDate(DateTime? dueDate) {

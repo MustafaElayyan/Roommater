@@ -13,6 +13,7 @@ class CreateTaskUseCase {
     String? description,
     DateTime? dueDate,
     String? assignedToUserId,
+    String? assignedToName,
   }) =>
       _repository.createTask(
         householdId,
@@ -20,5 +21,6 @@ class CreateTaskUseCase {
         description: description,
         dueDate: dueDate,
         assignedToUserId: assignedToUserId,
+        assignedToName: assignedToName,
       );
 }

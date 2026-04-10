@@ -61,6 +61,7 @@ class TaskController extends AsyncNotifier<void> {
     String? description,
     DateTime? dueDate,
     String? assignedToUserId,
+    String? assignedToName,
   }) async {
     final household = ref.read(currentHouseholdProvider);
     if (household == null) return;
@@ -73,6 +74,7 @@ class TaskController extends AsyncNotifier<void> {
         description: description,
         dueDate: dueDate,
         assignedToUserId: assignedToUserId,
+        assignedToName: assignedToName,
       );
       ref.invalidate(tasksProvider);
     });
@@ -85,6 +87,8 @@ class TaskController extends AsyncNotifier<void> {
     required bool isCompleted,
     DateTime? dueDate,
     String? assignedToUserId,
+    String? assignedToName,
+    String? completionNote,
   }) async {
     final household = ref.read(currentHouseholdProvider);
     if (household == null) return;
@@ -99,6 +103,8 @@ class TaskController extends AsyncNotifier<void> {
         isCompleted: isCompleted,
         dueDate: dueDate,
         assignedToUserId: assignedToUserId,
+        assignedToName: assignedToName,
+        completionNote: completionNote,
       );
       ref.invalidate(tasksProvider);
     });
@@ -115,9 +121,13 @@ class TaskController extends AsyncNotifier<void> {
     });
   }
 
-  Future<void> toggleComplete(TaskEntity task) async {
+  Future<void> toggleComplete(TaskEntity task, {String? completionNote}) async {
     final household = ref.read(currentHouseholdProvider);
     if (household == null) return;
+    final currentUid = ref.read(firebaseAuthProvider).currentUser?.uid;
+    if (task.assignedToUserId == null || task.assignedToUserId != currentUid) {
+      return;
+    }
 
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
@@ -129,6 +139,8 @@ class TaskController extends AsyncNotifier<void> {
         isCompleted: !task.isCompleted,
         dueDate: task.dueDate,
         assignedToUserId: task.assignedToUserId,
+        assignedToName: task.assignedToName,
+        completionNote: !task.isCompleted ? completionNote : null,
       );
       ref.invalidate(tasksProvider);
     });

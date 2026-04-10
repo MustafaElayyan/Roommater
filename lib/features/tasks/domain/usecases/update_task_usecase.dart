@@ -15,6 +15,8 @@ class UpdateTaskUseCase {
     required bool isCompleted,
     DateTime? dueDate,
     String? assignedToUserId,
+    String? assignedToName,
+    String? completionNote,
   }) =>
       _repository.updateTask(
         householdId,
@@ -24,5 +26,7 @@ class UpdateTaskUseCase {
         isCompleted: isCompleted,
         dueDate: dueDate,
         assignedToUserId: assignedToUserId,
+        assignedToName: assignedToName,
+        completionNote: completionNote,
       );
 }

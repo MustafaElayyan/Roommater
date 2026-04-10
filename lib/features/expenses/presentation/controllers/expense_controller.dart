@@ -72,9 +72,13 @@ class ExpenseController extends AsyncNotifier<void> {
     required String userId,
     required bool isSettled,
   }) async {
+    final household = ref.read(currentHouseholdProvider);
+    if (household == null) return;
+
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(_settleExpenseUseCaseProvider)(
+            household.id,
             expenseId,
             userId: userId,
             isSettled: isSettled,
@@ -84,9 +88,12 @@ class ExpenseController extends AsyncNotifier<void> {
   }
 
   Future<void> deleteExpense(String expenseId) async {
+    final household = ref.read(currentHouseholdProvider);
+    if (household == null) return;
+
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(expenseRepositoryProvider).deleteExpense(expenseId);
+      await ref.read(expenseRepositoryProvider).deleteExpense(household.id, expenseId);
       ref.invalidate(expensesProvider);
     });
   }

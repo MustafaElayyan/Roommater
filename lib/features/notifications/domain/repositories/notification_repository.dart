@@ -13,5 +13,5 @@ abstract interface class NotificationRepository {
     String? referenceType,
   });
 
-  Future<void> markAsRead(String notificationId);
+  Future<void> markAsRead(String recipientUserId, String notificationId);
 }

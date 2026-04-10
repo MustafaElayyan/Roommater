@@ -37,7 +37,7 @@ class EventsScreen extends ConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go(AppRoutes.createEvent),
+        onPressed: () => context.push(AppRoutes.createEvent),
         child: const Icon(Icons.add),
       ),
     );
