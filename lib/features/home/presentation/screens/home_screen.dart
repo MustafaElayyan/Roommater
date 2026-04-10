@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../events/domain/entities/event_entity.dart';
+import '../../../events/presentation/controllers/event_controller.dart';
 import '../../../household/domain/entities/member_entity.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
 import '../../../tasks/domain/entities/task_entity.dart';
@@ -27,6 +30,7 @@ class _DashboardTab extends ConsumerWidget {
         ? ref.watch(householdMembersProvider(household.id))
         : const AsyncValue<List<MemberEntity>>.data([]);
     final tasksAsync = ref.watch(tasksProvider);
+    final eventsAsync = ref.watch(eventsProvider);
     final taskChecks = ref.watch(homeTaskChecksProvider);
     final currentUid = ref.watch(authStateProvider).valueOrNull?.uid;
 
@@ -131,10 +135,37 @@ class _DashboardTab extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         Text('Upcoming Events', style: Theme.of(context).textTheme.titleMedium),
-        const Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text('No upcoming events yet'),
+        Card(
+          child: eventsAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (error, _) => Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('Failed to load events: $error'),
+            ),
+            data: (events) {
+              final upcomingEvents = _upcomingEvents(events);
+              if (upcomingEvents.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('No upcoming events yet'),
+                );
+              }
+              return Column(
+                children: upcomingEvents
+                    .map(
+                      (event) => ListTile(
+                        onTap: () => context.go('/events/${event.id}'),
+                        title: Text(event.title),
+                        subtitle: Text(_eventSubtitle(event)),
+                        trailing: const Icon(Icons.chevron_right),
+                      ),
+                    )
+                    .toList(),
+              );
+            },
           ),
         ),
         const SizedBox(height: 16),
@@ -197,5 +228,22 @@ class _DashboardTab extends ConsumerWidget {
       if (member.uid == uid) return member.displayName;
     }
     return null;
+  }
+
+  List<EventEntity> _upcomingEvents(List<EventEntity> events) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final upcoming = events
+        .where((event) => !event.eventDate.isBefore(today))
+        .toList()
+      ..sort((a, b) => a.eventDate.compareTo(b.eventDate));
+    return upcoming.take(3).toList();
+  }
+
+  String _eventSubtitle(EventEntity event) {
+    final date =
+        '${event.eventDate.year}-${event.eventDate.month.toString().padLeft(2, '0')}-${event.eventDate.day.toString().padLeft(2, '0')}';
+    final time = event.eventTime == null ? '' : ' • ${event.eventTime}';
+    return '$date$time • ${event.eventType}';
   }
 }

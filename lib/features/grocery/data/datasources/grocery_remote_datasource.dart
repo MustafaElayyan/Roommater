@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 import '../../../../core/errors/app_exception.dart';
 import '../models/grocery_item_model.dart';
@@ -15,18 +14,17 @@ class GroceryRemoteDataSource {
     String householdId, {
     required bool isPurchased,
   }) {
-    try {
-      return _firestore
-          .collection('households')
-          .doc(householdId)
-          .collection('groceries')
-          .where('isPurchased', isEqualTo: isPurchased)
-          .orderBy('createdAt', descending: true)
-          .snapshots()
-          .map((snapshot) => snapshot.docs.map(GroceryItemModel.fromFirestore).toList());
-    } on FirebaseException catch (e) {
-      throw ApiException('Failed to load groceries.', e);
-    }
+    return _firestore
+        .collection('households')
+        .doc(householdId)
+        .collection('groceries')
+        .where('isPurchased', isEqualTo: isPurchased)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map(GroceryItemModel.fromFirestore).toList())
+        .handleError((error) {
+          throw ApiException('Failed to load groceries.', error);
+        });
   }
 
   Future<void> addItem(
