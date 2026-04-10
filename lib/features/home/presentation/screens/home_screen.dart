@@ -165,30 +165,33 @@ class _DashboardTab extends ConsumerWidget {
     String? note;
     if (!task.isCompleted) {
       final controller = TextEditingController();
-      note = await showDialog<String>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Complete Task'),
-          content: TextField(
-            controller: controller,
-            maxLines: 3,
-            decoration: const InputDecoration(
-              hintText: 'Add completion note (optional)',
+      try {
+        note = await showDialog<String>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Complete Task'),
+            content: TextField(
+              controller: controller,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                hintText: 'Add completion note (optional)',
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(null),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+                child: const Text('Complete'),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(null),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(controller.text.trim()),
-              child: const Text('Complete'),
-            ),
-          ],
-        ),
-      );
-      controller.dispose();
+        );
+      } finally {
+        controller.dispose();
+      }
       if (note == null) return;
     }
     ref.read(taskControllerProvider.notifier).toggleComplete(
