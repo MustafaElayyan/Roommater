@@ -150,10 +150,8 @@ class HouseholdRemoteDataSource {
 
   Future<MemberModel> _buildMemberModel(User? user) async {
     if (user == null) {
-      return const MemberModel(
-        uid: 'guest',
-        displayName: 'Guest',
-        email: 'guest@roommater.local',
+      throw const ApiException(
+        'You must be signed in to create or join a household.',
       );
     }
 

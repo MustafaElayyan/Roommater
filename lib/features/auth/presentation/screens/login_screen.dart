@@ -6,7 +6,6 @@ import '../../../../app/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../controllers/auth_controller.dart';
-import '../controllers/guest_provider.dart';
 import '../widgets/auth_form_field.dart';
 
 /// Screen that allows existing users to sign in with email and password.
@@ -32,7 +31,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    ref.read(isGuestProvider.notifier).state = false;
     await ref.read(authControllerProvider.notifier).signIn(
           email: _emailController.text.trim(),
           password: _passwordController.text,
@@ -49,12 +47,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!mounted) return;
     final hasDisplayName = user?.displayName?.trim().isNotEmpty ?? false;
     context.go(hasDisplayName ? AppRoutes.noHousehold : AppRoutes.profileSetup);
-  }
-
-  void _continueAsGuest() {
-    if (!mounted) return;
-    ref.read(isGuestProvider.notifier).state = true;
-    context.go(AppRoutes.home);
   }
 
   @override
@@ -100,13 +92,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Password reset is not available yet.',
-                      ),
-                    ),
-                  ),
+                  onPressed: () => context.push(AppRoutes.forgotPassword),
                   style: TextButton.styleFrom(
                     foregroundColor: _actionTextColor,
                     minimumSize: const Size(120, 48),
@@ -132,14 +118,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   foregroundColor: _actionTextColor,
                 ),
                 child: const Text("Don't have account? Register"),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton(
-                onPressed: _continueAsGuest,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: _actionTextColor,
-                ),
-                child: const Text('Continue as Guest'),
               ),
             ],
           ),

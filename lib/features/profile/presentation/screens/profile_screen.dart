@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authStateProvider).valueOrNull;
+    final displayName = user?.displayName?.trim() ?? '';
+    final hasName = displayName.isNotEmpty;
+    final photoUrl = user?.photoUrl;
+    final hasPhoto = photoUrl?.isNotEmpty ?? false;
+    final avatarInitial =
+        displayName.isNotEmpty ? displayName.substring(0, 1).toUpperCase() : '?';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
@@ -18,22 +28,28 @@ class ProfileScreen extends StatelessWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
-        children: const [
+        children: [
           Center(
             child: CircleAvatar(
               radius: 44,
-              child: Icon(Icons.person, size: 40),
+              backgroundImage: hasPhoto ? NetworkImage(photoUrl!) : null,
+              child: hasPhoto
+                  ? null
+                  : Text(
+                      avatarInitial,
+                      style: const TextStyle(fontSize: 32),
+                    ),
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Center(
-            child: Text(
-              'Mustafa Elayyan',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              child: Text(
+              hasName ? displayName : 'No display name set',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
-          SizedBox(height: 8),
-          Center(child: Text('UI preview profile data')),
+          const SizedBox(height: 8),
+          Center(child: Text(user?.email ?? 'No email available')),
         ],
       ),
     );

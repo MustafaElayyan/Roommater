@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/theme/theme_provider.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
-import '../../features/auth/presentation/controllers/guest_provider.dart';
 import '../../features/auth/presentation/screens/auth_choice_screen.dart';
+import '../../features/auth/presentation/screens/email_verification_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/profile_setup_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
@@ -21,6 +23,7 @@ import '../../features/household/presentation/screens/create_household_screen.da
 import '../../features/household/presentation/screens/join_household_screen.dart';
 import '../../features/household/presentation/screens/manage_members_screen.dart';
 import '../../features/household/presentation/screens/no_household_screen.dart';
+import '../../features/household/presentation/controllers/household_controller.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
@@ -38,19 +41,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     AppRoutes.authChoice,
     AppRoutes.login,
     AppRoutes.register,
+    AppRoutes.forgotPassword,
+    AppRoutes.emailVerification,
   };
   const authOnlyRoutes = <String>{
     AppRoutes.authChoice,
     AppRoutes.login,
     AppRoutes.register,
   };
-  const guestAccessibleRoutes = <String>{
-    AppRoutes.noHousehold,
-    AppRoutes.createHousehold,
-    AppRoutes.joinHousehold,
-    AppRoutes.home,
-  };
-
   return GoRouter(
     initialLocation: AppRoutes.onboarding,
     debugLogDiagnostics: false,
@@ -61,16 +59,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (authState is AsyncError<UserEntity?>) return null;
 
       final isLoggedIn = authState.valueOrNull != null;
-      final isGuest = ref.read(isGuestProvider);
       final location = state.matchedLocation;
       final isPublicRoute = publicRoutes.contains(location);
       final isAuthRoute = authOnlyRoutes.contains(location);
-      final isGuestAccessibleRoute = guestAccessibleRoutes.contains(location);
 
       if (!isLoggedIn && !isPublicRoute) {
-        if (isGuest && isGuestAccessibleRoute) {
-          return null;
-        }
         return AppRoutes.authChoice;
       }
 
@@ -96,6 +89,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.register,
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.forgotPassword,
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.emailVerification,
+        builder: (context, state) => const EmailVerificationScreen(),
       ),
       GoRoute(
         path: AppRoutes.profileSetup,
@@ -242,6 +243,7 @@ class _MainShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = _selectedIndex();
     final themeMode = ref.watch(themeModeProvider);
+    final household = ref.watch(currentHouseholdProvider);
 
     void goToShellRoute(String route) {
       Navigator.of(context).pop();
@@ -309,6 +311,30 @@ class _MainShell extends ConsumerWidget {
                   onTap: () => pushToTopLevelRoute(AppRoutes.manageMembers),
                 ),
                 ListTile(
+                  leading: const Icon(Icons.vpn_key_outlined),
+                  title: const Text('Household Code'),
+                  subtitle: Text(
+                    household?.inviteCode ?? 'No household',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  enabled: household != null,
+                  onTap: household == null
+                      ? null
+                      : () {
+                          final inviteCode = household.inviteCode;
+                          Clipboard.setData(ClipboardData(text: inviteCode));
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Household code copied!'),
+                            ),
+                          );
+                        },
+                ),
+                ListTile(
                   leading: const Icon(Icons.notifications_outlined),
                   title: const Text('Notifications'),
                   onTap: () => pushToTopLevelRoute(AppRoutes.notifications),
@@ -320,7 +346,6 @@ class _MainShell extends ConsumerWidget {
                   onTap: () async {
                     Navigator.of(context).pop();
                     try {
-                      ref.read(isGuestProvider.notifier).state = false;
                       await ref.read(authControllerProvider.notifier).signOut();
                       if (context.mounted) context.go(AppRoutes.authChoice);
                     } catch (_) {

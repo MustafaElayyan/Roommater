@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../household/domain/entities/member_entity.dart';
+import '../../../household/presentation/controllers/household_controller.dart';
+import '../../../tasks/domain/entities/task_entity.dart';
+import '../../../tasks/presentation/controllers/task_controller.dart';
 import '../controllers/home_controller.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -16,6 +21,11 @@ class _DashboardTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final household = ref.watch(currentHouseholdProvider);
+    final membersAsync = household != null
+        ? ref.watch(householdMembersProvider(household.id))
+        : const AsyncValue<List<MemberEntity>>.data([]);
+    final tasksAsync = ref.watch(tasksProvider);
     final taskChecks = ref.watch(homeTaskChecksProvider);
 
     return ListView(
@@ -28,20 +38,42 @@ class _DashboardTab extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Sunrise Apartment 4B',
+                  household?.name ?? 'No household selected',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
-                const Row(
-                  children: [
-                    CircleAvatar(child: Text('A')),
-                    SizedBox(width: 8),
-                    CircleAvatar(child: Text('L')),
-                    SizedBox(width: 8),
-                    CircleAvatar(child: Text('M')),
-                    SizedBox(width: 8),
-                    CircleAvatar(child: Text('S')),
-                  ],
+                membersAsync.when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  error: (_, _) => const Text('Failed to load members'),
+                  data: (members) {
+                    if (members.isEmpty) {
+                      return const Text('No household members yet');
+                    }
+                    return Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: members
+                          .map(
+                            (member) {
+                              final hasPhoto = member.photoUrl?.isNotEmpty ?? false;
+                              return CircleAvatar(
+                                backgroundImage:
+                                    hasPhoto ? NetworkImage(member.photoUrl!) : null,
+                                child: hasPhoto
+                                    ? null
+                                    : Text(
+                                        member.displayName.isNotEmpty
+                                            ? member.displayName[0].toUpperCase()
+                                            : '?',
+                                      ),
+                              );
+                            },
+                          )
+                          .toList(),
+                    );
+                  },
                 ),
               ],
             ),
@@ -50,42 +82,42 @@ class _DashboardTab extends ConsumerWidget {
         const SizedBox(height: 16),
         Text("Today's Tasks", style: Theme.of(context).textTheme.titleMedium),
         Card(
-          child: Column(
-            children: [
-              CheckboxListTile(
-                value: taskChecks[0],
-                onChanged: (v) => _toggleTask(ref, 0, v),
-                title: const Text('Wash dishes'),
-              ),
-              CheckboxListTile(
-                value: taskChecks[1],
-                onChanged: (v) => _toggleTask(ref, 1, v),
-                title: const Text('Take out trash'),
-              ),
-              CheckboxListTile(
-                value: taskChecks[2],
-                onChanged: (v) => _toggleTask(ref, 2, v),
-                title: const Text('Clean living room'),
-              ),
-            ],
+          child: tasksAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (error, _) => Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('Failed to load tasks: $error'),
+            ),
+            data: (tasks) {
+              if (tasks.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('No tasks yet'),
+                );
+              }
+              return Column(
+                children: tasks
+                    .map(
+                      (task) => CheckboxListTile(
+                        value: taskChecks[task.id] ?? task.isCompleted,
+                        onChanged: (_) => _toggleTask(ref, task),
+                        title: Text(task.title),
+                      ),
+                    )
+                    .toList(),
+              );
+            },
           ),
         ),
         const SizedBox(height: 16),
         Text('Upcoming Events', style: Theme.of(context).textTheme.titleMedium),
         const Card(
-          child: Column(
-            children: [
-              ListTile(
-                leading: Icon(Icons.event),
-                title: Text('House Meeting'),
-                subtitle: Text('Tomorrow • 7:00 PM'),
-              ),
-              ListTile(
-                leading: Icon(Icons.event),
-                title: Text('Movie Night'),
-                subtitle: Text('Friday • 9:00 PM'),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('No upcoming events yet'),
           ),
         ),
         const SizedBox(height: 16),
@@ -94,30 +126,16 @@ class _DashboardTab extends ConsumerWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const Card(
-          child: Column(
-            children: [
-              ListTile(
-                leading: Icon(Icons.notifications_none),
-                title: Text('Ahmad completed Kitchen cleaning task'),
-              ),
-              ListTile(
-                leading: Icon(Icons.notifications_none),
-                title: Text('New expense added: Grocery run'),
-              ),
-              ListTile(
-                leading: Icon(Icons.notifications_none),
-                title: Text('Lana joined the house meeting event'),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('No notifications yet'),
           ),
         ),
       ],
     );
   }
 
-  void _toggleTask(WidgetRef ref, int index, bool? value) {
-    final next = [...ref.read(homeTaskChecksProvider)];
-    next[index] = value ?? false;
-    ref.read(homeTaskChecksProvider.notifier).state = next;
+  void _toggleTask(WidgetRef ref, TaskEntity task) {
+    ref.read(taskControllerProvider.notifier).toggleComplete(task);
   }
 }

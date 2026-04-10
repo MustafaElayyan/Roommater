@@ -10,6 +10,8 @@ abstract final class AppRoutes {
   static const String authChoice = '/auth-choice';
   static const String login = '/login';
   static const String register = '/register';
+  static const String forgotPassword = '/forgot-password';
+  static const String emailVerification = '/email-verification';
   static const String profileSetup = '/profile-setup';
 
   // --- Household / Main ---

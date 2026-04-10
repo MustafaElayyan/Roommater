@@ -62,6 +62,7 @@ class AuthRemoteDataSource {
         'photoUrl': user.photoURL,
         'createdAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
+      await user.sendEmailVerification();
       final doc = await userDoc.get();
       return UserModel.fromFirestore(doc);
     } on FirebaseAuthException catch (e) {
@@ -78,6 +79,61 @@ class AuthRemoteDataSource {
       throw AuthException(e.message ?? 'Failed to sign out.', e);
     } on FirebaseException catch (e) {
       throw AuthException(e.message ?? 'Failed to sign out.', e);
+    }
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(e.message ?? 'Failed to send password reset email.', e);
+    } on FirebaseException catch (e) {
+      throw AuthException(e.message ?? 'Failed to send password reset email.', e);
+    }
+  }
+
+  Future<void> sendEmailVerification() async {
+    await _sendVerificationEmail(
+      errorMessage: 'Failed to send verification email.',
+    );
+  }
+
+  Future<void> resendEmailVerification() async {
+    await _sendVerificationEmail(
+      errorMessage: 'Failed to resend verification email.',
+    );
+  }
+
+  Future<void> _sendVerificationEmail({
+    required String errorMessage,
+  }) async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) {
+        throw const AuthException('No authenticated user found.');
+      }
+      await user.sendEmailVerification();
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(e.message ?? errorMessage, e);
+    } on FirebaseException catch (e) {
+      throw AuthException(e.message ?? errorMessage, e);
+    }
+  }
+
+  Future<void> updateProfilePhoto(String photoUrl) async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) {
+        throw const AuthException('No authenticated user found.');
+      }
+      await user.updatePhotoURL(photoUrl);
+      await _firestore.collection('users').doc(user.uid).set({
+        'photoUrl': photoUrl,
+      }, SetOptions(merge: true));
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(e.message ?? 'Failed to update profile photo.', e);
+    } on FirebaseException catch (e) {
+      throw AuthException(e.message ?? 'Failed to update profile photo.', e);
     }
   }
 
