@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/profile_entity.dart';
 
 /// Data-layer model for a user profile payload.
@@ -13,9 +15,12 @@ class ProfileModel extends ProfileEntity {
     super.location,
   });
 
-  factory ProfileModel.fromJson(Map<String, dynamic> data) {
+  factory ProfileModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data() ?? const <String, dynamic>{};
     return ProfileModel(
-      uid: data['uid'] as String? ?? '',
+      uid: data['uid'] as String? ?? doc.id,
       displayName: data['displayName'] as String? ?? '',
       email: data['email'] as String? ?? '',
       bio: data['bio'] as String?,
@@ -26,7 +31,7 @@ class ProfileModel extends ProfileEntity {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toFirestore() {
     return {
       'uid': uid,
       'displayName': displayName,

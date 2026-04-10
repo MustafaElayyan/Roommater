@@ -36,9 +36,6 @@ build/
 **/generated_plugin_registrant.dart
 flutter_**
 
-# .NET build artifacts
-Roommater.API/bin/
-Roommater.API/obj/
-Roommater.API/*.db
-Roommater.API/*.db-shm
-Roommater.API/*.db-wal
+# Firebase
+google-services.json
+**/firebase_app_id_file.json

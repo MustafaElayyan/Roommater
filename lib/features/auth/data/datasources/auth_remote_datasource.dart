@@ -1,32 +1,34 @@
-import '../../../../core/network/api_client.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../../../core/errors/app_exception.dart';
 import '../models/user_model.dart';
 
-/// Performs authentication API calls and translates failures into [AuthException].
+/// Performs Firebase Auth/Firestore calls and translates failures into [AuthException].
 class AuthRemoteDataSource {
-  const AuthRemoteDataSource(this._apiClient);
+  AuthRemoteDataSource(this._firebaseAuth, this._firestore);
 
-  final ApiClient _apiClient;
+  final FirebaseAuth _firebaseAuth;
+  final FirebaseFirestore _firestore;
 
   Future<UserModel> signIn({
     required String email,
     required String password,
   }) async {
     try {
-      final response = await _apiClient.postJson(
-        'auth/signin',
-        body: {'email': email, 'password': password},
-        requiresAuth: false,
+      final credential = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-      final token = response['token'] as String?;
-      final userJson = response['user'] as Map<String, dynamic>?;
-      if (token == null || userJson == null) {
-        throw const AuthException('Invalid sign-in response.');
+      final user = credential.user;
+      if (user == null) {
+        throw const AuthException('No Firebase user returned after sign-in.');
       }
-      await _apiClient.writeToken(token);
-      return UserModel.fromJson(userJson);
-    } on AppException catch (e) {
-      throw AuthException(e.message, e);
+      return _readOrCreateUserDocument(user);
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(e.message ?? 'Failed to sign in.', e);
+    } on FirebaseException catch (e) {
+      throw AuthException(e.message ?? 'Failed to sign in.', e);
     }
   }
 
@@ -36,41 +38,78 @@ class AuthRemoteDataSource {
     String? displayName,
   }) async {
     try {
-      final response = await _apiClient.postJson(
-        'auth/signup',
-        body: {
-          'email': email,
-          'password': password,
-          if (displayName != null) 'displayName': displayName,
-        },
-        requiresAuth: false,
+      final credential = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-      final token = response['token'] as String?;
-      final userJson = response['user'] as Map<String, dynamic>?;
-      if (token == null || userJson == null) {
-        throw const AuthException('Invalid sign-up response.');
+      final user = credential.user;
+      if (user == null) {
+        throw const AuthException('No Firebase user returned after sign-up.');
       }
-      await _apiClient.writeToken(token);
-      return UserModel.fromJson(userJson);
-    } on AppException catch (e) {
-      throw AuthException(e.message, e);
+      final trimmedDisplayName = displayName?.trim();
+      if (trimmedDisplayName != null && trimmedDisplayName.isNotEmpty) {
+        await user.updateDisplayName(trimmedDisplayName);
+      }
+      final userDoc = _firestore.collection('users').doc(user.uid);
+      await userDoc.set({
+        'uid': user.uid,
+        'email': user.email ?? email,
+        'displayName':
+            trimmedDisplayName == null || trimmedDisplayName.isEmpty
+                ? null
+                : trimmedDisplayName,
+        'photoUrl': user.photoURL,
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      final doc = await userDoc.get();
+      return UserModel.fromFirestore(doc);
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(e.message ?? 'Failed to sign up.', e);
+    } on FirebaseException catch (e) {
+      throw AuthException(e.message ?? 'Failed to sign up.', e);
     }
   }
 
   Future<void> signOut() async {
     try {
-      await _apiClient.clearToken();
-    } on AppException catch (e) {
-      throw AuthException(e.message, e);
+      await _firebaseAuth.signOut();
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(e.message ?? 'Failed to sign out.', e);
+    } on FirebaseException catch (e) {
+      throw AuthException(e.message ?? 'Failed to sign out.', e);
     }
   }
 
   Future<UserModel?> getCurrentUser() async {
     try {
-      final response = await _apiClient.getJson('auth/me');
-      return UserModel.fromJson(response);
-    } on AppException {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) return null;
+      return _readOrCreateUserDocument(user);
+    } on FirebaseException {
       return null;
     }
+  }
+
+  Stream<UserModel?> get authStateChanges {
+    return _firebaseAuth.authStateChanges().asyncMap((user) async {
+      if (user == null) return null;
+      return _readOrCreateUserDocument(user);
+    });
+  }
+
+  Future<UserModel> _readOrCreateUserDocument(User user) async {
+    final userDoc = _firestore.collection('users').doc(user.uid);
+    final doc = await userDoc.get();
+    if (doc.exists) return UserModel.fromFirestore(doc);
+
+    final fallback = UserModel(
+      uid: user.uid,
+      email: user.email ?? '',
+      displayName: user.displayName,
+      photoUrl: user.photoURL,
+    );
+    await userDoc.set(fallback.toFirestore(), SetOptions(merge: true));
+    final created = await userDoc.get();
+    return UserModel.fromFirestore(created);
   }
 }

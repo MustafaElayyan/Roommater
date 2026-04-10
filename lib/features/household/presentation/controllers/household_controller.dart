@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/network/api_client.dart';
+import '../../../../core/network/firestore_service.dart';
 import '../../data/datasources/household_remote_datasource.dart';
 import '../../data/repositories/household_repository_impl.dart';
 import '../../domain/entities/household_entity.dart';
@@ -16,7 +16,10 @@ import '../../domain/usecases/remove_member_usecase.dart';
 
 final _householdDataSourceProvider =
     Provider<HouseholdRemoteDataSource>((ref) {
-  return HouseholdRemoteDataSource(ref.watch(apiClientProvider));
+  return HouseholdRemoteDataSource(
+    ref.watch(firestoreProvider),
+    ref.watch(firebaseAuthProvider),
+  );
 });
 
 final householdRepositoryProvider = Provider<HouseholdRepository>((ref) {

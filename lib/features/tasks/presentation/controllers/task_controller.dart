@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/network/api_client.dart';
+import '../../../../core/network/firestore_service.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
 import '../../data/datasources/task_remote_datasource.dart';
 import '../../data/repositories/task_repository_impl.dart';
@@ -14,7 +14,10 @@ import '../../domain/usecases/update_task_usecase.dart';
 // --- Dependency graph ---
 
 final _taskDataSourceProvider = Provider<TaskRemoteDataSource>((ref) {
-  return TaskRemoteDataSource(ref.watch(apiClientProvider));
+  return TaskRemoteDataSource(
+    ref.watch(firestoreProvider),
+    ref.watch(firebaseAuthProvider),
+  );
 });
 
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {

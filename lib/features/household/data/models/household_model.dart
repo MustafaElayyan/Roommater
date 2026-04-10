@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/household_entity.dart';
 import 'member_model.dart';
 
@@ -28,6 +30,29 @@ class HouseholdModel extends HouseholdEntity {
     );
   }
 
+  factory HouseholdModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data() ?? const <String, dynamic>{};
+    final membersRaw = data['members'] as List<dynamic>? ?? const [];
+    final createdAtRaw = data['createdAt'];
+    return HouseholdModel(
+      id: data['id'] as String? ?? doc.id,
+      name: data['name'] as String? ?? '',
+      inviteCode: data['inviteCode'] as String? ?? '',
+      createdByUserId: data['createdByUserId'] as String? ?? '',
+      createdAt: switch (createdAtRaw) {
+        Timestamp() => createdAtRaw.toDate(),
+        String() => DateTime.tryParse(createdAtRaw) ?? DateTime.now(),
+        _ => DateTime.now(),
+      },
+      members: membersRaw
+          .whereType<Map<String, dynamic>>()
+          .map(MemberModel.fromFirestore)
+          .toList(),
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -42,6 +67,24 @@ class HouseholdModel extends HouseholdEntity {
                 email: e.email,
                 photoUrl: e.photoUrl,
               ).toJson())
+          .toList(),
+    };
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'id': id,
+      'name': name,
+      'inviteCode': inviteCode,
+      'createdByUserId': createdByUserId,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'members': members
+          .map((e) => MemberModel(
+                uid: e.uid,
+                displayName: e.displayName,
+                email: e.email,
+                photoUrl: e.photoUrl,
+              ).toFirestore())
           .toList(),
     };
   }
