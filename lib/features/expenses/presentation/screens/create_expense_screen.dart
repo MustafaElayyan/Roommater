@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../domain/entities/expense_entity.dart';
+import '../controllers/expense_controller.dart';
 import '../../../household/domain/entities/member_entity.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
 
@@ -13,11 +15,13 @@ class CreateExpenseScreen extends ConsumerStatefulWidget {
 }
 
 class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _categoryController = TextEditingController();
   final _splitAmong = <String>{};
   String? _payer;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -56,51 +60,68 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
               child: Text('No members found. Join or create a household first.'),
             );
           }
-          final memberNames = members.map((m) => m.displayName).toList();
-          _payer ??= memberNames.first;
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-              ),
+          _payer ??= members.first.uid;
+          return Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                TextFormField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(labelText: 'Title'),
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? 'Title is required'
+                      : null,
+                ),
               const SizedBox(height: 12),
-              TextField(
+              TextFormField(
                 controller: _amountController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Amount'),
                 onChanged: (_) => setState(() {}),
+                validator: (value) {
+                  final parsed = double.tryParse(value ?? '');
+                  if (parsed == null || parsed <= 0) {
+                    return 'Enter a valid amount';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 12),
-              TextField(
+              TextFormField(
                 controller: _categoryController,
                 decoration: const InputDecoration(labelText: 'Category'),
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
+                DropdownButtonFormField<String>(
                 value: _payer,
                 decoration: const InputDecoration(labelText: 'Payer'),
-                items: memberNames
-                    .map((m) => DropdownMenuItem(value: m, child: Text(m)))
+                items: members
+                    .map(
+                      (m) => DropdownMenuItem(
+                        value: m.uid,
+                        child: Text(m.displayName),
+                      ),
+                    )
                     .toList(),
-                onChanged: (value) => setState(() => _payer = value ?? memberNames.first),
+                onChanged: (value) =>
+                    setState(() => _payer = value ?? members.first.uid),
               ),
               const SizedBox(height: 12),
               const Text('Split Among'),
               Wrap(
                 spacing: 6,
-                children: memberNames
+                children: members
                     .map(
                       (member) => FilterChip(
-                        label: Text(member),
-                        selected: _splitAmong.contains(member),
+                        label: Text(member.displayName),
+                        selected: _splitAmong.contains(member.uid),
                         onSelected: (selected) {
                           setState(() {
                             if (selected) {
-                              _splitAmong.add(member);
+                              _splitAmong.add(member.uid);
                             } else {
-                              _splitAmong.remove(member);
+                              _splitAmong.remove(member.uid);
                             }
                           });
                         },
@@ -116,13 +137,57 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
               ),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: hasSplitMembers ? () => Navigator.of(context).pop() : null,
+                onPressed: hasSplitMembers && !_isSubmitting
+                    ? () => _submit(context, members)
+                    : null,
                 child: const Text('Create Expense'),
               ),
-            ],
+              ],
+            ),
           );
         },
       ),
     );
+  }
+
+  Future<void> _submit(BuildContext context, List<MemberEntity> members) async {
+    if (!(_formKey.currentState?.validate() ?? false) || _isSubmitting) return;
+    if (_splitAmong.isEmpty) return;
+    final amount = double.tryParse(_amountController.text.trim()) ?? 0;
+    if (amount <= 0) return;
+
+    setState(() => _isSubmitting = true);
+    final eachShare = amount / _splitAmong.length;
+    final splits = _splitAmong
+        .map(
+          (uid) => ExpenseSplitEntity(
+            userId: uid,
+            shareAmount: eachShare,
+            isSettled: false,
+            settledAt: null,
+          ),
+        )
+        .toList();
+
+    await ref.read(expenseControllerProvider.notifier).createExpense(
+          title: _titleController.text.trim(),
+          amount: amount,
+          category: _categoryController.text.trim().isEmpty
+              ? null
+              : _categoryController.text.trim(),
+          payerId: _payer ?? members.first.uid,
+          splits: splits,
+        );
+
+    if (!mounted) return;
+    final state = ref.read(expenseControllerProvider);
+    if (state.hasError) {
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${state.error}')),
+      );
+      return;
+    }
+    context.pop();
   }
 }
