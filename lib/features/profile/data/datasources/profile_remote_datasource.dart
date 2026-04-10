@@ -55,11 +55,36 @@ class ProfileRemoteDataSource {
     required String contentType,
   }) async {
     try {
-      final ref = _firebaseStorage.ref().child('avatars/$uid.$extension');
-      await ref.putData(
-        Uint8List.fromList(bytes),
-        SettableMetadata(contentType: contentType),
+      final normalizedExtension = extension.toLowerCase();
+      const possibleExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+      await Future.wait(
+        possibleExtensions
+            .where((ext) => ext != normalizedExtension)
+            .map((ext) async {
+              try {
+                await _firebaseStorage.ref().child('avatars/$uid.$ext').delete();
+              } catch (_) {
+                // Ignore if an old avatar path does not exist.
+              }
+            }),
       );
+
+      final ref = _firebaseStorage.ref().child('avatars/$uid.$normalizedExtension');
+      final data = Uint8List.fromList(bytes);
+      final metadata = SettableMetadata(contentType: contentType);
+      try {
+        await ref.putData(data, metadata);
+      } on FirebaseException catch (e) {
+        if (e.code == 'object-not-found') {
+          const objectNotFoundRetryDelayMillis = 500;
+          await Future<void>.delayed(
+            const Duration(milliseconds: objectNotFoundRetryDelayMillis),
+          );
+          await ref.putData(data, metadata);
+        } else {
+          rethrow;
+        }
+      }
       final photoUrl = await _getDownloadUrlWithRetry(ref);
       final userDoc = _firestore.collection('users').doc(uid);
       await userDoc.set({
