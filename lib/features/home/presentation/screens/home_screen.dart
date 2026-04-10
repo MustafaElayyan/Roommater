@@ -112,21 +112,12 @@ class _DashboardTab extends ConsumerWidget {
                         subtitle: membersAsync.maybeWhen(
                           data: (members) {
                             final creator = task.createdByName ??
-                                members
-                                    .where((m) => m.uid == task.createdByUserId)
-                                    .map((m) => m.displayName)
-                                    .firstWhere(
-                                      (_) => true,
-                                      orElse: () => task.createdByUserId,
-                                    );
+                                _findMemberName(members, task.createdByUserId) ??
+                                task.createdByUserId;
                             final assignee = task.assignedToName ??
-                                members
-                                    .where((m) => m.uid == task.assignedToUserId)
-                                    .map((m) => m.displayName)
-                                    .firstWhere(
-                                      (_) => true,
-                                      orElse: () => task.assignedToUserId ?? 'Unassigned',
-                                    );
+                                _findMemberName(members, task.assignedToUserId) ??
+                                task.assignedToUserId ??
+                                'Unassigned';
                             return Text('Created by: $creator\nAssigned to: $assignee');
                           },
                           orElse: () => null,
@@ -198,5 +189,13 @@ class _DashboardTab extends ConsumerWidget {
           task,
           completionNote: note,
         );
+  }
+
+  String? _findMemberName(List<MemberEntity> members, String? uid) {
+    if (uid == null) return null;
+    for (final member in members) {
+      if (member.uid == uid) return member.displayName;
+    }
+    return null;
   }
 }
