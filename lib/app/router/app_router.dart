@@ -85,6 +85,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return AppRoutes.emailVerification;
       }
 
+      if (isLoggedIn && !isEmailVerified && location == AppRoutes.emailVerification) {
+        return null;
+      }
+
       if (isLoggedIn && householdBootstrap.isLoading && !isPublicRoute) {
         return null;
       }

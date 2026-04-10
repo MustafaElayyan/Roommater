@@ -63,6 +63,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     } else {
       ref.invalidate(profileProvider(uid));
+      await ref.refresh(authStateProvider.future);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile picture updated.')),
       );

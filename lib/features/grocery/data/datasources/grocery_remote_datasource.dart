@@ -19,9 +19,12 @@ class GroceryRemoteDataSource {
         .doc(householdId)
         .collection('groceries')
         .where('isPurchased', isEqualTo: isPurchased)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map(GroceryItemModel.fromFirestore).toList())
+        .map((snapshot) {
+          final items = snapshot.docs.map(GroceryItemModel.fromFirestore).toList();
+          items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return items;
+        })
         .handleError((error) {
           throw ApiException('Failed to load groceries.', error);
         });
