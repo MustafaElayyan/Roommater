@@ -98,7 +98,7 @@ class ProfileRemoteDataSource {
         await Future<void>.delayed(Duration(milliseconds: 250 * attempt));
       }
     }
-    throw lastError ?? const ApiException('Failed to update profile photo.');
+    throw lastError!;
   }
 
   Future<void> changePassword({
@@ -120,7 +120,7 @@ class ProfileRemoteDataSource {
     } on FirebaseAuthException catch (e) {
       throw AuthException(e.message ?? 'Failed to change password.', e);
     } on FirebaseException catch (e) {
-      throw AuthException(e.message ?? 'Failed to change password.', e);
+      throw ApiException('Failed to change password.', e);
     }
   }
 }
