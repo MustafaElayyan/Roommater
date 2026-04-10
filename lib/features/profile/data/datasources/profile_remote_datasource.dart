@@ -16,6 +16,8 @@ class ProfileRemoteDataSource {
     this._firebaseStorage,
   );
 
+  // Storage objects may be briefly unavailable for read-after-write; this
+  // allows up to ~8.4s total backoff (0.4 + 0.8 + ... + 2.0) before failing.
   static const int _downloadUrlRetryAttempts = 6;
   static const int _downloadUrlRetryBaseDelayMs = 400;
 

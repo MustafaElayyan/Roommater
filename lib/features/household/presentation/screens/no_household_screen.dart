@@ -15,7 +15,9 @@ class NoHouseholdScreen extends ConsumerWidget {
     } catch (_) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to sign out')),
+        const SnackBar(
+          content: Text('Failed to sign out. Please try again or restart the app.'),
+        ),
       );
     }
   }
