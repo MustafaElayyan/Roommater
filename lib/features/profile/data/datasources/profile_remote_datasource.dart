@@ -57,13 +57,10 @@ class ProfileRemoteDataSource {
       );
       final photoUrl = await _getDownloadUrlWithRetry(ref);
       final userDoc = _firestore.collection('users').doc(uid);
-      final userSnapshot = await userDoc.get();
-      if (!userSnapshot.exists) {
-        await userDoc.set({
-          'uid': uid,
-          'createdAt': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
-      }
+      await userDoc.set({
+        'uid': uid,
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
       await userDoc.set({
         'photoUrl': photoUrl,
       }, SetOptions(merge: true));
