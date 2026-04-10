@@ -24,16 +24,7 @@ class GroceryRemoteDataSource {
         .snapshots()
         .map((snapshot) => snapshot.docs.map(GroceryItemModel.fromFirestore).toList())
         .handleError((error) {
-          if (error is FirebaseException) {
-            throw ApiException('Failed to load groceries.', error);
-          }
-          if (error is Exception) {
-            throw ApiException('Failed to load groceries.', error);
-          }
-          throw ApiException(
-            'Failed to load groceries.',
-            Exception(error.toString()),
-          );
+          throw ApiException('Failed to load groceries.', error);
         });
   }
 

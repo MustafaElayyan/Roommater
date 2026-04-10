@@ -65,7 +65,7 @@ class ProfileRemoteDataSource {
       }
       return photoUrl;
     } on FirebaseException catch (e) {
-      throw ApiException('Failed to update profile photo.', e);
+      throw ApiException(e.message ?? 'Failed to update profile photo.', e);
     } on Exception catch (e) {
       throw ApiException('Failed to update profile photo.', e);
     }
