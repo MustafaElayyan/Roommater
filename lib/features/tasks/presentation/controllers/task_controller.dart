@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/firestore_service.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
 import '../../data/datasources/task_remote_datasource.dart';
 import '../../data/repositories/task_repository_impl.dart';
@@ -44,6 +45,8 @@ final _deleteTaskUseCaseProvider = Provider<DeleteTaskUseCase>((ref) {
 
 /// Fetches all tasks for the current household.
 final tasksProvider = FutureProvider<List<TaskEntity>>((ref) {
+  final user = ref.watch(authStateProvider).valueOrNull;
+  if (user == null) return [];
   final household = ref.watch(currentHouseholdProvider);
   if (household == null) return [];
   return ref.watch(_getTasksUseCaseProvider)(household.id);
