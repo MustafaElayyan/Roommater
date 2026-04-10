@@ -15,10 +15,8 @@ class ProfileScreen extends ConsumerWidget {
     final hasName = displayName.isNotEmpty;
     final photoUrl = user?.photoUrl;
     final hasPhoto = photoUrl?.isNotEmpty ?? false;
-    var avatarInitial = '?';
-    if (displayName.isNotEmpty) {
-      avatarInitial = displayName.substring(0, 1).toUpperCase();
-    }
+    final avatarInitial =
+        displayName.isNotEmpty ? displayName.substring(0, 1).toUpperCase() : '?';
 
     return Scaffold(
       appBar: AppBar(
