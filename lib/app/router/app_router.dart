@@ -70,7 +70,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final hasHousehold = user?.householdId?.trim().isNotEmpty ?? false;
       final isHouseholdRoute = location == AppRoutes.noHousehold ||
           location == AppRoutes.createHousehold ||
-          location == AppRoutes.joinHousehold;
+          location == AppRoutes.joinHousehold ||
+          location == AppRoutes.profileSetup;
       final isMainRoute = location == AppRoutes.home ||
           location == AppRoutes.tasks ||
           location == AppRoutes.grocery ||

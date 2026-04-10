@@ -55,8 +55,19 @@ class ProfileRemoteDataSource {
         Uint8List.fromList(bytes),
         SettableMetadata(contentType: contentType),
       );
-      final photoUrl = await ref.getDownloadURL();
-      await _firestore.collection('users').doc(uid).set({
+      final photoUrl = await _getDownloadUrlWithRetry(ref);
+      final userDoc = _firestore.collection('users').doc(uid);
+      final userSnapshot = await userDoc.get();
+      if (!userSnapshot.exists) {
+        final currentUser = _firebaseAuth.currentUser;
+        await userDoc.set({
+          'uid': uid,
+          'email': currentUser?.email,
+          'displayName': currentUser?.displayName,
+          'createdAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+      await userDoc.set({
         'photoUrl': photoUrl,
       }, SetOptions(merge: true));
       final user = _firebaseAuth.currentUser;
@@ -69,6 +80,25 @@ class ProfileRemoteDataSource {
     } on Exception catch (e) {
       throw ApiException('Failed to update profile photo.', e);
     }
+  }
+
+  Future<String> _getDownloadUrlWithRetry(
+    Reference ref, {
+    int maxAttempts = 3,
+  }) async {
+    FirebaseException? lastError;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await ref.getDownloadURL();
+      } on FirebaseException catch (e) {
+        lastError = e;
+        if (e.code != 'object-not-found' || attempt == maxAttempts) {
+          rethrow;
+        }
+        await Future<void>.delayed(Duration(milliseconds: 250 * attempt));
+      }
+    }
+    throw lastError ?? const ApiException('Failed to update profile photo.');
   }
 
   Future<void> changePassword({
@@ -90,7 +120,7 @@ class ProfileRemoteDataSource {
     } on FirebaseAuthException catch (e) {
       throw AuthException(e.message ?? 'Failed to change password.', e);
     } on FirebaseException catch (e) {
-      throw ApiException('Failed to change password.', e);
+      throw AuthException(e.message ?? 'Failed to change password.', e);
     }
   }
 }
