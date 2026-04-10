@@ -67,6 +67,7 @@ class ProfileController extends AsyncNotifier<ProfileEntity?> {
     state = await AsyncValue.guard(
       () => ref.read(_updateProfileUseCaseProvider)(profile),
     );
+    ref.invalidate(profileProvider(profile.uid));
   }
 
   Future<void> changePassword({
@@ -98,6 +99,7 @@ class ProfileController extends AsyncNotifier<ProfileEntity?> {
         extension: extension,
         contentType: contentType,
       );
+      ref.invalidate(profileProvider(uid));
       return ref.read(_getProfileUseCaseProvider)(uid);
     });
   }
