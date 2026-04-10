@@ -93,20 +93,20 @@ class AuthRemoteDataSource {
   }
 
   Future<void> sendEmailVerification() async {
-    try {
-      final user = _firebaseAuth.currentUser;
-      if (user == null) {
-        throw const AuthException('No authenticated user found.');
-      }
-      await user.sendEmailVerification();
-    } on FirebaseAuthException catch (e) {
-      throw AuthException(e.message ?? 'Failed to send verification email.', e);
-    } on FirebaseException catch (e) {
-      throw AuthException(e.message ?? 'Failed to send verification email.', e);
-    }
+    await _sendVerificationEmail(
+      errorMessage: 'Failed to send verification email.',
+    );
   }
 
   Future<void> resendEmailVerification() async {
+    await _sendVerificationEmail(
+      errorMessage: 'Failed to resend verification email.',
+    );
+  }
+
+  Future<void> _sendVerificationEmail({
+    required String errorMessage,
+  }) async {
     try {
       final user = _firebaseAuth.currentUser;
       if (user == null) {
@@ -114,9 +114,9 @@ class AuthRemoteDataSource {
       }
       await user.sendEmailVerification();
     } on FirebaseAuthException catch (e) {
-      throw AuthException(e.message ?? 'Failed to resend verification email.', e);
+      throw AuthException(e.message ?? errorMessage, e);
     } on FirebaseException catch (e) {
-      throw AuthException(e.message ?? 'Failed to resend verification email.', e);
+      throw AuthException(e.message ?? errorMessage, e);
     }
   }
 
