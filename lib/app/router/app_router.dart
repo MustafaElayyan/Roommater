@@ -81,11 +81,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return AppRoutes.authChoice;
       }
 
-      if (isLoggedIn && !isEmailVerified && location != AppRoutes.emailVerification) {
-        return AppRoutes.emailVerification;
-      }
-
-      if (isLoggedIn && !isEmailVerified && location == AppRoutes.emailVerification) {
+      if (isLoggedIn && !isEmailVerified) {
+        if (location != AppRoutes.emailVerification) {
+          return AppRoutes.emailVerification;
+        }
         return null;
       }
 
