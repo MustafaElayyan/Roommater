@@ -20,13 +20,27 @@ class ProfileSetupScreen extends ConsumerStatefulWidget {
 class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _picker = ImagePicker();
   Uint8List? _imageBytes;
+  String _imageExtension = 'jpg';
+  String _contentType = 'image/jpeg';
 
   Future<void> _pickImage(ImageSource source) async {
     final image = await _picker.pickImage(source: source, imageQuality: 80);
     if (image == null) return;
     final bytes = await image.readAsBytes();
+    final extension = image.path.contains('.')
+        ? image.path.split('.').last.toLowerCase()
+        : 'jpg';
+    final contentType = switch (extension) {
+      'png' => 'image/png',
+      'webp' => 'image/webp',
+      _ => 'image/jpeg',
+    };
     if (!mounted) return;
-    setState(() => _imageBytes = bytes);
+    setState(() {
+      _imageBytes = bytes;
+      _imageExtension = extension;
+      _contentType = contentType;
+    });
   }
 
   Future<void> _showImageSourcePicker() async {
@@ -69,10 +83,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       if (_imageBytes != null) {
         final refPath = FirebaseStorage.instance
             .ref()
-            .child('avatars/${user.uid}.jpg');
+            .child('avatars/${user.uid}.$_imageExtension');
         await refPath.putData(
           _imageBytes!,
-          SettableMetadata(contentType: 'image/jpeg'),
+          SettableMetadata(contentType: _contentType),
         );
         final downloadUrl = await refPath.getDownloadURL();
         await ref.read(authControllerProvider.notifier).updateProfilePhoto(downloadUrl);

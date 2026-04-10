@@ -5,6 +5,7 @@ import '../../../household/domain/entities/member_entity.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
 import '../../../tasks/domain/entities/task_entity.dart';
 import '../../../tasks/presentation/controllers/task_controller.dart';
+import '../controllers/home_controller.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -25,6 +26,7 @@ class _DashboardTab extends ConsumerWidget {
         ? ref.watch(householdMembersProvider(household.id))
         : const AsyncValue<List<MemberEntity>>.data([]);
     final tasksAsync = ref.watch(tasksProvider);
+    final taskChecks = ref.watch(homeTaskChecksProvider);
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -100,7 +102,7 @@ class _DashboardTab extends ConsumerWidget {
                 children: tasks
                     .map(
                       (task) => CheckboxListTile(
-                        value: task.isCompleted,
+                        value: taskChecks[task.id] ?? task.isCompleted,
                         onChanged: (_) => _toggleTask(ref, task),
                         title: Text(task.title),
                       ),
