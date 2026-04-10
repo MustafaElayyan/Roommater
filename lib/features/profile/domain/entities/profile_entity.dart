@@ -8,6 +8,7 @@ class ProfileEntity {
     required this.displayName,
     required this.email,
     this.bio,
+    this.phone,
     this.photoUrl,
     this.age,
     this.occupation,
@@ -18,6 +19,7 @@ class ProfileEntity {
   final String displayName;
   final String email;
   final String? bio;
+  final String? phone;
   final String? photoUrl;
   final int? age;
   final String? occupation;

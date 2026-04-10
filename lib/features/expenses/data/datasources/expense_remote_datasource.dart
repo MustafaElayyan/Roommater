@@ -14,8 +14,9 @@ class ExpenseRemoteDataSource {
   Future<List<ExpenseModel>> getExpenses(String householdId) async {
     try {
       final snapshot = await _firestore
+          .collection('households')
+          .doc(householdId)
           .collection('expenses')
-          .where('householdId', isEqualTo: householdId)
           .orderBy('createdAt', descending: true)
           .get();
       return snapshot.docs.map(ExpenseModel.fromFirestore).toList();
@@ -33,7 +34,11 @@ class ExpenseRemoteDataSource {
     required List<ExpenseSplitModel> splits,
   }) async {
     try {
-      final ref = _firestore.collection('expenses').doc();
+      final ref = _firestore
+          .collection('households')
+          .doc(householdId)
+          .collection('expenses')
+          .doc();
       final model = ExpenseModel(
         id: ref.id,
         householdId: householdId,
@@ -53,12 +58,17 @@ class ExpenseRemoteDataSource {
   }
 
   Future<ExpenseModel> settleExpenseSplit(
+    String householdId,
     String expenseId, {
     required String userId,
     required bool isSettled,
   }) async {
     try {
-      final ref = _firestore.collection('expenses').doc(expenseId);
+      final ref = _firestore
+          .collection('households')
+          .doc(householdId)
+          .collection('expenses')
+          .doc(expenseId);
       final doc = await ref.get();
       if (!doc.exists) {
         throw const ApiException('Expense not found.');
@@ -95,9 +105,14 @@ class ExpenseRemoteDataSource {
     }
   }
 
-  Future<void> deleteExpense(String expenseId) async {
+  Future<void> deleteExpense(String householdId, String expenseId) async {
     try {
-      await _firestore.collection('expenses').doc(expenseId).delete();
+      await _firestore
+          .collection('households')
+          .doc(householdId)
+          .collection('expenses')
+          .doc(expenseId)
+          .delete();
     } on FirebaseException catch (e) {
       throw ApiException('Failed to delete expense.', e);
     }

@@ -11,7 +11,10 @@ class TaskEntity {
     required this.isCompleted,
     this.dueDate,
     required this.createdByUserId,
+    this.createdByName,
     this.assignedToUserId,
+    this.assignedToName,
+    this.completionNote,
     required this.createdAt,
   });
 
@@ -22,7 +25,10 @@ class TaskEntity {
   final bool isCompleted;
   final DateTime? dueDate;
   final String createdByUserId;
+  final String? createdByName;
   final String? assignedToUserId;
+  final String? assignedToName;
+  final String? completionNote;
   final DateTime createdAt;
 
   @override

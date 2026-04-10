@@ -164,6 +164,7 @@ class AuthRemoteDataSource {
       email: user.email ?? '',
       displayName: user.displayName,
       photoUrl: user.photoURL,
+      householdId: null,
     );
     await userDoc.set(fallback.toFirestore(), SetOptions(merge: true));
     final created = await userDoc.get();

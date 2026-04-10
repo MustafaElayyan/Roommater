@@ -12,8 +12,9 @@ class NotificationRemoteDataSource {
   Future<List<NotificationModel>> getNotifications(String recipientUserId) async {
     try {
       final snapshot = await _firestore
+          .collection('users')
+          .doc(recipientUserId)
           .collection('notifications')
-          .where('recipientUserId', isEqualTo: recipientUserId)
           .orderBy('createdAt', descending: true)
           .get();
       return snapshot.docs.map(NotificationModel.fromFirestore).toList();
@@ -32,7 +33,11 @@ class NotificationRemoteDataSource {
     String? referenceType,
   }) async {
     try {
-      final ref = _firestore.collection('notifications').doc();
+      final ref = _firestore
+          .collection('users')
+          .doc(recipientUserId)
+          .collection('notifications')
+          .doc();
       final model = NotificationModel(
         id: ref.id,
         recipientUserId: recipientUserId,
@@ -53,9 +58,14 @@ class NotificationRemoteDataSource {
     }
   }
 
-  Future<void> markAsRead(String notificationId) async {
+  Future<void> markAsRead(String recipientUserId, String notificationId) async {
     try {
-      await _firestore.collection('notifications').doc(notificationId).set({
+      await _firestore
+          .collection('users')
+          .doc(recipientUserId)
+          .collection('notifications')
+          .doc(notificationId)
+          .set({
         'isRead': true,
       }, SetOptions(merge: true));
     } on FirebaseException catch (e) {

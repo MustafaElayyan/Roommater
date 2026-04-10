@@ -30,6 +30,7 @@ class TaskRepositoryImpl implements TaskRepository {
     String? description,
     DateTime? dueDate,
     String? assignedToUserId,
+    String? assignedToName,
   }) {
     return _dataSource.createTask(
       householdId,
@@ -37,6 +38,7 @@ class TaskRepositoryImpl implements TaskRepository {
       description: description,
       dueDate: dueDate,
       assignedToUserId: assignedToUserId,
+      assignedToName: assignedToName,
     );
   }
 
@@ -49,6 +51,8 @@ class TaskRepositoryImpl implements TaskRepository {
     required bool isCompleted,
     DateTime? dueDate,
     String? assignedToUserId,
+    String? assignedToName,
+    String? completionNote,
   }) {
     return _dataSource.updateTask(
       householdId,
@@ -58,6 +62,8 @@ class TaskRepositoryImpl implements TaskRepository {
       isCompleted: isCompleted,
       dueDate: dueDate,
       assignedToUserId: assignedToUserId,
+      assignedToName: assignedToName,
+      completionNote: completionNote,
     );
   }
 

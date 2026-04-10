@@ -22,11 +22,40 @@ class ProfileRepositoryImpl implements ProfileRepository {
         displayName: profile.displayName,
         email: profile.email,
         bio: profile.bio,
+        phone: profile.phone,
         photoUrl: profile.photoUrl,
         age: profile.age,
         occupation: profile.occupation,
         location: profile.location,
       ),
+    );
+  }
+
+  @override
+  Future<String> updateProfilePhoto({
+    required String uid,
+    required List<int> bytes,
+    required String extension,
+    required String contentType,
+  }) {
+    return _dataSource.updateProfilePhoto(
+      uid: uid,
+      bytes: bytes,
+      extension: extension,
+      contentType: contentType,
+    );
+  }
+
+  @override
+  Future<void> changePassword({
+    required String email,
+    required String currentPassword,
+    required String newPassword,
+  }) {
+    return _dataSource.changePassword(
+      email: email,
+      currentPassword: currentPassword,
+      newPassword: newPassword,
     );
   }
 }

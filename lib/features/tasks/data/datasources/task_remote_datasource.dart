@@ -49,6 +49,7 @@ class TaskRemoteDataSource {
     String? description,
     DateTime? dueDate,
     String? assignedToUserId,
+    String? assignedToName,
   }) async {
     try {
       final taskRef = _firestore
@@ -56,6 +57,7 @@ class TaskRemoteDataSource {
           .doc(householdId)
           .collection('tasks')
           .doc();
+      final currentUser = _firebaseAuth.currentUser;
       final model = TaskModel(
         id: taskRef.id,
         householdId: householdId,
@@ -63,8 +65,11 @@ class TaskRemoteDataSource {
         description: description,
         isCompleted: false,
         dueDate: dueDate,
-        createdByUserId: _firebaseAuth.currentUser?.uid ?? 'guest',
+        createdByUserId: currentUser?.uid ?? 'guest',
+        createdByName: currentUser?.displayName ?? currentUser?.email,
         assignedToUserId: assignedToUserId,
+        assignedToName: assignedToName,
+        completionNote: null,
         createdAt: DateTime.now(),
       );
       await taskRef.set(model.toFirestore(), SetOptions(merge: true));
@@ -83,6 +88,8 @@ class TaskRemoteDataSource {
     required bool isCompleted,
     DateTime? dueDate,
     String? assignedToUserId,
+    String? assignedToName,
+    String? completionNote,
   }) async {
     try {
       final taskRef = _firestore
@@ -101,6 +108,14 @@ class TaskRemoteDataSource {
           'assignedToUserId': assignedToUserId
         else
           'assignedToUserId': null,
+        if (assignedToName != null)
+          'assignedToName': assignedToName
+        else
+          'assignedToName': null,
+        if (completionNote != null)
+          'completionNote': completionNote
+        else if (!isCompleted)
+          'completionNote': null,
       }, SetOptions(merge: true));
       final updated = await taskRef.get();
       return TaskModel.fromFirestore(updated);

@@ -14,8 +14,9 @@ class EventRemoteDataSource {
   Future<List<EventModel>> getEvents(String householdId) async {
     try {
       final snapshot = await _firestore
+          .collection('households')
+          .doc(householdId)
           .collection('events')
-          .where('householdId', isEqualTo: householdId)
           .orderBy('eventDate')
           .get();
       return snapshot.docs.map(EventModel.fromFirestore).toList();
@@ -34,7 +35,11 @@ class EventRemoteDataSource {
     required String eventType,
   }) async {
     try {
-      final ref = _firestore.collection('events').doc();
+      final ref = _firestore
+          .collection('households')
+          .doc(householdId)
+          .collection('events')
+          .doc();
       final model = EventModel(
         id: ref.id,
         householdId: householdId,
@@ -55,9 +60,14 @@ class EventRemoteDataSource {
     }
   }
 
-  Future<void> deleteEvent(String eventId) async {
+  Future<void> deleteEvent(String householdId, String eventId) async {
     try {
-      await _firestore.collection('events').doc(eventId).delete();
+      await _firestore
+          .collection('households')
+          .doc(householdId)
+          .collection('events')
+          .doc(eventId)
+          .delete();
     } on FirebaseException catch (e) {
       throw ApiException('Failed to delete event.', e);
     }

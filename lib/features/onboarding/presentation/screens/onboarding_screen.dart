@@ -27,7 +27,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _goToAuthChoice() {
-    context.push(AppRoutes.authChoice);
+    context.go(AppRoutes.login);
   }
 
   Widget _buildIllustration(int index) {

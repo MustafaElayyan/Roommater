@@ -9,6 +9,7 @@ class UserModel extends UserEntity {
     required super.email,
     super.displayName,
     super.photoUrl,
+    super.householdId,
   });
 
   factory UserModel.fromFirestore(
@@ -20,6 +21,7 @@ class UserModel extends UserEntity {
       email: data['email'] as String? ?? '',
       displayName: data['displayName'] as String?,
       photoUrl: data['photoUrl'] as String?,
+      householdId: data['householdId'] as String?,
     );
   }
 
@@ -29,6 +31,7 @@ class UserModel extends UserEntity {
       'email': email,
       if (displayName != null) 'displayName': displayName,
       if (photoUrl != null) 'photoUrl': photoUrl,
+      if (householdId != null) 'householdId': householdId,
     };
   }
 }

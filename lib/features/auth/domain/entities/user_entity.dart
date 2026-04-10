@@ -11,12 +11,14 @@ class UserEntity {
     required this.email,
     this.displayName,
     this.photoUrl,
+    this.householdId,
   });
 
   final String uid;
   final String email;
   final String? displayName;
   final String? photoUrl;
+  final String? householdId;
 
   @override
   bool operator ==(Object other) =>

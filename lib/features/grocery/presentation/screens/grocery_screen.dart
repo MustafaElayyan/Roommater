@@ -1,143 +1,195 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class GroceryScreen extends StatefulWidget {
+import '../../domain/entities/grocery_item_entity.dart';
+import '../controllers/grocery_controller.dart';
+
+class GroceryScreen extends ConsumerStatefulWidget {
   const GroceryScreen({super.key});
 
   @override
-  State<GroceryScreen> createState() => _GroceryScreenState();
+  ConsumerState<GroceryScreen> createState() => _GroceryScreenState();
 }
 
-class _GroceryScreenState extends State<GroceryScreen> {
-  final _controller = TextEditingController();
+class _GroceryScreenState extends ConsumerState<GroceryScreen>
+    with SingleTickerProviderStateMixin {
+  final _nameController = TextEditingController();
   final _qtyController = TextEditingController();
-  final List<Map<String, dynamic>> _toBuy = [];
-  final List<Map<String, dynamic>> _purchased = [];
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _nameController.dispose();
     _qtyController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
-  /// Parses quantity input and defaults to 1 for invalid or non-positive values.
-  int _parseQuantity(String text) {
-    final parsedQty = int.tryParse(text.trim());
-    if (parsedQty == null || parsedQty <= 0) {
-      return 1;
+  String? _validateName(String value) {
+    final name = value.trim();
+    if (name.isEmpty) {
+      return 'Item name is required.';
     }
-    return parsedQty;
+    if (!RegExp(r'[A-Za-z]').hasMatch(name)) {
+      return 'Item name must contain at least one letter.';
+    }
+    return null;
+  }
+
+  Future<void> _addItem() async {
+    final nameError = _validateName(_nameController.text);
+    if (nameError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(nameError)),
+      );
+      return;
+    }
+
+    final qty = int.tryParse(_qtyController.text.trim());
+    await ref.read(groceryControllerProvider.notifier).addItem(
+          name: _nameController.text.trim(),
+          quantity: (qty == null || qty <= 0) ? 1 : qty,
+        );
+    if (!mounted) return;
+    final state = ref.read(groceryControllerProvider);
+    if (state.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${state.error}')),
+      );
+      return;
+    }
+    _nameController.clear();
+    _qtyController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Row(
+    final toBuyAsync = ref.watch(toBuyGroceriesProvider);
+    final purchasedAsync = ref.watch(purchasedGroceriesProvider);
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
             children: [
               Expanded(
                 child: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(hintText: 'Add item'),
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    hintText: 'Item name',
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               SizedBox(
-                width: 60,
+                width: 72,
                 child: TextField(
                   controller: _qtyController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(hintText: 'Qty'),
+                  decoration: const InputDecoration(
+                    hintText: 'Qty',
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               FilledButton(
-                onPressed: () {
-                  if (_controller.text.trim().isEmpty) return;
-                  final qty = _parseQuantity(_qtyController.text);
-                  setState(() {
-                    _toBuy.add({
-                      'id': '${_controller.text.trim()}-${DateTime.now().microsecondsSinceEpoch}',
-                      'name': _controller.text.trim(),
-                      'qty': qty,
-                      'checked': false,
-                    });
-                    _controller.clear();
-                    _qtyController.clear();
-                  });
-                },
+                onPressed: _addItem,
                 child: const Text('Add'),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text('To Buy', style: Theme.of(context).textTheme.titleMedium),
-          if (_toBuy.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text('No grocery items yet'),
-            ),
-          ..._toBuy.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
+        ),
+        TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'To Buy'),
+            Tab(text: 'Purchased'),
+          ],
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _GroceryList(
+                itemsAsync: toBuyAsync,
+                isPurchasedList: false,
+              ),
+              _GroceryList(
+                itemsAsync: purchasedAsync,
+                isPurchasedList: true,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GroceryList extends ConsumerWidget {
+  const _GroceryList({
+    required this.itemsAsync,
+    required this.isPurchasedList,
+  });
+
+  final AsyncValue<List<GroceryItemEntity>> itemsAsync;
+  final bool isPurchasedList;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return itemsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(child: Text('Failed to load groceries: $error')),
+      data: (items) {
+        if (items.isEmpty) {
+          return Center(
+            child: Text(isPurchasedList ? 'No purchased items yet' : 'No grocery items yet'),
+          );
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
             return Dismissible(
-              key: ValueKey(item['id']),
-              onDismissed: (_) => setState(() => _toBuy.removeAt(index)),
+              key: ValueKey(item.id),
+              background: Container(
+                color: Colors.red.withOpacity(0.2),
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: const Icon(Icons.delete_outline),
+              ),
+              direction: DismissDirection.endToStart,
+              onDismissed: (_) {
+                ref.read(groceryControllerProvider.notifier).deleteItem(item.id);
+              },
               child: CheckboxListTile(
-                value: item['checked'] as bool,
-                onChanged: (value) => setState(() => item['checked'] = value),
-                title: Text(item['name'] as String),
-                secondary: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove),
-                      onPressed: () => setState(() {
-                        final currentQty = item['qty'] as int;
-                        item['qty'] = currentQty > 1 ? currentQty - 1 : 1;
-                      }),
-                    ),
-                    CircleAvatar(
-                      radius: 12,
-                      child: Text('${item['qty']}'),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: () => setState(() {
-                        final currentQty = item['qty'] as int;
-                        item['qty'] = currentQty + 1;
-                      }),
-                    ),
-                  ],
+                value: item.isPurchased,
+                onChanged: (_) {
+                  ref.read(groceryControllerProvider.notifier).togglePurchased(
+                        item.id,
+                        isPurchased: !item.isPurchased,
+                      );
+                },
+                title: Text(
+                  item.name,
+                  style: TextStyle(
+                    decoration: item.isPurchased ? TextDecoration.lineThrough : null,
+                  ),
                 ),
+                subtitle: Text('Qty: ${item.quantity}'),
               ),
             );
-          }),
-          const SizedBox(height: 16),
-          Text('Purchased', style: Theme.of(context).textTheme.titleMedium),
-          if (_purchased.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text('No purchased items yet'),
-            ),
-          ..._purchased.map(
-            (item) => CheckboxListTile(
-              value: item['checked'] as bool,
-              onChanged: (value) => setState(() => item['checked'] = value),
-              title: Text(
-                item['name'] as String,
-                style: const TextStyle(decoration: TextDecoration.lineThrough),
-              ),
-              secondary: CircleAvatar(
-                radius: 12,
-                child: Text('${item['qty']}'),
-              ),
-            ),
-          ),
-        ],
-      ),
+          },
+        );
+      },
     );
   }
 }

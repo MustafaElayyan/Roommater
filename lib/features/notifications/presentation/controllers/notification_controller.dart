@@ -46,9 +46,12 @@ class NotificationController extends AsyncNotifier<void> {
   Future<void> build() async {}
 
   Future<void> markAsRead(String notificationId) async {
+    final userId = ref.read(authStateProvider).valueOrNull?.uid;
+    if (userId == null) return;
+
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(_markNotificationReadUseCaseProvider)(notificationId);
+      await ref.read(_markNotificationReadUseCaseProvider)(userId, notificationId);
       ref.invalidate(notificationsProvider);
     });
   }

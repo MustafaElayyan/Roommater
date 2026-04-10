@@ -12,7 +12,10 @@ class TaskModel extends TaskEntity {
     required super.isCompleted,
     super.dueDate,
     required super.createdByUserId,
+    super.createdByName,
     super.assignedToUserId,
+    super.assignedToName,
+    super.completionNote,
     required super.createdAt,
   });
 
@@ -27,7 +30,10 @@ class TaskModel extends TaskEntity {
           ? DateTime.parse(data['dueDate'] as String)
           : null,
       createdByUserId: data['createdByUserId'] as String? ?? '',
+      createdByName: data['createdByName'] as String?,
       assignedToUserId: data['assignedToUserId'] as String?,
+      assignedToName: data['assignedToName'] as String?,
+      completionNote: data['completionNote'] as String?,
       createdAt: DateTime.parse(
         data['createdAt'] as String? ?? DateTime.now().toIso8601String(),
       ),
@@ -53,7 +59,10 @@ class TaskModel extends TaskEntity {
         _ => null,
       },
       createdByUserId: data['createdByUserId'] as String? ?? '',
+      createdByName: data['createdByName'] as String?,
       assignedToUserId: data['assignedToUserId'] as String?,
+      assignedToName: data['assignedToName'] as String?,
+      completionNote: data['completionNote'] as String?,
       createdAt: switch (createdAtRaw) {
         Timestamp() => createdAtRaw.toDate(),
         String() => DateTime.tryParse(createdAtRaw) ?? DateTime.now(),
@@ -71,7 +80,10 @@ class TaskModel extends TaskEntity {
       'isCompleted': isCompleted,
       if (dueDate != null) 'dueDate': dueDate!.toIso8601String(),
       'createdByUserId': createdByUserId,
+      if (createdByName != null) 'createdByName': createdByName,
       if (assignedToUserId != null) 'assignedToUserId': assignedToUserId,
+      if (assignedToName != null) 'assignedToName': assignedToName,
+      if (completionNote != null) 'completionNote': completionNote,
       'createdAt': createdAt.toIso8601String(),
     };
   }
@@ -85,7 +97,10 @@ class TaskModel extends TaskEntity {
       'isCompleted': isCompleted,
       if (dueDate != null) 'dueDate': Timestamp.fromDate(dueDate!),
       'createdByUserId': createdByUserId,
+      if (createdByName != null) 'createdByName': createdByName,
       if (assignedToUserId != null) 'assignedToUserId': assignedToUserId,
+      if (assignedToName != null) 'assignedToName': assignedToName,
+      if (completionNote != null) 'completionNote': completionNote,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }

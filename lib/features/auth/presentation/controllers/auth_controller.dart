@@ -41,6 +41,8 @@ final _sendPasswordResetUseCaseProvider = Provider<SendPasswordResetUseCase>((re
   return SendPasswordResetUseCase(ref.watch(authRepositoryProvider));
 });
 
+final rememberMeProvider = StateProvider<bool>((ref) => true);
+
 /// Emits the current [UserEntity] or `null` when no user is signed in.
 final authStateProvider = StreamProvider<UserEntity?>((ref) {
   return ref.watch(authRepositoryProvider).authStateChanges;

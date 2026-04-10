@@ -13,10 +13,11 @@ abstract interface class ExpenseRepository {
   });
 
   Future<ExpenseEntity> settleExpenseSplit(
+    String householdId,
     String expenseId, {
     required String userId,
     required bool isSettled,
   });
 
-  Future<void> deleteExpense(String expenseId);
+  Future<void> deleteExpense(String householdId, String expenseId);
 }

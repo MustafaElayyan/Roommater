@@ -5,7 +5,7 @@ class DeleteEventUseCase {
 
   final EventRepository _repository;
 
-  Future<void> call(String eventId) {
-    return _repository.deleteEvent(eventId);
+  Future<void> call(String householdId, String eventId) {
+    return _repository.deleteEvent(householdId, eventId);
   }
 }

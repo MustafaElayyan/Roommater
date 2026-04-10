@@ -18,6 +18,7 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   String? _selectedMemberUid;
+  String? _selectedMemberName;
   DateTime? _date;
   TimeOfDay? _time;
   bool _isSubmitting = false;
@@ -53,6 +54,7 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
               : _descController.text.trim(),
           dueDate: dueDate,
           assignedToUserId: _selectedMemberUid,
+          assignedToName: _selectedMemberName,
         );
 
     if (!mounted) return;
@@ -120,7 +122,17 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
                   ),
                 ],
                 onChanged: (value) {
-                  setState(() => _selectedMemberUid = value);
+                  setState(() {
+                    _selectedMemberUid = value;
+                    String? selectedName;
+                    for (final member in members) {
+                      if (member.uid == value) {
+                        selectedName = member.displayName;
+                        break;
+                      }
+                    }
+                    _selectedMemberName = selectedName;
+                  });
                 },
               ),
             ),
