@@ -7,6 +7,8 @@ import '../../../events/domain/entities/event_entity.dart';
 import '../../../events/presentation/controllers/event_controller.dart';
 import '../../../household/domain/entities/member_entity.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
+import '../../../notifications/domain/entities/notification_entity.dart';
+import '../../../notifications/presentation/controllers/notification_controller.dart';
 import '../../../tasks/domain/entities/task_entity.dart';
 import '../../../tasks/presentation/controllers/task_controller.dart';
 import '../controllers/home_controller.dart';
@@ -31,6 +33,7 @@ class _DashboardTab extends ConsumerWidget {
         : const AsyncValue<List<MemberEntity>>.data([]);
     final tasksAsync = ref.watch(tasksProvider);
     final eventsAsync = ref.watch(eventsProvider);
+    final notificationsAsync = ref.watch(notificationsProvider);
     final taskChecks = ref.watch(homeTaskChecksProvider);
     final currentUid = ref.watch(authStateProvider).valueOrNull?.uid;
 
@@ -174,12 +177,50 @@ class _DashboardTab extends ConsumerWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text('No notifications yet'),
+          child: notificationsAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (error, _) => Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('Failed to load notifications: $error'),
+            ),
+            data: (notifications) {
+              if (notifications.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('No notifications yet'),
+                );
+              }
+              final recentNotifications = notifications.take(3).toList();
+              return Column(
+                children: recentNotifications
+                    .map((notification) => _buildNotificationTile(ref, notification))
+                    .toList(),
+              );
+            },
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildNotificationTile(WidgetRef ref, NotificationEntity notification) {
+    return ListTile(
+      tileColor: notification.isRead ? null : Colors.blue.withValues(alpha: 0.08),
+      title: Text(notification.title),
+      subtitle: notification.body == null ? null : Text(notification.body!),
+      trailing: notification.isRead
+          ? const Icon(Icons.done_all, size: 18)
+          : const Icon(Icons.mark_email_unread_outlined, size: 18),
+      onTap: notification.isRead
+          ? null
+          : () {
+              ref
+                  .read(notificationControllerProvider.notifier)
+                  .markAsRead(notification.id);
+            },
     );
   }
 

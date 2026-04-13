@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/errors/app_exception.dart';
 import '../models/profile_model.dart';
@@ -57,17 +58,10 @@ class ProfileRemoteDataSource {
     try {
       final normalizedExtension = extension.toLowerCase();
       const possibleExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-      await Future.wait(
-        possibleExtensions
-            .where((ext) => ext != normalizedExtension)
-            .map((ext) async {
-              try {
-                await _firebaseStorage.ref().child('avatars/$uid.$ext').delete();
-              } catch (_) {
-                // Ignore if an old avatar path does not exist.
-              }
-            }),
-      );
+      for (final ext in possibleExtensions) {
+        if (ext == normalizedExtension) continue;
+        await _deleteAvatarIfExists(uid, ext);
+      }
 
       final ref = _firebaseStorage.ref().child('avatars/$uid.$normalizedExtension');
       final data = Uint8List.fromList(bytes);
@@ -99,6 +93,16 @@ class ProfileRemoteDataSource {
       throw ApiException(e.message ?? 'Failed to update profile photo.', e);
     } on Exception catch (e) {
       throw ApiException('Failed to update profile photo.', e);
+    }
+  }
+
+  Future<void> _deleteAvatarIfExists(String uid, String extension) async {
+    try {
+      await _firebaseStorage.ref().child('avatars/$uid.$extension').delete();
+    } on FirebaseException catch (e) {
+      if (e.code != 'object-not-found') rethrow;
+    } on PlatformException catch (e) {
+      if (e.code != 'object-not-found') rethrow;
     }
   }
 
