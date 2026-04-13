@@ -84,16 +84,11 @@ class TaskController extends AsyncNotifier<void> {
           assignedToUserId.isNotEmpty &&
           assignedToUserId != createdTask.createdByUserId) {
         final currentUser = ref.read(authStateProvider).valueOrNull;
-        final displayName = currentUser?.displayName?.trim();
-        final email = currentUser?.email?.trim();
-        final createdByName = createdTask.createdByName?.trim();
-        final assignerName = (displayName != null && displayName.isNotEmpty)
-            ? displayName
-            : (email != null && email.isNotEmpty)
-                ? email
-                : (createdByName != null && createdByName.isNotEmpty)
-                    ? createdByName
-                    : 'A roommate';
+        final assignerName = _resolveAssignerName(
+          displayName: currentUser?.displayName,
+          email: currentUser?.email,
+          createdByName: createdTask.createdByName,
+        );
         await ref.read(notificationControllerProvider.notifier).createNotification(
               recipientUserId: assignedToUserId,
               householdId: household.id,
@@ -106,6 +101,29 @@ class TaskController extends AsyncNotifier<void> {
       }
       ref.invalidate(tasksProvider);
     });
+  }
+
+  String _resolveAssignerName({
+    String? displayName,
+    String? email,
+    String? createdByName,
+  }) {
+    final trimmedDisplayName = displayName?.trim();
+    if (trimmedDisplayName != null && trimmedDisplayName.isNotEmpty) {
+      return trimmedDisplayName;
+    }
+
+    final trimmedEmail = email?.trim();
+    if (trimmedEmail != null && trimmedEmail.isNotEmpty) {
+      return trimmedEmail;
+    }
+
+    final trimmedCreatedByName = createdByName?.trim();
+    if (trimmedCreatedByName != null && trimmedCreatedByName.isNotEmpty) {
+      return trimmedCreatedByName;
+    }
+
+    return 'A roommate';
   }
 
   Future<void> updateTask({
