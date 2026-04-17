@@ -30,6 +30,15 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
     super.dispose();
   }
 
+  void _resetForm() {
+    _titleController.clear();
+    _descController.clear();
+    _selectedMemberUid = null;
+    _selectedMemberName = null;
+    _date = null;
+    _time = null;
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -66,7 +75,19 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
         SnackBar(content: Text('Error: ${controllerState.error}')),
       );
     } else {
-      context.pop();
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        if (mounted) {
+          setState(() {
+            _isSubmitting = false;
+            _resetForm();
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Task created successfully')),
+          );
+        }
+      }
     }
   }
 
@@ -82,7 +103,11 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
         title: const Text('Create Task'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            }
+          },
         ),
       ),
       body: Form(

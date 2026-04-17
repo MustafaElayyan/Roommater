@@ -31,6 +31,14 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
     super.dispose();
   }
 
+  void _resetForm(List<MemberEntity> members) {
+    _titleController.clear();
+    _amountController.clear();
+    _categoryController.clear();
+    _splitAmong.clear();
+    _payer = members.isEmpty ? null : members.first.uid;
+  }
+
   @override
   Widget build(BuildContext context) {
     final household = ref.watch(currentHouseholdProvider);
@@ -48,7 +56,11 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
         title: const Text('Create Expense'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            }
+          },
         ),
       ),
       body: membersAsync.when(
@@ -188,6 +200,18 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
       );
       return;
     }
-    context.pop();
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+          _resetForm(members);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Expense created successfully')),
+        );
+      }
+    }
   }
 }

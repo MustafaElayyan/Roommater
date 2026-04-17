@@ -29,6 +29,15 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
     super.dispose();
   }
 
+  void _resetForm() {
+    _titleController.clear();
+    _descController.clear();
+    _locationController.clear();
+    _date = null;
+    _time = null;
+    _type = 'meeting';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,7 +45,11 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
         title: const Text('Create Event'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            }
+          },
         ),
       ),
       body: Form(
@@ -158,6 +171,18 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
       );
       return;
     }
-    context.pop();
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+          _resetForm();
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Event created successfully')),
+        );
+      }
+    }
   }
 }
