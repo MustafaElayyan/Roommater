@@ -113,7 +113,7 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
     final normalizedCurrentUserEmail =
         (currentUserEmail != null && currentUserEmail.isNotEmpty)
             ? currentUserEmail
-            : currentUser?.uid ?? 'current-user';
+            : '';
     final currentUserLabel = (currentUserName != null && currentUserName.isNotEmpty)
         ? currentUserName
         : (currentUserEmail != null && currentUserEmail.isNotEmpty)

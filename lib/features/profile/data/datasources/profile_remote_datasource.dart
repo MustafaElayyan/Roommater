@@ -22,6 +22,9 @@ class ProfileRemoteDataSource {
   static const int _downloadUrlRetryAttempts = 6;
   static const int _downloadUrlRetryBaseDelayMs = 400;
   static const String _objectNotFoundCode = 'object-not-found';
+  static final RegExp _objectNotFoundTokenPattern = RegExp(
+    r'(^|[^a-z0-9-])object-not-found([^a-z0-9-]|$)',
+  );
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _firebaseAuth;
@@ -136,9 +139,7 @@ class ProfileRemoteDataSource {
   }
 
   bool _containsObjectNotFoundToken(String value) {
-    return RegExp(
-      r'(^|[^a-z0-9-])object-not-found([^a-z0-9-]|$)',
-    ).hasMatch(value);
+    return _objectNotFoundTokenPattern.hasMatch(value);
   }
 
   Future<String> _getDownloadUrlWithRetry(
