@@ -119,7 +119,12 @@ class ProfileRemoteDataSource {
     String? message,
     String? details,
   }) {
-    if (code == 'object-not-found' || code.endsWith('/object-not-found')) {
+    const objectNotFoundCodes = {
+      'object-not-found',
+      'storage/object-not-found',
+      'firebase_storage/object-not-found',
+    };
+    if (objectNotFoundCodes.contains(code)) {
       return true;
     }
 

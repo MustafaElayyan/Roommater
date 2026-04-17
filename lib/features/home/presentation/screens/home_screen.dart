@@ -105,7 +105,7 @@ class _DashboardTab extends ConsumerWidget {
               if (todaysTasks.isEmpty) {
                 return const Padding(
                   padding: EdgeInsets.all(16),
-                  child: Text('No tasks scheduled for today'),
+                  child: Text('No tasks due today'),
                 );
               }
               return Column(
