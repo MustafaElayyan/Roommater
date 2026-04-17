@@ -109,7 +109,11 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
         : const AsyncValue<List<MemberEntity>>.data([]);
     final currentUser = ref.watch(authStateProvider).valueOrNull;
     final currentUserName = currentUser?.displayName?.trim();
-    final currentUserEmail = currentUser?.email.trim();
+    final currentUserEmail = currentUser?.email?.trim();
+    final normalizedCurrentUserEmail =
+        (currentUserEmail != null && currentUserEmail.isNotEmpty)
+            ? currentUserEmail
+            : 'no-email@roommater.local';
     final currentUserLabel = (currentUserName != null && currentUserName.isNotEmpty)
         ? currentUserName
         : (currentUserEmail != null && currentUserEmail.isNotEmpty)
@@ -161,7 +165,7 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
                     MemberEntity(
                       uid: uid,
                       displayName: currentUserLabel,
-                      email: currentUser?.email ?? '',
+                      email: normalizedCurrentUserEmail,
                       photoUrl: currentUser?.photoUrl,
                     ),
                   );
