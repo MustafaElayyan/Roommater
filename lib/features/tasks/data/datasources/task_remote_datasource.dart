@@ -15,7 +15,6 @@ class TaskRemoteDataSource {
   Stream<List<TaskModel>> watchTasks(
     String householdId, {
     bool? myTasks,
-    int? page,
     int? pageSize,
   }) {
     try {
@@ -39,9 +38,17 @@ class TaskRemoteDataSource {
       return query
           .snapshots()
           .map((snapshot) => snapshot.docs.map(TaskModel.fromFirestore).toList())
-          .handleError((error) {
-        throw ApiException('Failed to load tasks.', error);
-      });
+          .transform(
+            StreamTransformer<List<TaskModel>, List<TaskModel>>.fromHandlers(
+              handleError: (error, stackTrace, sink) {
+                if (error is FirebaseException) {
+                  sink.addError(ApiException('Failed to load tasks.', error), stackTrace);
+                  return;
+                }
+                sink.addError(error, stackTrace);
+              },
+            ),
+          );
     } on FirebaseException catch (e) {
       throw ApiException('Failed to load tasks.', e);
     }

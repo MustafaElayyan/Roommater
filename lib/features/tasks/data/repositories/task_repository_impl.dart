@@ -12,13 +12,11 @@ class TaskRepositoryImpl implements TaskRepository {
   Stream<List<TaskEntity>> watchTasks(
     String householdId, {
     bool? myTasks,
-    int? page,
     int? pageSize,
   }) {
     return _dataSource.watchTasks(
       householdId,
       myTasks: myTasks,
-      page: page,
       pageSize: pageSize,
     );
   }
