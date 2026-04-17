@@ -114,7 +114,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go(AppRoutes.createTask),
+        onPressed: () => context.push(AppRoutes.createTask),
         child: const Icon(Icons.add),
       ),
     );

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/router/app_routes.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
 import '../../../household/domain/entities/member_entity.dart';
 import '../controllers/task_controller.dart';
@@ -22,6 +24,14 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
   DateTime? _date;
   TimeOfDay? _time;
   bool _isSubmitting = false;
+
+  void _handleBackNavigation() {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    context.go(AppRoutes.tasks);
+  }
 
   @override
   void dispose() {
@@ -97,72 +107,103 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
     final membersAsync = household != null
         ? ref.watch(householdMembersProvider(household.id))
         : const AsyncValue<List<MemberEntity>>.data([]);
+    final currentUser = ref.watch(authStateProvider).valueOrNull;
+    final currentUserName = currentUser?.displayName?.trim();
+    final currentUserEmail = currentUser?.email?.trim();
+    final normalizedCurrentUserEmail =
+        (currentUserEmail != null && currentUserEmail.isNotEmpty)
+            ? currentUserEmail
+            : '';
+    final currentUserLabel = (currentUserName != null && currentUserName.isNotEmpty)
+        ? currentUserName
+        : (currentUserEmail != null && currentUserEmail.isNotEmpty)
+            ? currentUserEmail
+            : 'You';
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Task'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            }
-          },
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _handleBackNavigation();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Create Task'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _handleBackNavigation,
+          ),
         ),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            TextFormField(
+        body: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              TextFormField(
               controller: _titleController,
               decoration: const InputDecoration(labelText: 'Title'),
               validator: (value) =>
                   (value == null || value.trim().isEmpty) ? 'Title is required' : null,
             ),
-            const SizedBox(height: 12),
-            TextField(
+              const SizedBox(height: 12),
+              TextField(
               controller: _descController,
               maxLines: 3,
               decoration: const InputDecoration(labelText: 'Description'),
             ),
-            const SizedBox(height: 12),
-            membersAsync.when(
+              const SizedBox(height: 12),
+              membersAsync.when(
               loading: () => const LinearProgressIndicator(),
               error: (e, _) => Text('Failed to load members: $e'),
-              data: (members) => DropdownButtonFormField<String>(
-                value: _selectedMemberUid,
-                decoration: const InputDecoration(labelText: 'Assign Member'),
-                items: [
-                  const DropdownMenuItem<String>(
-                    value: null,
-                    child: Text('Unassigned'),
-                  ),
-                  ...members.map(
-                    (m) => DropdownMenuItem<String>(
-                      value: m.uid,
-                      child: Text(m.displayName),
+              data: (members) {
+                final assignableMembers = <MemberEntity>[...members];
+                final uid = currentUser?.uid;
+                final hasCurrentUser = uid != null && members.any((member) => member.uid == uid);
+                if (uid != null && !hasCurrentUser) {
+                  assignableMembers.add(
+                    MemberEntity(
+                      uid: uid,
+                      displayName: currentUserLabel,
+                      email: normalizedCurrentUserEmail,
+                      photoUrl: currentUser?.photoUrl,
                     ),
-                  ),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _selectedMemberUid = value;
-                    String? selectedName;
-                    for (final member in members) {
-                      if (member.uid == value) {
-                        selectedName = member.displayName;
-                        break;
+                  );
+                }
+
+                return DropdownButtonFormField<String>(
+                  value: _selectedMemberUid,
+                  decoration: const InputDecoration(labelText: 'Assign Member'),
+                  items: [
+                    const DropdownMenuItem<String>(
+                      value: null,
+                      child: Text('Unassigned'),
+                    ),
+                    ...assignableMembers.map(
+                      (m) => DropdownMenuItem<String>(
+                        value: m.uid,
+                        child: Text(m.displayName),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedMemberUid = value;
+                      String? selectedName;
+                      for (final member in assignableMembers) {
+                        if (member.uid == value) {
+                          selectedName = member.displayName;
+                          break;
+                        }
                       }
-                    }
-                    _selectedMemberName = selectedName;
-                  });
-                },
+                      _selectedMemberName = selectedName;
+                    });
+                  },
+                );
+              },
               ),
-            ),
-            const SizedBox(height: 12),
-            ListTile(
+              const SizedBox(height: 12),
+              ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(_date == null
                   ? 'Pick date'
@@ -179,7 +220,7 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
                 if (picked != null) setState(() => _date = picked);
               },
             ),
-            ListTile(
+              ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(_time == null
                   ? 'Pick time'
@@ -194,8 +235,8 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
                 if (picked != null) setState(() => _time = picked);
               },
             ),
-            const SizedBox(height: 24),
-            FilledButton(
+              const SizedBox(height: 24),
+              FilledButton(
               onPressed: _isSubmitting ? null : _submit,
               child: _isSubmitting
                   ? const SizedBox(
@@ -204,8 +245,9 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Text('Submit'),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

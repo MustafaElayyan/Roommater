@@ -21,6 +21,10 @@ class ProfileRemoteDataSource {
   // allows up to ~8.4s total backoff (0.4 + 0.8 + ... + 2.0) before failing.
   static const int _downloadUrlRetryAttempts = 6;
   static const int _downloadUrlRetryBaseDelayMs = 400;
+  static const String _objectNotFoundCode = 'object-not-found';
+  static final RegExp _objectNotFoundTokenPattern = RegExp(
+    r'(^|[^a-z0-9-])object-not-found([^a-z0-9-]|$)',
+  );
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _firebaseAuth;
@@ -100,10 +104,42 @@ class ProfileRemoteDataSource {
     try {
       await _firebaseStorage.ref().child('avatars/$uid.$extension').delete();
     } on FirebaseException catch (e) {
-      if (e.code != 'object-not-found') rethrow;
+      if (!_isObjectNotFoundError(code: e.code, message: e.message)) {
+        rethrow;
+      }
     } on PlatformException catch (e) {
-      if (e.code != 'object-not-found') rethrow;
+      if (!_isObjectNotFoundError(
+        code: e.code,
+        message: e.message,
+        details: e.details?.toString(),
+      )) {
+        rethrow;
+      }
     }
+  }
+
+  bool _isObjectNotFoundError({
+    required String code,
+    String? message,
+    String? details,
+  }) {
+    const objectNotFoundCodes = {
+      _objectNotFoundCode,
+      'storage/$_objectNotFoundCode',
+      'firebase_storage/$_objectNotFoundCode',
+    };
+    if (objectNotFoundCodes.contains(code)) {
+      return true;
+    }
+
+    final normalizedMessage = (message ?? '').toLowerCase();
+    final normalizedDetails = (details ?? '').toLowerCase();
+    return _containsObjectNotFoundToken(normalizedMessage) ||
+        _containsObjectNotFoundToken(normalizedDetails);
+  }
+
+  bool _containsObjectNotFoundToken(String value) {
+    return _objectNotFoundTokenPattern.hasMatch(value);
   }
 
   Future<String> _getDownloadUrlWithRetry(
