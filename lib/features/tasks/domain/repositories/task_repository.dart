@@ -3,7 +3,7 @@ import '../entities/task_entity.dart';
 /// Contract for task operations.
 abstract interface class TaskRepository {
   /// Returns tasks for the household with [householdId].
-  Future<List<TaskEntity>> getTasks(
+  Stream<List<TaskEntity>> watchTasks(
     String householdId, {
     bool? myTasks,
     int? page,

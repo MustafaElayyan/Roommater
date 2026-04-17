@@ -7,13 +7,13 @@ class GetTasksUseCase {
 
   final TaskRepository _repository;
 
-  Future<List<TaskEntity>> call(
+  Stream<List<TaskEntity>> call(
     String householdId, {
     bool? myTasks,
     int? page,
     int? pageSize,
   }) =>
-      _repository.getTasks(
+      _repository.watchTasks(
         householdId,
         myTasks: myTasks,
         page: page,

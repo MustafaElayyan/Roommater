@@ -12,6 +12,41 @@ class TaskRemoteDataSource {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _firebaseAuth;
 
+  Stream<List<TaskModel>> watchTasks(
+    String householdId, {
+    bool? myTasks,
+    int? page,
+    int? pageSize,
+  }) {
+    try {
+      Query<Map<String, dynamic>> query = _firestore
+          .collection('households')
+          .doc(householdId)
+          .collection('tasks')
+          .orderBy('createdAt', descending: true);
+
+      if (myTasks == true) {
+        final uid = _firebaseAuth.currentUser?.uid;
+        if (uid != null) {
+          query = query.where('assignedToUserId', isEqualTo: uid);
+        }
+      }
+
+      if (pageSize != null && pageSize > 0) {
+        query = query.limit(pageSize);
+      }
+
+      return query
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map(TaskModel.fromFirestore).toList())
+          .handleError((error) {
+        throw ApiException('Failed to load tasks.', error);
+      });
+    } on FirebaseException catch (e) {
+      throw ApiException('Failed to load tasks.', e);
+    }
+  }
+
   Future<List<TaskModel>> getTasks(
     String householdId, {
     bool? myTasks,
