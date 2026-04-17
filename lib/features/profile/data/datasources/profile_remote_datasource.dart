@@ -100,11 +100,11 @@ class ProfileRemoteDataSource {
     try {
       await _firebaseStorage.ref().child('avatars/$uid.$extension').delete();
     } on FirebaseException catch (e) {
-      if (!_isObjectNotFoundStorageError(code: e.code, message: e.message)) {
+      if (!_isObjectNotFoundError(code: e.code, message: e.message)) {
         rethrow;
       }
     } on PlatformException catch (e) {
-      if (!_isObjectNotFoundStorageError(
+      if (!_isObjectNotFoundError(
         code: e.code,
         message: e.message,
         details: e.details?.toString(),
@@ -114,7 +114,7 @@ class ProfileRemoteDataSource {
     }
   }
 
-  bool _isObjectNotFoundStorageError({
+  bool _isObjectNotFoundError({
     required String code,
     String? message,
     String? details,

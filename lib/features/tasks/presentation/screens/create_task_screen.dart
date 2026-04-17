@@ -111,7 +111,7 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
     final currentUserName = currentUser?.displayName?.trim();
     final currentUserLabel = (currentUserName != null && currentUserName.isNotEmpty)
         ? currentUserName
-        : currentUser?.email ?? 'You';
+        : currentUser?.email ?? 'Me (current user)';
 
     return PopScope(
       canPop: false,
