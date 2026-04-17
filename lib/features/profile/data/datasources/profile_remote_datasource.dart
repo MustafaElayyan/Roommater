@@ -100,10 +100,33 @@ class ProfileRemoteDataSource {
     try {
       await _firebaseStorage.ref().child('avatars/$uid.$extension').delete();
     } on FirebaseException catch (e) {
-      if (e.code != 'object-not-found') rethrow;
+      if (!_isObjectNotFoundStorageError(code: e.code, message: e.message)) {
+        rethrow;
+      }
     } on PlatformException catch (e) {
-      if (e.code != 'object-not-found') rethrow;
+      if (!_isObjectNotFoundStorageError(
+        code: e.code,
+        message: e.message,
+        details: e.details?.toString(),
+      )) {
+        rethrow;
+      }
     }
+  }
+
+  bool _isObjectNotFoundStorageError({
+    required String code,
+    String? message,
+    String? details,
+  }) {
+    if (code == 'object-not-found' || code.endsWith('/object-not-found')) {
+      return true;
+    }
+
+    final normalizedMessage = (message ?? '').toLowerCase();
+    final normalizedDetails = (details ?? '').toLowerCase();
+    return normalizedMessage.contains('object-not-found') ||
+        normalizedDetails.contains('object-not-found');
   }
 
   Future<String> _getDownloadUrlWithRetry(

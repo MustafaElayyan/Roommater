@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/router/app_routes.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../controllers/expense_controller.dart';
 import '../../../household/domain/entities/member_entity.dart';
@@ -22,6 +23,14 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
   final _splitAmong = <String>{};
   String? _payer;
   bool _isSubmitting = false;
+
+  void _handleBackNavigation() {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    context.go(AppRoutes.expenses);
+  }
 
   @override
   void dispose() {
@@ -51,40 +60,43 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
         ? (amount / _splitAmong.length).toStringAsFixed(2)
         : '0.00';
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Expense'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            }
-          },
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _handleBackNavigation();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Create Expense'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _handleBackNavigation,
+          ),
         ),
-      ),
-      body: membersAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Failed to load members: $error')),
-        data: (members) {
-          if (members.isEmpty) {
-            return const Center(
-              child: Text('No members found. Join or create a household first.'),
-            );
-          }
-          _payer ??= members.first.uid;
-          return Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                TextFormField(
-                  controller: _titleController,
-                  decoration: const InputDecoration(labelText: 'Title'),
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'Title is required'
-                      : null,
-                ),
+        body: membersAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(child: Text('Failed to load members: $error')),
+          data: (members) {
+            if (members.isEmpty) {
+              return const Center(
+                child: Text('No members found. Join or create a household first.'),
+              );
+            }
+            _payer ??= members.first.uid;
+            return Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: const InputDecoration(labelText: 'Title'),
+                    validator: (value) => (value == null || value.trim().isEmpty)
+                        ? 'Title is required'
+                        : null,
+                  ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _amountController,
@@ -154,10 +166,11 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
                     : null,
                 child: const Text('Create Expense'),
               ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

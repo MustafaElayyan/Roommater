@@ -101,14 +101,15 @@ class _DashboardTab extends ConsumerWidget {
               child: Text('Failed to load tasks: $error'),
             ),
             data: (tasks) {
-              if (tasks.isEmpty) {
+              final todaysTasks = _todayTasks(tasks);
+              if (todaysTasks.isEmpty) {
                 return const Padding(
                   padding: EdgeInsets.all(16),
-                  child: Text('No tasks yet'),
+                  child: Text('No tasks scheduled for today'),
                 );
               }
               return Column(
-                children: tasks
+                children: todaysTasks
                     .map(
                       (task) => CheckboxListTile(
                         value: taskChecks[task.id] ?? task.isCompleted,
@@ -279,6 +280,17 @@ class _DashboardTab extends ConsumerWidget {
         .toList()
       ..sort((a, b) => a.eventDate.compareTo(b.eventDate));
     return upcoming.take(3).toList();
+  }
+
+  List<TaskEntity> _todayTasks(List<TaskEntity> tasks) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return tasks.where((task) {
+      final dueDate = task.dueDate;
+      if (dueDate == null) return false;
+      final dueDay = DateTime(dueDate.year, dueDate.month, dueDate.day);
+      return dueDay == today;
+    }).toList();
   }
 
   String _eventSubtitle(EventEntity event) {

@@ -87,7 +87,7 @@ class ExpensesScreen extends ConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go(AppRoutes.createExpense),
+        onPressed: () => context.push(AppRoutes.createExpense),
         child: const Icon(Icons.add),
       ),
     );
