@@ -131,8 +131,14 @@ class ProfileRemoteDataSource {
 
     final normalizedMessage = (message ?? '').toLowerCase();
     final normalizedDetails = (details ?? '').toLowerCase();
-    return normalizedMessage.contains(_objectNotFoundCode) ||
-        normalizedDetails.contains(_objectNotFoundCode);
+    return _containsObjectNotFoundToken(normalizedMessage) ||
+        _containsObjectNotFoundToken(normalizedDetails);
+  }
+
+  bool _containsObjectNotFoundToken(String value) {
+    return RegExp(
+      r'(^|[^a-z0-9-])object-not-found([^a-z0-9-]|$)',
+    ).hasMatch(value);
   }
 
   Future<String> _getDownloadUrlWithRetry(
