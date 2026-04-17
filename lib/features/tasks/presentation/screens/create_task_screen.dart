@@ -30,6 +30,15 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
     super.dispose();
   }
 
+  void _resetForm() {
+    _titleController.clear();
+    _descController.clear();
+    _selectedMemberUid = null;
+    _selectedMemberName = null;
+    _date = null;
+    _time = null;
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -72,12 +81,7 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
         if (mounted) {
           setState(() {
             _isSubmitting = false;
-            _titleController.clear();
-            _descController.clear();
-            _selectedMemberUid = null;
-            _selectedMemberName = null;
-            _date = null;
-            _time = null;
+            _resetForm();
           });
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Task created successfully')),
