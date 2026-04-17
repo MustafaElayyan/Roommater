@@ -21,6 +21,7 @@ class ProfileRemoteDataSource {
   // allows up to ~8.4s total backoff (0.4 + 0.8 + ... + 2.0) before failing.
   static const int _downloadUrlRetryAttempts = 6;
   static const int _downloadUrlRetryBaseDelayMs = 400;
+  static const String _objectNotFoundCode = 'object-not-found';
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _firebaseAuth;
@@ -120,9 +121,9 @@ class ProfileRemoteDataSource {
     String? details,
   }) {
     const objectNotFoundCodes = {
-      'object-not-found',
-      'storage/object-not-found',
-      'firebase_storage/object-not-found',
+      _objectNotFoundCode,
+      'storage/$_objectNotFoundCode',
+      'firebase_storage/$_objectNotFoundCode',
     };
     if (objectNotFoundCodes.contains(code)) {
       return true;
@@ -130,8 +131,8 @@ class ProfileRemoteDataSource {
 
     final normalizedMessage = (message ?? '').toLowerCase();
     final normalizedDetails = (details ?? '').toLowerCase();
-    return normalizedMessage.contains('object-not-found') ||
-        normalizedDetails.contains('object-not-found');
+    return normalizedMessage.contains(_objectNotFoundCode) ||
+        normalizedDetails.contains(_objectNotFoundCode);
   }
 
   Future<String> _getDownloadUrlWithRetry(
