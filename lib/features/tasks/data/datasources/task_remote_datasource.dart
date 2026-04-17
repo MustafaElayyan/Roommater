@@ -17,41 +17,37 @@ class TaskRemoteDataSource {
     bool? myTasks,
     int? pageSize,
   }) {
-    try {
-      Query<Map<String, dynamic>> query = _firestore
-          .collection('households')
-          .doc(householdId)
-          .collection('tasks')
-          .orderBy('createdAt', descending: true);
+    Query<Map<String, dynamic>> query = _firestore
+        .collection('households')
+        .doc(householdId)
+        .collection('tasks')
+        .orderBy('createdAt', descending: true);
 
-      if (myTasks == true) {
-        final uid = _firebaseAuth.currentUser?.uid;
-        if (uid != null) {
-          query = query.where('assignedToUserId', isEqualTo: uid);
-        }
+    if (myTasks == true) {
+      final uid = _firebaseAuth.currentUser?.uid;
+      if (uid != null) {
+        query = query.where('assignedToUserId', isEqualTo: uid);
       }
-
-      if (pageSize != null && pageSize > 0) {
-        query = query.limit(pageSize);
-      }
-
-      return query
-          .snapshots()
-          .map((snapshot) => snapshot.docs.map(TaskModel.fromFirestore).toList())
-          .transform(
-            StreamTransformer<List<TaskModel>, List<TaskModel>>.fromHandlers(
-              handleError: (error, stackTrace, sink) {
-                if (error is FirebaseException) {
-                  sink.addError(ApiException('Failed to load tasks.', error), stackTrace);
-                  return;
-                }
-                sink.addError(error, stackTrace);
-              },
-            ),
-          );
-    } on FirebaseException catch (e) {
-      throw ApiException('Failed to load tasks.', e);
     }
+
+    if (pageSize != null && pageSize > 0) {
+      query = query.limit(pageSize);
+    }
+
+    return query
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map(TaskModel.fromFirestore).toList())
+        .transform(
+          StreamTransformer<List<TaskModel>, List<TaskModel>>.fromHandlers(
+            handleError: (error, stackTrace, sink) {
+              if (error is FirebaseException) {
+                sink.addError(ApiException('Failed to load tasks.', error), stackTrace);
+                return;
+              }
+              sink.addError(error, stackTrace);
+            },
+          ),
+        );
   }
 
   Future<List<TaskModel>> getTasks(
