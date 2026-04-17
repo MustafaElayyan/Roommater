@@ -44,12 +44,12 @@ final _deleteTaskUseCaseProvider = Provider<DeleteTaskUseCase>((ref) {
 
 // --- State ---
 
-/// Fetches all tasks for the current household.
-final tasksProvider = FutureProvider<List<TaskEntity>>((ref) {
+/// Watches all tasks for the current household.
+final tasksProvider = StreamProvider<List<TaskEntity>>((ref) {
   final user = ref.watch(authStateProvider).valueOrNull;
-  if (user == null) return [];
+  if (user == null) return const Stream.empty();
   final household = ref.watch(currentHouseholdProvider);
-  if (household == null) return [];
+  if (household == null) return const Stream.empty();
   return ref.watch(_getTasksUseCaseProvider)(household.id);
 });
 
@@ -99,7 +99,6 @@ class TaskController extends AsyncNotifier<void> {
               referenceType: 'task',
             );
       }
-      ref.invalidate(tasksProvider);
     });
   }
 
@@ -152,7 +151,6 @@ class TaskController extends AsyncNotifier<void> {
         assignedToName: assignedToName,
         completionNote: completionNote,
       );
-      ref.invalidate(tasksProvider);
     });
   }
 
@@ -163,7 +161,6 @@ class TaskController extends AsyncNotifier<void> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(_deleteTaskUseCaseProvider)(household.id, taskId);
-      ref.invalidate(tasksProvider);
     });
   }
 
@@ -188,7 +185,6 @@ class TaskController extends AsyncNotifier<void> {
         assignedToName: task.assignedToName,
         completionNote: !task.isCompleted ? completionNote : null,
       );
-      ref.invalidate(tasksProvider);
     });
   }
 }

@@ -9,16 +9,14 @@ class TaskRepositoryImpl implements TaskRepository {
   final TaskRemoteDataSource _dataSource;
 
   @override
-  Future<List<TaskEntity>> getTasks(
+  Stream<List<TaskEntity>> watchTasks(
     String householdId, {
     bool? myTasks,
-    int? page,
     int? pageSize,
   }) {
-    return _dataSource.getTasks(
+    return _dataSource.watchTasks(
       householdId,
       myTasks: myTasks,
-      page: page,
       pageSize: pageSize,
     );
   }
