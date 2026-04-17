@@ -113,12 +113,12 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
     final normalizedCurrentUserEmail =
         (currentUserEmail != null && currentUserEmail.isNotEmpty)
             ? currentUserEmail
-            : 'no-email@roommate.local';
+            : 'unknown@localhost';
     final currentUserLabel = (currentUserName != null && currentUserName.isNotEmpty)
         ? currentUserName
         : (currentUserEmail != null && currentUserEmail.isNotEmpty)
             ? currentUserEmail
-            : 'Current user';
+            : 'You';
 
     return PopScope(
       canPop: false,
