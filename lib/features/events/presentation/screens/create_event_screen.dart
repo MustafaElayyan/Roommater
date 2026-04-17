@@ -168,7 +168,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
       if (mounted) {
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Item created successfully')),
+          const SnackBar(content: Text('Event created successfully')),
         );
       }
     }

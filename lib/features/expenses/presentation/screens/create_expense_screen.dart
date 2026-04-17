@@ -198,7 +198,7 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
       if (mounted) {
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Item created successfully')),
+          const SnackBar(content: Text('Expense created successfully')),
         );
       }
     }
