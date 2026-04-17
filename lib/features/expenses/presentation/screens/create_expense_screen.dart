@@ -196,7 +196,14 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
       context.pop();
     } else {
       if (mounted) {
-        setState(() => _isSubmitting = false);
+        setState(() {
+          _isSubmitting = false;
+          _titleController.clear();
+          _amountController.clear();
+          _categoryController.clear();
+          _splitAmong.clear();
+          _payer = members.isEmpty ? null : members.first.uid;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Expense created successfully')),
         );

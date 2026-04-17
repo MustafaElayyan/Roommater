@@ -166,7 +166,15 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
       context.pop();
     } else {
       if (mounted) {
-        setState(() => _isSubmitting = false);
+        setState(() {
+          _isSubmitting = false;
+          _titleController.clear();
+          _descController.clear();
+          _locationController.clear();
+          _date = null;
+          _time = null;
+          _type = 'meeting';
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Event created successfully')),
         );

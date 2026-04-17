@@ -70,7 +70,15 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
         context.pop();
       } else {
         if (mounted) {
-          setState(() => _isSubmitting = false);
+          setState(() {
+            _isSubmitting = false;
+            _titleController.clear();
+            _descController.clear();
+            _selectedMemberUid = null;
+            _selectedMemberName = null;
+            _date = null;
+            _time = null;
+          });
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Task created successfully')),
           );
