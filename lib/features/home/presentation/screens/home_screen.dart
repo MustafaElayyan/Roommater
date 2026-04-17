@@ -101,7 +101,9 @@ class _DashboardTab extends ConsumerWidget {
               child: Text('Failed to load tasks: $error'),
             ),
             data: (tasks) {
-              final todaysTasks = _filterTodayTasks(tasks);
+              final now = DateTime.now();
+              final today = DateTime(now.year, now.month, now.day);
+              final todaysTasks = _filterTasksForDay(tasks, today);
               if (todaysTasks.isEmpty) {
                 return const Padding(
                   padding: EdgeInsets.all(16),
@@ -282,14 +284,15 @@ class _DashboardTab extends ConsumerWidget {
     return upcoming.take(3).toList();
   }
 
-  List<TaskEntity> _filterTodayTasks(List<TaskEntity> tasks) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+  List<TaskEntity> _filterTasksForDay(
+    List<TaskEntity> tasks,
+    DateTime day,
+  ) {
     return tasks.where((task) {
       final dueDate = task.dueDate;
       if (dueDate == null) return false;
       final dueDay = DateTime(dueDate.year, dueDate.month, dueDate.day);
-      return dueDay == today;
+      return dueDay == day;
     }).toList();
   }
 

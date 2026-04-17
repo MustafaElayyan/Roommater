@@ -109,9 +109,12 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
         : const AsyncValue<List<MemberEntity>>.data([]);
     final currentUser = ref.watch(authStateProvider).valueOrNull;
     final currentUserName = currentUser?.displayName?.trim();
+    final currentUserEmail = currentUser?.email.trim();
     final currentUserLabel = (currentUserName != null && currentUserName.isNotEmpty)
         ? currentUserName
-        : currentUser?.email ?? 'Me (current user)';
+        : (currentUserEmail != null && currentUserEmail.isNotEmpty)
+            ? currentUserEmail
+            : 'Current user';
 
     return PopScope(
       canPop: false,
