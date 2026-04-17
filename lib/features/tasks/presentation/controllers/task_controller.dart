@@ -96,8 +96,8 @@ class TaskController extends AsyncNotifier<void> {
               title: '$assignerName assigned you a task',
               body: createdTask.title,
               referenceId: createdTask.id,
-                referenceType: 'task',
-              );
+              referenceType: 'task',
+            );
       }
     });
   }

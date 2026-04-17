@@ -41,7 +41,10 @@ class TaskRemoteDataSource {
           StreamTransformer<List<TaskModel>, List<TaskModel>>.fromHandlers(
             handleError: (error, stackTrace, sink) {
               if (error is FirebaseException) {
-                sink.addError(ApiException('Failed to load tasks.', error), stackTrace);
+                sink.addError(
+                  ApiException('Failed to load tasks (${error.code}).', error),
+                  stackTrace,
+                );
                 return;
               }
               sink.addError(error, stackTrace);
