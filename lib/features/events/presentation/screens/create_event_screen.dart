@@ -36,7 +36,11 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
         title: const Text('Create Event'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            }
+          },
         ),
       ),
       body: Form(
@@ -158,6 +162,15 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
       );
       return;
     }
-    context.pop();
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item created successfully')),
+        );
+      }
+    }
   }
 }

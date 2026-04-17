@@ -66,7 +66,16 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
         SnackBar(content: Text('Error: ${controllerState.error}')),
       );
     } else {
-      context.pop();
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        if (mounted) {
+          setState(() => _isSubmitting = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Item created successfully')),
+          );
+        }
+      }
     }
   }
 
@@ -82,7 +91,11 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
         title: const Text('Create Task'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            }
+          },
         ),
       ),
       body: Form(

@@ -48,7 +48,11 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
         title: const Text('Create Expense'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            }
+          },
         ),
       ),
       body: membersAsync.when(
@@ -188,6 +192,15 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
       );
       return;
     }
-    context.pop();
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item created successfully')),
+        );
+      }
+    }
   }
 }
