@@ -11,20 +11,36 @@ import '../controllers/household_controller.dart';
 class ManageMembersScreen extends ConsumerWidget {
   const ManageMembersScreen({super.key});
 
+  void _handleBackNavigation(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    context.go(AppRoutes.home);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final household = ref.watch(currentHouseholdProvider);
 
     if (household == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Manage Members'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.go(AppRoutes.home),
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) {
+            _handleBackNavigation(context);
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Manage Members'),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => _handleBackNavigation(context),
+            ),
           ),
+          body: const Center(child: Text('No household selected.')),
         ),
-        body: const Center(child: Text('No household selected.')),
       );
     }
 
@@ -32,87 +48,95 @@ class ManageMembersScreen extends ConsumerWidget {
     final currentUser = ref.watch(authStateProvider).valueOrNull;
     final isCreator = currentUser?.uid == household.createdByUserId;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Manage Members'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go(AppRoutes.home),
-        ),
-      ),
-      body: membersAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(
-                  'Failed to load members',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  error.toString(),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: 16),
-                FilledButton.icon(
-                  onPressed: () => ref.invalidate(
-                    householdMembersProvider(household.id),
-                  ),
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Retry'),
-                ),
-              ],
-            ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _handleBackNavigation(context);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Manage Members'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => _handleBackNavigation(context),
           ),
         ),
-        data: (members) {
-          if (members.isEmpty) {
-            return const Center(child: Text('No members found.'));
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: members.length,
-            itemBuilder: (context, index) {
-              final member = members[index];
-              final isSelf = member.uid == currentUser?.uid;
-              final isOwner = member.uid == household.createdByUserId;
-               return Card(
-                 child: ListTile(
-                   onTap: () => context.push(AppRoutes.profileDetailsFor(member.uid)),
-                   leading: UserAvatar(
-                     photoUrl: member.photoUrl,
-                     displayName: member.displayName,
-                     radius: 20,
-                   ),
-                  title: Text(
-                    member.displayName +
-                        (isSelf ? ' (You)' : '') +
-                        (isOwner ? ' · Owner' : ''),
+        body: membersAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Failed to load members',
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  subtitle: Text(member.email),
-                  trailing: isCreator && !isSelf
-                      ? IconButton(
-                          icon: const Icon(Icons.person_remove_outlined),
-                          onPressed: () => _confirmRemove(
-                            context,
-                            ref,
-                            household.id,
-                            member,
-                          ),
-                        )
-                      : null,
-                ),
-              );
-            },
-          );
-        },
+                  const SizedBox(height: 8),
+                  Text(
+                    error.toString(),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: () => ref.invalidate(
+                      householdMembersProvider(household.id),
+                    ),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          data: (members) {
+            if (members.isEmpty) {
+              return const Center(child: Text('No members found.'));
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: members.length,
+              itemBuilder: (context, index) {
+                final member = members[index];
+                final isSelf = member.uid == currentUser?.uid;
+                final isOwner = member.uid == household.createdByUserId;
+                return Card(
+                  child: ListTile(
+                    onTap: () => context.push(AppRoutes.profileDetailsFor(member.uid)),
+                    leading: UserAvatar(
+                      photoUrl: member.photoUrl,
+                      displayName: member.displayName,
+                      radius: 20,
+                    ),
+                    title: Text(
+                      member.displayName +
+                          (isSelf ? ' (You)' : '') +
+                          (isOwner ? ' · Owner' : ''),
+                    ),
+                    subtitle: Text(member.email),
+                    trailing: isCreator && !isSelf
+                        ? IconButton(
+                            icon: const Icon(Icons.person_remove_outlined),
+                            onPressed: () => _confirmRemove(
+                              context,
+                              ref,
+                              household.id,
+                              member,
+                            ),
+                          )
+                        : null,
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

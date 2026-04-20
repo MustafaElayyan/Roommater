@@ -114,7 +114,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             context,
                             members: members,
                             uid: task.createdByUserId,
-                            label: 'Created by',
+                            label: 'Assigned by',
                             fallbackName: creatorName ?? task.createdByUserId,
                           ),
                           _buildMemberProfileLink(
@@ -129,6 +129,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                               task.completionNote!.trim().isNotEmpty)
                             Text('Completion note: ${task.completionNote}'),
                         ],
+                      ),
+                      onTap: () => _showTaskDetails(
+                        context,
+                        task,
+                        assignedBy: creatorName ?? task.createdByUserId,
+                        assignedTo: assigneeName ?? 'Unassigned',
+                        dueText: dueText,
                       ),
                     ),
                   );
@@ -155,6 +162,48 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   String? _resolveCreator(TaskEntity task, List<MemberEntity> members) {
     final match = members.where((m) => m.uid == task.createdByUserId).toList();
     return match.isNotEmpty ? match.first.displayName : null;
+  }
+
+  Future<void> _showTaskDetails(
+    BuildContext context,
+    TaskEntity task, {
+    required String assignedBy,
+    required String assignedTo,
+    String? dueText,
+  }) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(task.title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Assigned by: $assignedBy'),
+            const SizedBox(height: 4),
+            Text('Assigned to: $assignedTo'),
+            if (dueText != null) ...[
+              const SizedBox(height: 4),
+              Text('Due: $dueText'),
+            ],
+            if (task.description?.trim().isNotEmpty == true) ...[
+              const SizedBox(height: 8),
+              Text(task.description!.trim()),
+            ],
+            if (task.completionNote?.trim().isNotEmpty == true) ...[
+              const SizedBox(height: 8),
+              Text('Completion note: ${task.completionNote!.trim()}'),
+            ],
+          ],
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildMemberProfileLink(

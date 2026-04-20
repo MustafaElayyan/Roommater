@@ -15,41 +15,57 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _notifications = true;
 
+  void _handleBackNavigation() {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    context.go(AppRoutes.home);
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     final isDarkMode = themeMode == ThemeMode.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go(AppRoutes.home),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _handleBackNavigation();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Settings'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _handleBackNavigation,
+          ),
         ),
-      ),
-      body: ListView(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.person_outline),
-            title: const Text('Profile Settings'),
-            onTap: () => context.push(AppRoutes.profile),
-          ),
-          SwitchListTile(
-            value: isDarkMode,
-            onChanged: (value) {
-              ref
-                  .read(themeModeProvider.notifier)
-                  .setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
-            },
-            title: const Text('Dark Mode'),
-          ),
-          SwitchListTile(
-            value: _notifications,
-            onChanged: (value) => setState(() => _notifications = value),
-            title: const Text('Push Notifications'),
-          ),
-        ],
+        body: ListView(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: const Text('Profile Settings'),
+              onTap: () => context.push(AppRoutes.profile),
+            ),
+            SwitchListTile(
+              value: isDarkMode,
+              onChanged: (value) {
+                ref
+                    .read(themeModeProvider.notifier)
+                    .setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
+              },
+              title: const Text('Dark Mode'),
+            ),
+            SwitchListTile(
+              value: _notifications,
+              onChanged: (value) => setState(() => _notifications = value),
+              title: const Text('Push Notifications'),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -310,7 +310,7 @@ class _MainShell extends ConsumerWidget {
 
     void pushToTopLevelRoute(String route) {
       Navigator.of(context).pop();
-      context.go(route);
+      context.push(route);
     }
 
     return PopScope(

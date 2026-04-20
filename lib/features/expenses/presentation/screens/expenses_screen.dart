@@ -22,11 +22,37 @@ class ExpensesScreen extends ConsumerWidget {
         ? ref.watch(householdMembersProvider(household.id))
         : const AsyncValue<List<MemberEntity>>.data([]);
     final members = membersAsync.valueOrNull ?? const <MemberEntity>[];
+    final expenseErrorText = expensesAsync.hasError
+        ? expensesAsync.error.toString().toLowerCase()
+        : '';
+    final accessDenied = expenseErrorText.contains('owner or admin');
 
     return Scaffold(
       body: expensesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Failed to load expenses: $error')),
+        error: (error, _) {
+          final message = error.toString();
+          final denied = message.toLowerCase().contains('owner or admin');
+          if (denied) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.lock_outline, size: 42),
+                    SizedBox(height: 12),
+                    Text(
+                      'Only the household owner or admin can view expense history.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          return Center(child: Text('Failed to load expenses: $error'));
+        },
         data: (expenses) {
           if (expenses.isEmpty) {
             return const Center(child: Text('No expenses yet'));
@@ -113,10 +139,12 @@ class ExpensesScreen extends ConsumerWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push(AppRoutes.createExpense),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: accessDenied
+          ? null
+          : FloatingActionButton(
+              onPressed: () => context.push(AppRoutes.createExpense),
+              child: const Icon(Icons.add),
+            ),
     );
   }
 
