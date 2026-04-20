@@ -21,6 +21,12 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
   int _secondsRemaining = 0;
   Timer? _timer;
 
+  Future<void> _signOutAndGoToAuthChoice() async {
+    await ref.read(authControllerProvider.notifier).signOut();
+    if (!mounted) return;
+    context.go(AppRoutes.authChoice);
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -88,32 +94,48 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
         ref.read(firebaseAuthProvider).currentUser?.email ??
         'your email';
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Email Verification')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'A verification email has been sent to $email. Please check your inbox.',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: isLoading || _secondsRemaining > 0 ? null : _resendEmail,
-              child: Text(
-                _secondsRemaining > 0
-                    ? 'Resend Email ($_secondsRemaining)'
-                    : 'Resend Email',
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          unawaited(_signOutAndGoToAuthChoice());
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Email Verification'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              await _signOutAndGoToAuthChoice();
+            },
+          ),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'A verification email has been sent to $email. Please check your inbox.',
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: _checkVerification,
-              child: const Text("I've Verified My Email"),
-            ),
-          ],
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: isLoading || _secondsRemaining > 0 ? null : _resendEmail,
+                child: Text(
+                  _secondsRemaining > 0
+                      ? 'Resend Email ($_secondsRemaining)'
+                      : 'Resend Email',
+                ),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: _checkVerification,
+                child: const Text("I've Verified My Email"),
+              ),
+            ],
+          ),
         ),
       ),
     );
