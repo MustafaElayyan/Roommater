@@ -6,7 +6,7 @@ class GetNotificationsUseCase {
 
   final NotificationRepository _repository;
 
-  Future<List<NotificationEntity>> call(String recipientUserId) {
-    return _repository.getNotifications(recipientUserId);
+  Stream<List<NotificationEntity>> call(String recipientUserId) {
+    return _repository.watchNotifications(recipientUserId);
   }
 }

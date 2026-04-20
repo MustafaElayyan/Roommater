@@ -1,6 +1,8 @@
 import '../entities/notification_entity.dart';
 
 abstract interface class NotificationRepository {
+  Stream<List<NotificationEntity>> watchNotifications(String recipientUserId);
+
   Future<List<NotificationEntity>> getNotifications(String recipientUserId);
 
   Future<NotificationEntity> createNotification({

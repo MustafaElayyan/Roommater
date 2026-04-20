@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../shared/widgets/user_avatar.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../household/domain/entities/member_entity.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
 import '../../domain/entities/expense_entity.dart';
@@ -14,6 +16,7 @@ class ExpensesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final expensesAsync = ref.watch(expensesProvider);
+    final currentUid = ref.watch(authStateProvider).valueOrNull?.uid;
     final household = ref.watch(currentHouseholdProvider);
     final membersAsync = household != null
         ? ref.watch(householdMembersProvider(household.id))
@@ -33,6 +36,8 @@ class ExpensesScreen extends ConsumerWidget {
             itemCount: expenses.length,
             itemBuilder: (context, index) {
               final expense = expenses[index];
+              final userCanDeleteExpense = currentUid != null &&
+                  expense.createdByUserId == currentUid;
               return Card(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
@@ -47,14 +52,36 @@ class ExpensesScreen extends ConsumerWidget {
                       Text('Amount: ${expense.amount.toStringAsFixed(2)} JOD'),
                       if (expense.category?.isNotEmpty ?? false)
                         Text('Category: ${expense.category}'),
-                      Text('Payer: ${_memberName(members, expense.payerId)}'),
+                      _memberProfileLink(
+                        context,
+                        members: members,
+                        uid: expense.payerId,
+                        label: 'Payer',
+                      ),
+                      if (userCanDeleteExpense)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete_outline),
+                            onPressed: () => _confirmDeleteExpense(context, ref, expense),
+                          ),
+                        ),
                       const SizedBox(height: 8),
                       ...expense.splits.map(
                         (split) => ListTile(
                           dense: true,
                           contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            _memberName(members, split.userId),
+                          leading: UserAvatar(
+                            photoUrl: _memberPhotoUrl(members, split.userId),
+                            displayName: _memberName(members, split.userId),
+                            radius: 12,
+                            onTap: () =>
+                                context.push(AppRoutes.profileDetailsFor(split.userId)),
+                          ),
+                          title: InkWell(
+                            onTap: () =>
+                                context.push(AppRoutes.profileDetailsFor(split.userId)),
+                            child: Text(_memberName(members, split.userId)),
                           ),
                           subtitle: Text(
                             '${split.shareAmount.toStringAsFixed(2)} JOD',
@@ -96,5 +123,64 @@ class ExpensesScreen extends ConsumerWidget {
   String _memberName(List<MemberEntity> members, String uid) {
     final match = members.where((m) => m.uid == uid).toList();
     return match.isNotEmpty ? match.first.displayName : uid;
+  }
+
+  String? _memberPhotoUrl(List<MemberEntity> members, String uid) {
+    final match = members.where((m) => m.uid == uid).toList();
+    return match.isNotEmpty ? match.first.photoUrl : null;
+  }
+
+  Widget _memberProfileLink(
+    BuildContext context, {
+    required List<MemberEntity> members,
+    required String uid,
+    required String label,
+  }) {
+    final memberName = _memberName(members, uid);
+    return InkWell(
+      onTap: () => context.push(AppRoutes.profileDetailsFor(uid)),
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            UserAvatar(
+              photoUrl: _memberPhotoUrl(members, uid),
+              displayName: memberName,
+              radius: 10,
+            ),
+            const SizedBox(width: 6),
+            Text('$label: $memberName'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteExpense(
+    BuildContext context,
+    WidgetRef ref,
+    ExpenseEntity expense,
+  ) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Expense'),
+        content: Text('Delete "${expense.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (shouldDelete != true) return;
+    await ref.read(expenseControllerProvider.notifier).deleteExpense(expense.id);
   }
 }

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/firestore_service.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
-import '../../../notifications/presentation/controllers/notification_controller.dart';
 import '../../data/datasources/task_remote_datasource.dart';
 import '../../data/repositories/task_repository_impl.dart';
 import '../../domain/entities/task_entity.dart';
@@ -72,7 +71,7 @@ class TaskController extends AsyncNotifier<void> {
 
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      final createdTask = await ref.read(_createTaskUseCaseProvider)(
+      await ref.read(_createTaskUseCaseProvider)(
         household.id,
         title: title,
         description: description,
@@ -80,49 +79,7 @@ class TaskController extends AsyncNotifier<void> {
         assignedToUserId: assignedToUserId,
         assignedToName: assignedToName,
       );
-      if (assignedToUserId != null &&
-          assignedToUserId.isNotEmpty &&
-          assignedToUserId != createdTask.createdByUserId) {
-        final currentUser = ref.read(authStateProvider).valueOrNull;
-        final assignerName = _resolveAssignerName(
-          displayName: currentUser?.displayName,
-          email: currentUser?.email,
-          createdByName: createdTask.createdByName,
-        );
-        await ref.read(notificationControllerProvider.notifier).createNotification(
-              recipientUserId: assignedToUserId,
-              householdId: household.id,
-              type: 'task_assignment',
-              title: '$assignerName assigned you a task',
-              body: createdTask.title,
-              referenceId: createdTask.id,
-              referenceType: 'task',
-            );
-      }
     });
-  }
-
-  String _resolveAssignerName({
-    String? displayName,
-    String? email,
-    String? createdByName,
-  }) {
-    final trimmedDisplayName = displayName?.trim();
-    if (trimmedDisplayName != null && trimmedDisplayName.isNotEmpty) {
-      return trimmedDisplayName;
-    }
-
-    final trimmedEmail = email?.trim();
-    if (trimmedEmail != null && trimmedEmail.isNotEmpty) {
-      return trimmedEmail;
-    }
-
-    final trimmedCreatedByName = createdByName?.trim();
-    if (trimmedCreatedByName != null && trimmedCreatedByName.isNotEmpty) {
-      return trimmedCreatedByName;
-    }
-
-    return 'A roommate';
   }
 
   Future<void> updateTask({

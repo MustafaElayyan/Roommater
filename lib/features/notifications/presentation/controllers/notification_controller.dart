@@ -35,9 +35,9 @@ final _markNotificationReadUseCaseProvider =
   return MarkNotificationReadUseCase(ref.watch(notificationRepositoryProvider));
 });
 
-final notificationsProvider = FutureProvider<List<NotificationEntity>>((ref) {
+final notificationsProvider = StreamProvider<List<NotificationEntity>>((ref) {
   final userId = ref.watch(authStateProvider).valueOrNull?.uid;
-  if (userId == null) return [];
+  if (userId == null) return const Stream.empty();
   return ref.watch(_getNotificationsUseCaseProvider)(userId);
 });
 

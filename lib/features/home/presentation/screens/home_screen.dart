@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/router/app_routes.dart';
+import '../../../../shared/widgets/user_avatar.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../events/domain/entities/event_entity.dart';
 import '../../../events/presentation/controllers/event_controller.dart';
@@ -66,17 +68,12 @@ class _DashboardTab extends ConsumerWidget {
                       children: members
                           .map(
                             (member) {
-                              final hasPhoto = member.photoUrl?.isNotEmpty ?? false;
-                              return CircleAvatar(
-                                backgroundImage:
-                                    hasPhoto ? NetworkImage(member.photoUrl!) : null,
-                                child: hasPhoto
-                                    ? null
-                                    : Text(
-                                        member.displayName.isNotEmpty
-                                            ? member.displayName[0].toUpperCase()
-                                            : '?',
-                                      ),
+                              return UserAvatar(
+                                photoUrl: member.photoUrl,
+                                displayName: member.displayName,
+                                radius: 16,
+                                onTap: () =>
+                                    context.push(AppRoutes.profileDetailsFor(member.uid)),
                               );
                             },
                           )

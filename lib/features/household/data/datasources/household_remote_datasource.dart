@@ -107,16 +107,25 @@ class HouseholdRemoteDataSource {
   Future<List<MemberModel>> getMembers(String householdId) async {
     try {
       final household = await getHousehold(householdId);
-      return household.members
-          .map(
-            (member) => MemberModel(
-              uid: member.uid,
-              displayName: member.displayName,
-              email: member.email,
-              photoUrl: member.photoUrl,
-            ),
-          )
-          .toList();
+      final enrichedMembers = await Future.wait(
+        household.members.map((member) async {
+          final userDoc = await _firestore.collection('users').doc(member.uid).get();
+          final userData = userDoc.data() ?? const <String, dynamic>{};
+          return MemberModel(
+            uid: member.uid,
+            displayName:
+                (userData['displayName'] as String?)?.trim().isNotEmpty == true
+                    ? (userData['displayName'] as String).trim()
+                    : member.displayName,
+            email:
+                (userData['email'] as String?)?.trim().isNotEmpty == true
+                    ? (userData['email'] as String).trim()
+                    : member.email,
+            photoUrl: userData['photoUrl'] as String? ?? member.photoUrl,
+          );
+        }),
+      );
+      return enrichedMembers;
     } on FirebaseException catch (e) {
       throw ApiException('Failed to load members.', e);
     }

@@ -115,7 +115,9 @@ class TaskRemoteDataSource {
       );
       await taskRef.set(model.toFirestore(), SetOptions(merge: true));
       final created = await taskRef.get();
-      return TaskModel.fromFirestore(created);
+      final createdModel = TaskModel.fromFirestore(created);
+      await _createTaskAssignmentNotificationIfNeeded(createdModel);
+      return createdModel;
     } on FirebaseException catch (e) {
       throw ApiException('Failed to create task.', e);
     }
@@ -138,6 +140,9 @@ class TaskRemoteDataSource {
           .doc(householdId)
           .collection('tasks')
           .doc(taskId);
+      final previousDoc = await taskRef.get();
+      final previousTask =
+          previousDoc.exists ? TaskModel.fromFirestore(previousDoc) : null;
       await taskRef.set({
         'id': taskId,
         'householdId': householdId,
@@ -159,7 +164,13 @@ class TaskRemoteDataSource {
           'completionNote': null,
       }, SetOptions(merge: true));
       final updated = await taskRef.get();
-      return TaskModel.fromFirestore(updated);
+      final updatedTask = TaskModel.fromFirestore(updated);
+      final assignmentChanged =
+          previousTask?.assignedToUserId != updatedTask.assignedToUserId;
+      if (assignmentChanged || previousTask == null) {
+        await _createTaskAssignmentNotificationIfNeeded(updatedTask);
+      }
+      return updatedTask;
     } on FirebaseException catch (e) {
       throw ApiException('Failed to update task.', e);
     }
@@ -167,14 +178,63 @@ class TaskRemoteDataSource {
 
   Future<void> deleteTask(String householdId, String taskId) async {
     try {
-      await _firestore
+      final currentUid = _firebaseAuth.currentUser?.uid;
+      if (currentUid == null) {
+        throw const ApiException('You must be signed in to delete tasks.');
+      }
+      final taskRef = _firestore
           .collection('households')
           .doc(householdId)
           .collection('tasks')
-          .doc(taskId)
-          .delete();
+          .doc(taskId);
+      final doc = await taskRef.get();
+      if (!doc.exists) {
+        throw const ApiException('Task not found.');
+      }
+      final task = TaskModel.fromFirestore(doc);
+      if (task.createdByUserId != currentUid) {
+        throw const AuthException('Only the task creator can delete this task.');
+      }
+      await taskRef.delete();
     } on FirebaseException catch (e) {
       throw ApiException('Failed to delete task.', e);
     }
+  }
+
+  Future<void> _createTaskAssignmentNotificationIfNeeded(TaskModel task) async {
+    final assigneeId = task.assignedToUserId?.trim();
+    if (assigneeId == null || assigneeId.isEmpty) return;
+    if (assigneeId == task.createdByUserId) return;
+
+    final senderName = _firebaseAuth.currentUser?.displayName?.trim();
+    final senderEmail = _firebaseAuth.currentUser?.email?.trim();
+    final assigner = (senderName != null && senderName.isNotEmpty)
+        ? senderName
+        : (senderEmail != null && senderEmail.isNotEmpty)
+            ? senderEmail
+            : task.createdByName?.trim().isNotEmpty == true
+                ? task.createdByName!.trim()
+                : 'A roommate';
+
+    final notificationRef = _firestore
+        .collection('users')
+        .doc(assigneeId)
+        .collection('notifications')
+        .doc();
+
+    await notificationRef.set({
+      'id': notificationRef.id,
+      'recipientUserId': assigneeId,
+      'householdId': task.householdId,
+      'type': 'task_assignment',
+      'title': '$assigner assigned you a task',
+      'body': task.description?.trim().isNotEmpty == true
+          ? '${task.title}\n${task.description!.trim()}'
+          : task.title,
+      'isRead': false,
+      'referenceId': task.id,
+      'referenceType': 'task',
+      'createdAt': Timestamp.fromDate(DateTime.now()),
+    }, SetOptions(merge: true));
   }
 }

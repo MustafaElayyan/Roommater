@@ -42,6 +42,9 @@ abstract final class AppRoutes {
 
   // --- Profile ---
   static const String profile = '/profile';
+  static const String profileDetailsBase = '/profile-details';
+  static const String profileDetails = '$profileDetailsBase/:userId';
+  static String profileDetailsFor(String userId) => '$profileDetailsBase/$userId';
 
   // --- Settings ---
   static const String settings = '/settings';
