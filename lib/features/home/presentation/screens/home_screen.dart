@@ -125,7 +125,7 @@ class _DashboardTab extends ConsumerWidget {
                                 _findMemberName(members, task.assignedToUserId) ??
                                 task.assignedToUserId ??
                                 'Unassigned';
-                            return Text('Created by: $creator\nAssigned to: $assignee');
+                            return Text('Assigned by: $creator\nAssigned to: $assignee');
                           },
                           orElse: () => null,
                         ),

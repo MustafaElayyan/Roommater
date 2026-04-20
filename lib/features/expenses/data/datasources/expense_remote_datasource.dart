@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/errors/app_exception.dart';
 import '../models/expense_model.dart';
@@ -8,11 +9,25 @@ import '../models/expense_model.dart';
 class ExpenseRemoteDataSource {
   const ExpenseRemoteDataSource(this._firestore, this._firebaseAuth);
 
+  static const String expenseHistoryAccessDeniedMessage =
+      'Only the household owner or admin can view expense history.';
+
   final FirebaseFirestore _firestore;
   final FirebaseAuth _firebaseAuth;
 
   Future<List<ExpenseModel>> getExpenses(String householdId) async {
     try {
+      final currentUid = _firebaseAuth.currentUser?.uid?.trim();
+      if (currentUid == null || currentUid.isEmpty) {
+        throw const AuthException('You must be signed in to view expenses.');
+      }
+      final canViewExpenses = await _canViewExpenseHistory(
+        householdId: householdId,
+        userId: currentUid,
+      );
+      if (!canViewExpenses) {
+        throw const AuthException(expenseHistoryAccessDeniedMessage);
+      }
       final snapshot = await _firestore
           .collection('households')
           .doc(householdId)
@@ -56,7 +71,9 @@ class ExpenseRemoteDataSource {
       );
       await ref.set(model.toFirestore(), SetOptions(merge: true));
       final created = await ref.get();
-      return ExpenseModel.fromFirestore(created);
+      final createdModel = ExpenseModel.fromFirestore(created);
+      await _createExpenseNotifications(createdModel);
+      return createdModel;
     } on FirebaseException catch (e) {
       throw ApiException('Failed to create expense.', e);
     }
@@ -132,6 +149,95 @@ class ExpenseRemoteDataSource {
       await expenseRef.delete();
     } on FirebaseException catch (e) {
       throw ApiException('Failed to delete expense.', e);
+    }
+  }
+
+  Future<bool> _canViewExpenseHistory({
+    required String householdId,
+    required String userId,
+  }) async {
+    final householdDoc = await _firestore.collection('households').doc(householdId).get();
+    if (!householdDoc.exists) return false;
+    final householdData = householdDoc.data() ?? const <String, dynamic>{};
+    final ownerId = (householdData['createdByUserId'] as String? ?? '').trim();
+    if (ownerId == userId) return true;
+
+    final members = householdData['members'] as List<dynamic>? ?? const [];
+    var isHouseholdMember = false;
+    for (final member in members.whereType<Map<String, dynamic>>()) {
+      final memberUid = (member['uid'] as String? ?? '').trim();
+      if (memberUid != userId) continue;
+      isHouseholdMember = true;
+      final role = (member['role'] as String? ?? '').toLowerCase().trim();
+      if (_isAdminOrOwnerRole(role)) return true;
+    }
+
+    if (isHouseholdMember) return false;
+
+    final userDoc = await _firestore.collection('users').doc(userId).get();
+    final userData = userDoc.data() ?? const <String, dynamic>{};
+    final possibleRoles = [
+      userData['role'],
+      userData['householdRole'],
+      userData['roleInHousehold'],
+    ];
+    for (final value in possibleRoles) {
+      final role = (value as String? ?? '').toLowerCase().trim();
+      if (_isAdminOrOwnerRole(role)) return true;
+    }
+    return false;
+  }
+
+  bool _isAdminOrOwnerRole(String role) {
+    return role == 'admin' || role == 'owner';
+  }
+
+  Future<void> _createExpenseNotifications(ExpenseModel expense) async {
+    try {
+      final actorId = _firebaseAuth.currentUser?.uid?.trim();
+      if (actorId == null || actorId.isEmpty) return;
+
+      final actorName = _firebaseAuth.currentUser?.displayName?.trim();
+      final actorEmail = _firebaseAuth.currentUser?.email?.trim();
+      final actorLabel = (actorName != null && actorName.isNotEmpty)
+          ? actorName
+          : (actorEmail != null && actorEmail.isNotEmpty)
+              ? actorEmail
+              : 'A roommate';
+
+      final householdDoc = await _firestore
+          .collection('households')
+          .doc(expense.householdId)
+          .get();
+      final householdData = householdDoc.data() ?? const <String, dynamic>{};
+      final members = householdData['members'] as List<dynamic>? ?? const [];
+      final memberIds = members
+          .whereType<Map<String, dynamic>>()
+          .map((member) => (member['uid'] as String? ?? '').trim())
+          .where((uid) => uid.isNotEmpty && uid != actorId)
+          .toSet();
+
+      for (final recipientId in memberIds) {
+        final notificationRef = _firestore
+            .collection('users')
+            .doc(recipientId)
+            .collection('notifications')
+            .doc();
+        await notificationRef.set({
+          'id': notificationRef.id,
+          'recipientUserId': recipientId,
+          'householdId': expense.householdId,
+          'type': 'expense_created',
+          'title': '$actorLabel added a new expense',
+          'body': '${expense.title} — ${expense.amount.toStringAsFixed(2)} JOD',
+          'isRead': false,
+          'referenceId': expense.id,
+          'referenceType': 'expense',
+          'createdAt': Timestamp.fromDate(DateTime.now()),
+        }, SetOptions(merge: true));
+      }
+    } on FirebaseException catch (e) {
+      debugPrint('Expense notification fan-out failed: ${e.code} ${e.message}');
     }
   }
 }

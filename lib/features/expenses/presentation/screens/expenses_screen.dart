@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../core/errors/app_exception.dart';
 import '../../../../shared/widgets/user_avatar.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../household/domain/entities/member_entity.dart';
@@ -22,11 +23,34 @@ class ExpensesScreen extends ConsumerWidget {
         ? ref.watch(householdMembersProvider(household.id))
         : const AsyncValue<List<MemberEntity>>.data([]);
     final members = membersAsync.valueOrNull ?? const <MemberEntity>[];
+    final accessDenied = expensesAsync.hasError &&
+        _isExpenseHistoryAccessDenied(expensesAsync.error);
 
     return Scaffold(
       body: expensesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Failed to load expenses: $error')),
+        error: (error, _) {
+          final denied = _isExpenseHistoryAccessDenied(error);
+          if (denied) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.lock_outline, size: 42),
+                    SizedBox(height: 12),
+                    Text(
+                      'Only the household owner or admin can view expense history.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          return Center(child: Text('Failed to load expenses: $error'));
+        },
         data: (expenses) {
           if (expenses.isEmpty) {
             return const Center(child: Text('No expenses yet'));
@@ -113,10 +137,12 @@ class ExpensesScreen extends ConsumerWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push(AppRoutes.createExpense),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: accessDenied
+          ? null
+          : FloatingActionButton(
+              onPressed: () => context.push(AppRoutes.createExpense),
+              child: const Icon(Icons.add),
+            ),
     );
   }
 
@@ -182,5 +208,10 @@ class ExpensesScreen extends ConsumerWidget {
     );
     if (shouldDelete != true) return;
     await ref.read(expenseControllerProvider.notifier).deleteExpense(expense.id);
+  }
+
+  bool _isExpenseHistoryAccessDenied(Object? error) {
+    if (error is! AuthException) return false;
+    return error.message == 'Only the household owner or admin can view expense history.';
   }
 }
