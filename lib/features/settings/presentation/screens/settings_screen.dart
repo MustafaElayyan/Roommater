@@ -33,7 +33,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.person_outline),
             title: const Text('Profile Settings'),
-            onTap: () => context.go(AppRoutes.profile),
+            onTap: () => context.push(AppRoutes.profile),
           ),
           SwitchListTile(
             value: isDarkMode,

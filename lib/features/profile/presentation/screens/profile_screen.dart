@@ -145,6 +145,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
+  void _handleBackNavigation() {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    context.go(AppRoutes.home);
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authStateProvider).valueOrNull;
@@ -157,108 +165,116 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileAsync = ref.watch(profileProvider(user.uid));
     final isSubmitting = ref.watch(profileControllerProvider).isLoading;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile Settings'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go(AppRoutes.home),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _handleBackNavigation();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Profile Settings'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _handleBackNavigation,
+          ),
         ),
-      ),
-      body: profileAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Failed to load profile: $error')),
-        data: (profile) {
-          if (!_didInitControllers) {
-            _displayNameController.text = profile.displayName;
-            _phoneController.text = profile.phone ?? '';
-            _bioController.text = profile.bio ?? '';
-            _occupationController.text = profile.occupation ?? '';
-            _locationController.text = profile.location ?? '';
-            _didInitControllers = true;
-          }
+        body: profileAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(child: Text('Failed to load profile: $error')),
+          data: (profile) {
+            if (!_didInitControllers) {
+              _displayNameController.text = profile.displayName;
+              _phoneController.text = profile.phone ?? '';
+              _bioController.text = profile.bio ?? '';
+              _occupationController.text = profile.occupation ?? '';
+              _locationController.text = profile.location ?? '';
+              _didInitControllers = true;
+            }
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              Center(
-                child: Stack(
-                  children: [
-                    UserAvatar(
-                      photoUrl: profile.photoUrl,
-                      displayName: profile.displayName,
-                      radius: 44,
-                    ),
-                    Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: CircleAvatar(
-                        radius: 16,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          iconSize: 16,
-                          icon: const Icon(Icons.camera_alt_outlined),
-                          onPressed: isSubmitting ? null : () => _pickProfileImage(profile.uid),
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Center(
+                  child: Stack(
+                    children: [
+                      UserAvatar(
+                        photoUrl: profile.photoUrl,
+                        displayName: profile.displayName,
+                        radius: 44,
+                      ),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: CircleAvatar(
+                          radius: 16,
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            iconSize: 16,
+                            icon: const Icon(Icons.camera_alt_outlined),
+                            onPressed: isSubmitting ? null : () => _pickProfileImage(profile.uid),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _displayNameController,
-                decoration: const InputDecoration(labelText: 'Display Name'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(labelText: 'Phone'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _bioController,
-                decoration: const InputDecoration(labelText: 'Bio'),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _occupationController,
-                decoration: const InputDecoration(labelText: 'Occupation'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _locationController,
-                decoration: const InputDecoration(labelText: 'Location'),
-              ),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: isSubmitting ? null : () => _saveProfile(profile),
-                child: const Text('Save Profile'),
-              ),
-              const SizedBox(height: 24),
-              Text('Change Password', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _currentPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Current Password'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _newPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'New Password'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: isSubmitting ? null : () => _changePassword(profile.email),
-                child: const Text('Update Password'),
-              ),
-            ],
-          );
-        },
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _displayNameController,
+                  decoration: const InputDecoration(labelText: 'Display Name'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(labelText: 'Phone'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _bioController,
+                  decoration: const InputDecoration(labelText: 'Bio'),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _occupationController,
+                  decoration: const InputDecoration(labelText: 'Occupation'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _locationController,
+                  decoration: const InputDecoration(labelText: 'Location'),
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: isSubmitting ? null : () => _saveProfile(profile),
+                  child: const Text('Save Profile'),
+                ),
+                const SizedBox(height: 24),
+                Text('Change Password', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _currentPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Current Password'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _newPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'New Password'),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: isSubmitting ? null : () => _changePassword(profile.email),
+                  child: const Text('Update Password'),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
