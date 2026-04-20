@@ -29,7 +29,9 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
       await ref.read(authControllerProvider.notifier).signOut();
       if (!mounted) return;
       context.go(AppRoutes.authChoice);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('Email verification sign-out failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -114,7 +116,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
       canPop: false,
       onPopInvoked: (didPop) {
         if (!didPop && !_isSigningOut) {
-          unawaited(_signOutAndGoToAuthChoice());
+          _signOutAndGoToAuthChoice();
         }
       },
       child: Scaffold(
