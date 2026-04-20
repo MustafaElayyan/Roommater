@@ -166,7 +166,7 @@ class ExpensesScreen extends ConsumerWidget {
     for (final member in members) {
       if (member.uid == uid) return member.role;
     }
-    return '';
+    return 'member';
   }
 
   Widget _memberProfileLink(
