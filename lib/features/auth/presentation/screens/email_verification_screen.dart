@@ -22,9 +22,18 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
   Timer? _timer;
 
   Future<void> _signOutAndGoToAuthChoice() async {
-    await ref.read(authControllerProvider.notifier).signOut();
-    if (!mounted) return;
-    context.go(AppRoutes.authChoice);
+    try {
+      await ref.read(authControllerProvider.notifier).signOut();
+      if (!mounted) return;
+      context.go(AppRoutes.authChoice);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to sign out. Please try again.'),
+        ),
+      );
+    }
   }
 
   @override
