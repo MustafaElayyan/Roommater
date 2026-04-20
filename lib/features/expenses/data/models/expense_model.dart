@@ -57,6 +57,8 @@ class ExpenseSplitModel extends ExpenseSplitEntity {
 }
 
 class ExpenseModel extends ExpenseEntity {
+  /// Sentinel for legacy malformed records missing both creator and payer IDs.
+  /// This value intentionally prevents creator-only actions from succeeding.
   static const String unknownCreatorId = '__unknown_creator__';
 
   const ExpenseModel({

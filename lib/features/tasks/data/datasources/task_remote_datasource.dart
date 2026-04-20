@@ -229,7 +229,7 @@ class TaskRemoteDataSource {
       'type': 'task_assignment',
       'title': '$assigner assigned you a task',
       'body': task.description?.trim().isNotEmpty == true
-          ? '${task.title}\n${task.description!.trim()}'
+          ? '${task.title} — ${task.description!.trim()}'
           : task.title,
       'isRead': false,
       'referenceId': task.id,
