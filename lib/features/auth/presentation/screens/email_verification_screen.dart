@@ -20,8 +20,11 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
   static const int _cooldownSeconds = 30;
   int _secondsRemaining = 0;
   Timer? _timer;
+  bool _isSigningOut = false;
 
   Future<void> _signOutAndGoToAuthChoice() async {
+    if (_isSigningOut) return;
+    setState(() => _isSigningOut = true);
     try {
       await ref.read(authControllerProvider.notifier).signOut();
       if (!mounted) return;
@@ -33,6 +36,10 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
           content: Text('Failed to sign out. Please try again.'),
         ),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _isSigningOut = false);
+      }
     }
   }
 
@@ -115,9 +122,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
           title: const Text('Email Verification'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () async {
-              await _signOutAndGoToAuthChoice();
-            },
+            onPressed: _isSigningOut ? null : _signOutAndGoToAuthChoice,
           ),
         ),
         body: Padding(
