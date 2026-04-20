@@ -42,7 +42,10 @@ class UserAvatar extends StatelessWidget {
                       child: SizedBox(
                         width: radius,
                         height: radius,
-                        child: const CircularProgressIndicator(strokeWidth: 2),
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2,
+                          semanticLabel: 'Loading profile photo',
+                        ),
                       ),
                     ),
                   );
