@@ -20,6 +20,30 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
   static const int _cooldownSeconds = 30;
   int _secondsRemaining = 0;
   Timer? _timer;
+  bool _isSigningOut = false;
+
+  Future<void> _signOutAndGoToAuthChoice() async {
+    if (_isSigningOut) return;
+    setState(() => _isSigningOut = true);
+    try {
+      await ref.read(authControllerProvider.notifier).signOut();
+      if (!mounted) return;
+      context.go(AppRoutes.authChoice);
+    } catch (error, stackTrace) {
+      debugPrint('Email verification sign-out failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to sign out. Please try again.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSigningOut = false);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -88,32 +112,46 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
         ref.read(firebaseAuthProvider).currentUser?.email ??
         'your email';
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Email Verification')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'A verification email has been sent to $email. Please check your inbox.',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: isLoading || _secondsRemaining > 0 ? null : _resendEmail,
-              child: Text(
-                _secondsRemaining > 0
-                    ? 'Resend Email ($_secondsRemaining)'
-                    : 'Resend Email',
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (!didPop && !_isSigningOut) {
+          _signOutAndGoToAuthChoice();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Email Verification'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _isSigningOut ? null : _signOutAndGoToAuthChoice,
+          ),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'A verification email has been sent to $email. Please check your inbox.',
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: _checkVerification,
-              child: const Text("I've Verified My Email"),
-            ),
-          ],
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: isLoading || _secondsRemaining > 0 ? null : _resendEmail,
+                child: Text(
+                  _secondsRemaining > 0
+                      ? 'Resend Email ($_secondsRemaining)'
+                      : 'Resend Email',
+                ),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: _checkVerification,
+                child: const Text("I've Verified My Email"),
+              ),
+            ],
+          ),
         ),
       ),
     );
