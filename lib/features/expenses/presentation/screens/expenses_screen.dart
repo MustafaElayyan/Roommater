@@ -22,17 +22,15 @@ class ExpensesScreen extends ConsumerWidget {
         ? ref.watch(householdMembersProvider(household.id))
         : const AsyncValue<List<MemberEntity>>.data([]);
     final members = membersAsync.valueOrNull ?? const <MemberEntity>[];
-    final expenseErrorText = expensesAsync.hasError
-        ? expensesAsync.error.toString().toLowerCase()
-        : '';
-    final accessDenied = expenseErrorText.contains('owner or admin');
+    final accessDenied = expensesAsync.hasError &&
+        _isExpenseHistoryAccessDenied(expensesAsync.error.toString());
 
     return Scaffold(
       body: expensesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) {
           final message = error.toString();
-          final denied = message.toLowerCase().contains('owner or admin');
+          final denied = _isExpenseHistoryAccessDenied(message);
           if (denied) {
             return const Center(
               child: Padding(
@@ -210,5 +208,9 @@ class ExpensesScreen extends ConsumerWidget {
     );
     if (shouldDelete != true) return;
     await ref.read(expenseControllerProvider.notifier).deleteExpense(expense.id);
+  }
+
+  bool _isExpenseHistoryAccessDenied(String message) {
+    return message.toLowerCase().contains('owner or admin');
   }
 }
