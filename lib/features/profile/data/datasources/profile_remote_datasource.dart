@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/errors/app_exception.dart';
@@ -101,20 +102,34 @@ class ProfileRemoteDataSource {
   }
 
   Future<void> _deleteAvatarIfExists(String uid, String extension) async {
+    final normalizedUid = uid.trim();
+    final normalizedExtension = extension.trim().toLowerCase();
+    if (normalizedUid.isEmpty || normalizedExtension.isEmpty) {
+      debugPrint(
+        'Skipping old avatar deletion due to invalid storage path segments.',
+      );
+      return;
+    }
+
+    final objectPath = 'avatars/$normalizedUid.$normalizedExtension';
     try {
-      await _firebaseStorage.ref().child('avatars/$uid.$extension').delete();
+      await _firebaseStorage.ref(objectPath).delete();
     } on FirebaseException catch (e) {
-      if (!_isObjectNotFoundError(code: e.code, message: e.message)) {
-        rethrow;
+      if (_isObjectNotFoundError(code: e.code, message: e.message)) {
+        debugPrint('No old PFP found at $objectPath');
+        return;
       }
+      rethrow;
     } on PlatformException catch (e) {
-      if (!_isObjectNotFoundError(
+      if (_isObjectNotFoundError(
         code: e.code,
         message: e.message,
         details: e.details?.toString(),
       )) {
-        rethrow;
+        debugPrint('No old PFP found at $objectPath');
+        return;
       }
+      rethrow;
     }
   }
 
