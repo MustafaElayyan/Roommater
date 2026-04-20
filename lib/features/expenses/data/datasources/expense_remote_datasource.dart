@@ -165,7 +165,7 @@ class ExpenseRemoteDataSource {
       final memberUid = (member['uid'] as String? ?? '').trim();
       if (memberUid != userId) continue;
       final role = (member['role'] as String? ?? '').toLowerCase().trim();
-      if (role == 'admin' || role == 'owner') return true;
+      if (_isAdminOrOwnerRole(role)) return true;
     }
 
     final userDoc = await _firestore.collection('users').doc(userId).get();
@@ -177,9 +177,13 @@ class ExpenseRemoteDataSource {
     ];
     for (final value in possibleRoles) {
       final role = (value as String? ?? '').toLowerCase().trim();
-      if (role == 'admin' || role == 'owner') return true;
+      if (_isAdminOrOwnerRole(role)) return true;
     }
     return false;
+  }
+
+  bool _isAdminOrOwnerRole(String role) {
+    return role == 'admin' || role == 'owner';
   }
 
   Future<void> _createExpenseNotifications(ExpenseModel expense) async {

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../core/errors/app_exception.dart';
 import '../../../../shared/widgets/user_avatar.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../household/domain/entities/member_entity.dart';
@@ -23,14 +24,13 @@ class ExpensesScreen extends ConsumerWidget {
         : const AsyncValue<List<MemberEntity>>.data([]);
     final members = membersAsync.valueOrNull ?? const <MemberEntity>[];
     final accessDenied = expensesAsync.hasError &&
-        _isExpenseHistoryAccessDenied(expensesAsync.error.toString());
+        _isExpenseHistoryAccessDenied(expensesAsync.error);
 
     return Scaffold(
       body: expensesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) {
-          final message = error.toString();
-          final denied = _isExpenseHistoryAccessDenied(message);
+          final denied = _isExpenseHistoryAccessDenied(error);
           if (denied) {
             return const Center(
               child: Padding(
@@ -210,7 +210,8 @@ class ExpensesScreen extends ConsumerWidget {
     await ref.read(expenseControllerProvider.notifier).deleteExpense(expense.id);
   }
 
-  bool _isExpenseHistoryAccessDenied(String message) {
-    return message.toLowerCase().contains('owner or admin');
+  bool _isExpenseHistoryAccessDenied(Object? error) {
+    if (error is! AuthException) return false;
+    return error.message.toLowerCase().contains('owner or admin');
   }
 }
