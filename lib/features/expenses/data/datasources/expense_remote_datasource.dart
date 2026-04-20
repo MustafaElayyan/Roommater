@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/errors/app_exception.dart';
 import '../models/expense_model.dart';
@@ -230,8 +231,8 @@ class ExpenseRemoteDataSource {
           'createdAt': Timestamp.fromDate(DateTime.now()),
         }, SetOptions(merge: true));
       }
-    } on FirebaseException {
-      // Best-effort only; expense creation should still succeed.
+    } on FirebaseException catch (e) {
+      debugPrint('Expense notification fan-out failed: ${e.code} ${e.message}');
     }
   }
 }

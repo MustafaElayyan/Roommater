@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/errors/app_exception.dart';
 import '../models/event_model.dart';
@@ -119,8 +120,8 @@ class EventRemoteDataSource {
           'createdAt': Timestamp.fromDate(DateTime.now()),
         }, SetOptions(merge: true));
       }
-    } on FirebaseException {
-      // Best-effort only; event creation should still succeed.
+    } on FirebaseException catch (e) {
+      debugPrint('Event notification fan-out failed: ${e.code} ${e.message}');
     }
   }
 }
