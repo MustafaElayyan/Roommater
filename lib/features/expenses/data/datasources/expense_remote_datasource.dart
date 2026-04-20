@@ -34,6 +34,10 @@ class ExpenseRemoteDataSource {
     required List<ExpenseSplitModel> splits,
   }) async {
     try {
+      final currentUid = _firebaseAuth.currentUser?.uid;
+      if (currentUid == null || currentUid.trim().isEmpty) {
+        throw const AuthException('You must be signed in to create expenses.');
+      }
       final ref = _firestore
           .collection('households')
           .doc(householdId)
@@ -46,7 +50,7 @@ class ExpenseRemoteDataSource {
         amount: amount,
         category: category,
         payerId: payerId,
-        createdByUserId: _firebaseAuth.currentUser?.uid ?? 'guest',
+        createdByUserId: currentUid,
         createdAt: DateTime.now(),
         splits: splits,
       );

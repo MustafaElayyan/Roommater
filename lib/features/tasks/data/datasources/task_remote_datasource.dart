@@ -167,7 +167,7 @@ class TaskRemoteDataSource {
       final updatedTask = TaskModel.fromFirestore(updated);
       final assignmentChanged =
           previousTask?.assignedToUserId != updatedTask.assignedToUserId;
-      if (assignmentChanged || previousTask == null) {
+      if (assignmentChanged) {
         await _createTaskAssignmentNotificationIfNeeded(updatedTask);
       }
       return updatedTask;
