@@ -69,7 +69,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isEmailVerified =
           !isLoggedIn || (ref.read(firebaseAuthProvider).currentUser?.emailVerified == true);
       final householdBootstrap = ref.read(householdBootstrapProvider);
-      final hasHousehold = user?.householdId?.trim().isNotEmpty ?? false;
+      final hasHouseholdFromAuth = user?.householdId?.trim().isNotEmpty ?? false;
+      final hasHouseholdFromState = ref.read(currentHouseholdProvider) != null;
+      final hasHousehold = hasHouseholdFromAuth || hasHouseholdFromState;
       final isHouseholdRoute = location == AppRoutes.noHousehold ||
           location == AppRoutes.createHousehold ||
           location == AppRoutes.joinHousehold ||

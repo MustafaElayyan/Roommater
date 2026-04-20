@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
-import '../../../../shared/widgets/user_avatar.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
 import '../../../household/domain/entities/member_entity.dart';
@@ -183,22 +182,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       child: InkWell(
         onTap: () => context.push(AppRoutes.profileDetailsFor(uid)),
         borderRadius: BorderRadius.circular(20),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            UserAvatar(
-              photoUrl: member?.photoUrl,
-              displayName: displayName,
-              radius: 10,
-            ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                '$label: $displayName',
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+        child: Text(
+          '$label: $displayName',
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );
