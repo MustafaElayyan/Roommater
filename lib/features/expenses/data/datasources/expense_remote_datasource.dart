@@ -9,6 +9,9 @@ import '../models/expense_model.dart';
 class ExpenseRemoteDataSource {
   const ExpenseRemoteDataSource(this._firestore, this._firebaseAuth);
 
+  static const String expenseHistoryAccessDeniedMessage =
+      'Only the household owner or admin can view expense history.';
+
   final FirebaseFirestore _firestore;
   final FirebaseAuth _firebaseAuth;
 
@@ -23,9 +26,7 @@ class ExpenseRemoteDataSource {
         userId: currentUid,
       );
       if (!canViewExpenses) {
-        throw const AuthException(
-          'Only the household owner or admin can view expense history.',
-        );
+        throw const AuthException(expenseHistoryAccessDeniedMessage);
       }
       final snapshot = await _firestore
           .collection('households')
@@ -162,12 +163,16 @@ class ExpenseRemoteDataSource {
     if (ownerId == userId) return true;
 
     final members = householdData['members'] as List<dynamic>? ?? const [];
+    var isHouseholdMember = false;
     for (final member in members.whereType<Map<String, dynamic>>()) {
       final memberUid = (member['uid'] as String? ?? '').trim();
       if (memberUid != userId) continue;
+      isHouseholdMember = true;
       final role = (member['role'] as String? ?? '').toLowerCase().trim();
       if (_isAdminOrOwnerRole(role)) return true;
     }
+
+    if (isHouseholdMember) return false;
 
     final userDoc = await _firestore.collection('users').doc(userId).get();
     final userData = userDoc.data() ?? const <String, dynamic>{};

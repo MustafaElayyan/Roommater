@@ -212,6 +212,6 @@ class ExpensesScreen extends ConsumerWidget {
 
   bool _isExpenseHistoryAccessDenied(Object? error) {
     if (error is! AuthException) return false;
-    return error.message.toLowerCase().contains('owner or admin');
+    return error.message == 'Only the household owner or admin can view expense history.';
   }
 }
