@@ -166,7 +166,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final isSubmitting = ref.watch(profileControllerProvider).isLoading;
 
     return PopScope(
-      canPop: true,
+      canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) {
           _handleBackNavigation();
