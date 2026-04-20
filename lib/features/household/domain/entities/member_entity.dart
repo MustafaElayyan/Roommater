@@ -8,12 +8,15 @@ class MemberEntity {
     required this.displayName,
     required this.email,
     this.photoUrl,
+    this.role = 'member',
   });
 
   final String uid;
   final String displayName;
   final String email;
   final String? photoUrl;
+  /// Household role, typically one of: `owner`, `admin`, or `member`.
+  final String role;
 
   @override
   bool operator ==(Object other) =>

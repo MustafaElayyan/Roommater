@@ -7,6 +7,7 @@ class MemberModel extends MemberEntity {
     required super.displayName,
     required super.email,
     super.photoUrl,
+    super.role,
   });
 
   factory MemberModel.fromJson(Map<String, dynamic> data) {
@@ -15,6 +16,7 @@ class MemberModel extends MemberEntity {
       displayName: data['displayName'] as String? ?? '',
       email: data['email'] as String? ?? '',
       photoUrl: data['photoUrl'] as String?,
+      role: data['role'] as String? ?? 'member',
     );
   }
 
@@ -24,6 +26,7 @@ class MemberModel extends MemberEntity {
       displayName: data['displayName'] as String? ?? '',
       email: data['email'] as String? ?? '',
       photoUrl: data['photoUrl'] as String?,
+      role: data['role'] as String? ?? 'member',
     );
   }
 
@@ -33,6 +36,7 @@ class MemberModel extends MemberEntity {
       'displayName': displayName,
       'email': email,
       if (photoUrl != null) 'photoUrl': photoUrl,
+      'role': role,
     };
   }
 
@@ -42,6 +46,7 @@ class MemberModel extends MemberEntity {
       'displayName': displayName,
       'email': email,
       if (photoUrl != null) 'photoUrl': photoUrl,
+      'role': role,
     };
   }
 }

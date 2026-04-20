@@ -20,7 +20,7 @@ class HouseholdRemoteDataSource {
       final user = _firebaseAuth.currentUser;
       final householdRef = _firestore.collection('households').doc();
       final inviteCode = _generateInviteCode();
-      final creator = await _buildMemberModel(user);
+      final creator = await _buildMemberModel(user, role: 'owner');
 
       await householdRef.set({
         'id': householdRef.id,
@@ -134,6 +134,7 @@ class HouseholdRemoteDataSource {
                   ? (userData['email'] as String).trim()
                   : member.email,
           photoUrl: userData['photoUrl'] as String? ?? member.photoUrl,
+          role: member.role,
         );
       }).toList();
       return enrichedMembers;
@@ -168,7 +169,10 @@ class HouseholdRemoteDataSource {
     }
   }
 
-  Future<MemberModel> _buildMemberModel(User? user) async {
+  Future<MemberModel> _buildMemberModel(
+    User? user, {
+    String role = 'member',
+  }) async {
     if (user == null) {
       throw const ApiException(
         'You must be signed in to create or join a household.',
@@ -184,6 +188,7 @@ class HouseholdRemoteDataSource {
           'Roommate',
       email: (userData['email'] as String?) ?? user.email ?? '',
       photoUrl: (userData['photoUrl'] as String?) ?? user.photoURL,
+      role: role,
     );
   }
 
