@@ -204,7 +204,8 @@ class ExpenseRemoteDataSource {
   }
 
   bool _isAdminOrOwnerRole(String role) {
-    return role == 'admin' || role == 'owner';
+    final normalized = role.toLowerCase().trim();
+    return normalized == 'admin' || normalized == 'owner';
   }
 
   Future<bool> _canSettleExpense({

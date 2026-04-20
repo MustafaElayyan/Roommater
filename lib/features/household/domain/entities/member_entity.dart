@@ -15,6 +15,7 @@ class MemberEntity {
   final String displayName;
   final String email;
   final String? photoUrl;
+  /// Household role, typically one of: `owner`, `admin`, or `member`.
   final String role;
 
   @override

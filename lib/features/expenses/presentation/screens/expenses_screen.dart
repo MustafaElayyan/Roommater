@@ -163,9 +163,10 @@ class ExpensesScreen extends ConsumerWidget {
   }
 
   String _memberRole(List<MemberEntity> members, String uid) {
-    final match = members.where((m) => m.uid == uid).toList();
-    if (match.isEmpty) return '';
-    return match.first.role;
+    for (final member in members) {
+      if (member.uid == uid) return member.role;
+    }
+    return '';
   }
 
   Widget _memberProfileLink(
