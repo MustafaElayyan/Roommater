@@ -98,7 +98,7 @@ class ExpenseRemoteDataSource {
       );
       if (!canSettle) {
         throw const AuthException(
-          'Only the household owner can mark expenses as paid.',
+          'Only the household owner or admin can mark expenses as paid.',
         );
       }
       final ref = _firestore
