@@ -113,7 +113,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
-        if (!didPop) {
+        if (!didPop && !_isSigningOut) {
           unawaited(_signOutAndGoToAuthChoice());
         }
       },
