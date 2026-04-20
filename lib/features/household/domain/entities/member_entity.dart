@@ -8,12 +8,14 @@ class MemberEntity {
     required this.displayName,
     required this.email,
     this.photoUrl,
+    this.role = 'member',
   });
 
   final String uid;
   final String displayName;
   final String email;
   final String? photoUrl;
+  final String role;
 
   @override
   bool operator ==(Object other) =>

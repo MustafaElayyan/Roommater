@@ -61,11 +61,12 @@ class HouseholdModel extends HouseholdEntity {
       'createdByUserId': createdByUserId,
       'createdAt': createdAt.toIso8601String(),
       'members': members
-          .map((e) => MemberModel(
+              .map((e) => MemberModel(
                 uid: e.uid,
                 displayName: e.displayName,
                 email: e.email,
                 photoUrl: e.photoUrl,
+                role: e.role,
               ).toJson())
           .toList(),
     };
@@ -79,11 +80,12 @@ class HouseholdModel extends HouseholdEntity {
       'createdByUserId': createdByUserId,
       'createdAt': Timestamp.fromDate(createdAt),
       'members': members
-          .map((e) => MemberModel(
+              .map((e) => MemberModel(
                 uid: e.uid,
                 displayName: e.displayName,
                 email: e.email,
                 photoUrl: e.photoUrl,
+                role: e.role,
               ).toFirestore())
           .toList(),
     };

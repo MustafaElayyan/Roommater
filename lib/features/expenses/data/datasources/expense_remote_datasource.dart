@@ -10,7 +10,7 @@ class ExpenseRemoteDataSource {
   const ExpenseRemoteDataSource(this._firestore, this._firebaseAuth);
 
   static const String expenseHistoryAccessDeniedMessage =
-      'Only the household owner or admin can view expense history.';
+      'Only household members can view expense history.';
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _firebaseAuth;
@@ -86,6 +86,21 @@ class ExpenseRemoteDataSource {
     required bool isSettled,
   }) async {
     try {
+      final currentUid = _firebaseAuth.currentUser?.uid?.trim();
+      if (currentUid == null || currentUid.isEmpty) {
+        throw const AuthException(
+          'You must be signed in to update expense settlement.',
+        );
+      }
+      final canSettle = await _canSettleExpense(
+        householdId: householdId,
+        userId: currentUid,
+      );
+      if (!canSettle) {
+        throw const AuthException(
+          'Only the household owner can mark expenses as paid.',
+        );
+      }
       final ref = _firestore
           .collection('households')
           .doc(householdId)
@@ -118,7 +133,7 @@ class ExpenseRemoteDataSource {
               ).toFirestore(),
             )
             .toList(),
-        'lastUpdatedBy': _firebaseAuth.currentUser?.uid,
+        'lastUpdatedBy': currentUid,
       }, SetOptions(merge: true));
       final updated = await ref.get();
       return ExpenseModel.fromFirestore(updated);
@@ -172,7 +187,7 @@ class ExpenseRemoteDataSource {
       if (_isAdminOrOwnerRole(role)) return true;
     }
 
-    if (isHouseholdMember) return false;
+    if (isHouseholdMember) return true;
 
     final userDoc = await _firestore.collection('users').doc(userId).get();
     final userData = userDoc.data() ?? const <String, dynamic>{};
@@ -190,6 +205,26 @@ class ExpenseRemoteDataSource {
 
   bool _isAdminOrOwnerRole(String role) {
     return role == 'admin' || role == 'owner';
+  }
+
+  Future<bool> _canSettleExpense({
+    required String householdId,
+    required String userId,
+  }) async {
+    final householdDoc = await _firestore.collection('households').doc(householdId).get();
+    if (!householdDoc.exists) return false;
+    final householdData = householdDoc.data() ?? const <String, dynamic>{};
+    final ownerId = (householdData['createdByUserId'] as String? ?? '').trim();
+    if (ownerId == userId) return true;
+
+    final members = householdData['members'] as List<dynamic>? ?? const [];
+    for (final member in members.whereType<Map<String, dynamic>>()) {
+      final memberUid = (member['uid'] as String? ?? '').trim();
+      if (memberUid != userId) continue;
+      final role = (member['role'] as String? ?? '').toLowerCase().trim();
+      return _isAdminOrOwnerRole(role);
+    }
+    return false;
   }
 
   Future<void> _createExpenseNotifications(ExpenseModel expense) async {

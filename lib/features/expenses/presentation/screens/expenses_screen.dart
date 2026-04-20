@@ -23,6 +23,10 @@ class ExpensesScreen extends ConsumerWidget {
         ? ref.watch(householdMembersProvider(household.id))
         : const AsyncValue<List<MemberEntity>>.data([]);
     final members = membersAsync.valueOrNull ?? const <MemberEntity>[];
+    final userCanSettleExpenses = currentUid != null &&
+        household != null &&
+        (currentUid == household.createdByUserId ||
+            _isAdminOrOwnerRole(_memberRole(members, currentUid)));
     final accessDenied = expensesAsync.hasError &&
         _isExpenseHistoryAccessDenied(expensesAsync.error);
 
@@ -41,7 +45,7 @@ class ExpensesScreen extends ConsumerWidget {
                     Icon(Icons.lock_outline, size: 42),
                     SizedBox(height: 12),
                     Text(
-                      'Only the household owner or admin can view expense history.',
+                      'Only household members can view expense history.',
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -110,23 +114,25 @@ class ExpensesScreen extends ConsumerWidget {
                           subtitle: Text(
                             '${split.shareAmount.toStringAsFixed(2)} JOD',
                           ),
-                          trailing: IconButton(
-                            icon: Icon(
-                              split.isSettled
-                                  ? Icons.check_circle
-                                  : Icons.radio_button_unchecked,
-                              color: split.isSettled ? Colors.green : null,
-                            ),
-                            onPressed: () {
-                              ref
-                                  .read(expenseControllerProvider.notifier)
-                                  .settleExpense(
-                                    expenseId: expense.id,
-                                    userId: split.userId,
-                                    isSettled: !split.isSettled,
-                                  );
-                            },
-                          ),
+                          trailing: userCanSettleExpenses
+                              ? IconButton(
+                                  icon: Icon(
+                                    split.isSettled
+                                        ? Icons.check_circle
+                                        : Icons.radio_button_unchecked,
+                                    color: split.isSettled ? Colors.green : null,
+                                  ),
+                                  onPressed: () {
+                                    ref
+                                        .read(expenseControllerProvider.notifier)
+                                        .settleExpense(
+                                          expenseId: expense.id,
+                                          userId: split.userId,
+                                          isSettled: !split.isSettled,
+                                        );
+                                  },
+                                )
+                              : null,
                         ),
                       ),
                     ],
@@ -154,6 +160,12 @@ class ExpensesScreen extends ConsumerWidget {
   String? _memberPhotoUrl(List<MemberEntity> members, String uid) {
     final match = members.where((m) => m.uid == uid).toList();
     return match.isNotEmpty ? match.first.photoUrl : null;
+  }
+
+  String _memberRole(List<MemberEntity> members, String uid) {
+    final match = members.where((m) => m.uid == uid).toList();
+    if (match.isEmpty) return '';
+    return match.first.role;
   }
 
   Widget _memberProfileLink(
@@ -212,6 +224,11 @@ class ExpensesScreen extends ConsumerWidget {
 
   bool _isExpenseHistoryAccessDenied(Object? error) {
     if (error is! AuthException) return false;
-    return error.message == 'Only the household owner or admin can view expense history.';
+    return error.message == 'Only household members can view expense history.';
+  }
+
+  bool _isAdminOrOwnerRole(String role) {
+    final normalized = role.toLowerCase().trim();
+    return normalized == 'admin' || normalized == 'owner';
   }
 }
