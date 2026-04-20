@@ -57,6 +57,10 @@ class ExpenseSplitModel extends ExpenseSplitEntity {
 }
 
 class ExpenseModel extends ExpenseEntity {
+  /// Sentinel for legacy malformed records missing both creator and payer IDs.
+  /// This value intentionally prevents creator-only actions from succeeding.
+  static const String unknownCreatorId = '__unknown_creator__';
+
   const ExpenseModel({
     required super.id,
     required super.householdId,
@@ -64,6 +68,7 @@ class ExpenseModel extends ExpenseEntity {
     required super.amount,
     super.category,
     required super.payerId,
+    required super.createdByUserId,
     required super.createdAt,
     required super.splits,
   });
@@ -77,6 +82,9 @@ class ExpenseModel extends ExpenseEntity {
       amount: (data['amount'] as num?)?.toDouble() ?? 0,
       category: data['category'] as String?,
       payerId: data['payerId'] as String? ?? '',
+      createdByUserId: data['createdByUserId'] as String? ??
+          data['payerId'] as String? ??
+          unknownCreatorId,
       createdAt: switch (createdAtRaw) {
         String() => DateTime.tryParse(createdAtRaw) ?? DateTime.now(),
         _ => DateTime.now(),
@@ -100,6 +108,9 @@ class ExpenseModel extends ExpenseEntity {
       amount: (data['amount'] as num?)?.toDouble() ?? 0,
       category: data['category'] as String?,
       payerId: data['payerId'] as String? ?? '',
+      createdByUserId: data['createdByUserId'] as String? ??
+          data['payerId'] as String? ??
+          unknownCreatorId,
       createdAt: switch (createdAtRaw) {
         Timestamp() => createdAtRaw.toDate(),
         String() => DateTime.tryParse(createdAtRaw) ?? DateTime.now(),
@@ -120,6 +131,7 @@ class ExpenseModel extends ExpenseEntity {
       'amount': amount,
       if (category != null) 'category': category,
       'payerId': payerId,
+      'createdByUserId': createdByUserId,
       'createdAt': createdAt.toIso8601String(),
       'splits': splits
           .map(
@@ -142,6 +154,7 @@ class ExpenseModel extends ExpenseEntity {
       'amount': amount,
       if (category != null) 'category': category,
       'payerId': payerId,
+      'createdByUserId': createdByUserId,
       'createdAt': Timestamp.fromDate(createdAt),
       'splits': splits
           .map(

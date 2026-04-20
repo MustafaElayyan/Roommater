@@ -8,6 +8,11 @@ class NotificationRepositoryImpl implements NotificationRepository {
   final NotificationRemoteDataSource _dataSource;
 
   @override
+  Stream<List<NotificationEntity>> watchNotifications(String recipientUserId) {
+    return _dataSource.watchNotifications(recipientUserId);
+  }
+
+  @override
   Future<List<NotificationEntity>> getNotifications(String recipientUserId) {
     return _dataSource.getNotifications(recipientUserId);
   }

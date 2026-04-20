@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/network/firestore_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../profile/presentation/controllers/profile_controller.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/auth_form_field.dart';
@@ -115,14 +115,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final user = ref.read(firebaseAuthProvider).currentUser;
     if (user == null) return;
     try {
-      final refPath =
-          FirebaseStorage.instance.ref().child('avatars/${user.uid}.$_imageExtension');
-      await refPath.putData(
-        _imageBytes!,
-        SettableMetadata(contentType: _contentType),
-      );
-      final downloadUrl = await refPath.getDownloadURL();
-      await ref.read(authControllerProvider.notifier).updateProfilePhoto(downloadUrl);
+      await ref.read(profileControllerProvider.notifier).updateProfilePhoto(
+            uid: user.uid,
+            bytes: _imageBytes!,
+            extension: _imageExtension,
+            contentType: _contentType,
+          );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../shared/widgets/user_avatar.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
 import '../../../household/domain/entities/member_entity.dart';
@@ -75,6 +76,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   final dueText = _formatDueDate(task.dueDate);
                   final userCanCompleteTask = task.assignedToUserId == currentUid;
                   final userCanEditDueDate = task.createdByUserId == currentUid;
+                  final userCanDeleteTask = task.createdByUserId == currentUid;
                   return Card(
                     child: ListTile(
                       leading: userCanCompleteTask
@@ -83,10 +85,21 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                               onChanged: (_) => _toggleTask(context, ref, task),
                             )
                           : null,
-                      trailing: userCanEditDueDate
-                          ? IconButton(
-                              icon: const Icon(Icons.edit_calendar_outlined),
-                              onPressed: () => _editDueDate(context, ref, task),
+                      trailing: (userCanEditDueDate || userCanDeleteTask)
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (userCanEditDueDate)
+                                  IconButton(
+                                    icon: const Icon(Icons.edit_calendar_outlined),
+                                    onPressed: () => _editDueDate(context, ref, task),
+                                  ),
+                                if (userCanDeleteTask)
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline),
+                                    onPressed: () => _confirmDeleteTask(context, ref, task),
+                                  ),
+                              ],
                             )
                           : null,
                       title: Text(
@@ -98,8 +111,20 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Created by: ${creatorName ?? task.createdByUserId}'),
-                          Text('Assigned to: ${assigneeName ?? 'Unassigned'}'),
+                          _buildMemberProfileLink(
+                            context,
+                            members: members,
+                            uid: task.createdByUserId,
+                            label: 'Created by',
+                            fallbackName: creatorName ?? task.createdByUserId,
+                          ),
+                          _buildMemberProfileLink(
+                            context,
+                            members: members,
+                            uid: task.assignedToUserId,
+                            label: 'Assigned to',
+                            fallbackName: assigneeName ?? 'Unassigned',
+                          ),
                           if (dueText != null) Text('Due: $dueText'),
                           if (task.completionNote != null &&
                               task.completionNote!.trim().isNotEmpty)
@@ -131,6 +156,78 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   String? _resolveCreator(TaskEntity task, List<MemberEntity> members) {
     final match = members.where((m) => m.uid == task.createdByUserId).toList();
     return match.isNotEmpty ? match.first.displayName : null;
+  }
+
+  Widget _buildMemberProfileLink(
+    BuildContext context, {
+    required List<MemberEntity> members,
+    required String? uid,
+    required String label,
+    required String fallbackName,
+  }) {
+    if (uid == null || uid.trim().isEmpty) {
+      return Text('$label: $fallbackName');
+    }
+    MemberEntity? member;
+    for (final candidate in members) {
+      if (candidate.uid == uid) {
+        member = candidate;
+        break;
+      }
+    }
+    final displayName = (member?.displayName.trim().isNotEmpty ?? false)
+        ? member!.displayName
+        : fallbackName;
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: InkWell(
+        onTap: () => context.push(AppRoutes.profileDetailsFor(uid)),
+        borderRadius: BorderRadius.circular(20),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            UserAvatar(
+              photoUrl: member?.photoUrl,
+              displayName: displayName,
+              radius: 10,
+            ),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                '$label: $displayName',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteTask(
+    BuildContext context,
+    WidgetRef ref,
+    TaskEntity task,
+  ) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Task'),
+        content: Text('Delete "${task.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (shouldDelete != true) return;
+    await ref.read(taskControllerProvider.notifier).deleteTask(task.id);
   }
 
   Future<void> _toggleTask(

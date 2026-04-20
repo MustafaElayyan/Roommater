@@ -28,9 +28,11 @@ import '../../features/household/presentation/controllers/household_controller.d
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/profile_details_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/tasks/presentation/screens/create_task_screen.dart';
 import '../../features/tasks/presentation/screens/tasks_screen.dart';
+import '../../shared/widgets/user_avatar.dart';
 import 'app_routes.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -212,6 +214,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ProfileScreen(),
       ),
       GoRoute(
+        path: AppRoutes.profileDetails,
+        builder: (context, state) {
+          final userId = state.pathParameters['userId'] ?? '';
+          return ProfileDetailsScreen(userId: userId);
+        },
+      ),
+      GoRoute(
         path: AppRoutes.settings,
         builder: (context, state) => const SettingsScreen(),
       ),
@@ -283,7 +292,6 @@ class _MainShell extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final household = ref.watch(currentHouseholdProvider);
     final user = ref.watch(authStateProvider).valueOrNull;
-    final hasPhoto = user?.photoUrl?.isNotEmpty ?? false;
     final avatarLabel = (user?.displayName?.trim().isNotEmpty ?? false)
         ? user!.displayName!.trim()[0]
         : (user?.email.isNotEmpty ?? false)
@@ -343,15 +351,10 @@ class _MainShell extends ConsumerWidget {
                     padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
                     child: Row(
                       children: [
-                        CircleAvatar(
+                        UserAvatar(
+                          photoUrl: user?.photoUrl,
+                          displayName: avatarLabel,
                           radius: 28,
-                          backgroundImage: hasPhoto ? NetworkImage(user!.photoUrl!) : null,
-                          child: hasPhoto
-                              ? null
-                              : Text(
-                                  avatarLabel.toUpperCase(),
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(

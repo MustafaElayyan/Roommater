@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../shared/widgets/user_avatar.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../domain/entities/profile_entity.dart';
 import '../controllers/profile_controller.dart';
@@ -177,21 +178,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             _didInitControllers = true;
           }
 
-          final hasPhoto = profile.photoUrl?.isNotEmpty ?? false;
-          final fallbackLetter = profile.displayName.isNotEmpty
-              ? profile.displayName[0].toUpperCase()
-              : '?';
-
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
               Center(
                 child: Stack(
                   children: [
-                    CircleAvatar(
+                    UserAvatar(
+                      photoUrl: profile.photoUrl,
+                      displayName: profile.displayName,
                       radius: 44,
-                      backgroundImage: hasPhoto ? NetworkImage(profile.photoUrl!) : null,
-                      child: hasPhoto ? null : Text(fallbackLetter),
                     ),
                     Positioned(
                       right: 0,

@@ -107,16 +107,36 @@ class HouseholdRemoteDataSource {
   Future<List<MemberModel>> getMembers(String householdId) async {
     try {
       final household = await getHousehold(householdId);
-      return household.members
-          .map(
-            (member) => MemberModel(
-              uid: member.uid,
-              displayName: member.displayName,
-              email: member.email,
-              photoUrl: member.photoUrl,
-            ),
-          )
-          .toList();
+      final memberIds = household.members.map((member) => member.uid).toList();
+      final usersById = <String, Map<String, dynamic>>{};
+      for (var i = 0; i < memberIds.length; i += 10) {
+        final chunk = memberIds.skip(i).take(10).toList();
+        if (chunk.isEmpty) continue;
+        final snapshot = await _firestore
+            .collection('users')
+            .where(FieldPath.documentId, whereIn: chunk)
+            .get();
+        for (final doc in snapshot.docs) {
+          usersById[doc.id] = doc.data();
+        }
+      }
+
+      final enrichedMembers = household.members.map((member) {
+        final userData = usersById[member.uid] ?? const <String, dynamic>{};
+        return MemberModel(
+          uid: member.uid,
+          displayName:
+              (userData['displayName'] as String?)?.trim().isNotEmpty == true
+                  ? (userData['displayName'] as String).trim()
+                  : member.displayName,
+          email:
+              (userData['email'] as String?)?.trim().isNotEmpty == true
+                  ? (userData['email'] as String).trim()
+                  : member.email,
+          photoUrl: userData['photoUrl'] as String? ?? member.photoUrl,
+        );
+      }).toList();
+      return enrichedMembers;
     } on FirebaseException catch (e) {
       throw ApiException('Failed to load members.', e);
     }

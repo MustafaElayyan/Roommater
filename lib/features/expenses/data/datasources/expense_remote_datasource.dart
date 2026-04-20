@@ -34,6 +34,10 @@ class ExpenseRemoteDataSource {
     required List<ExpenseSplitModel> splits,
   }) async {
     try {
+      final currentUid = _firebaseAuth.currentUser?.uid;
+      if (currentUid == null || currentUid.trim().isEmpty) {
+        throw const AuthException('You must be signed in to create expenses.');
+      }
       final ref = _firestore
           .collection('households')
           .doc(householdId)
@@ -46,6 +50,7 @@ class ExpenseRemoteDataSource {
         amount: amount,
         category: category,
         payerId: payerId,
+        createdByUserId: currentUid,
         createdAt: DateTime.now(),
         splits: splits,
       );
@@ -107,12 +112,24 @@ class ExpenseRemoteDataSource {
 
   Future<void> deleteExpense(String householdId, String expenseId) async {
     try {
-      await _firestore
+      final currentUid = _firebaseAuth.currentUser?.uid;
+      if (currentUid == null) {
+        throw const ApiException('You must be signed in to delete expenses.');
+      }
+      final expenseRef = _firestore
           .collection('households')
           .doc(householdId)
           .collection('expenses')
-          .doc(expenseId)
-          .delete();
+          .doc(expenseId);
+      final doc = await expenseRef.get();
+      if (!doc.exists) {
+        throw const ApiException('Expense not found.');
+      }
+      final expense = ExpenseModel.fromFirestore(doc);
+      if (expense.createdByUserId != currentUid) {
+        throw const AuthException('Only the expense creator can delete this expense.');
+      }
+      await expenseRef.delete();
     } on FirebaseException catch (e) {
       throw ApiException('Failed to delete expense.', e);
     }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../shared/widgets/user_avatar.dart';
 import '../../domain/entities/member_entity.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../controllers/household_controller.dart';
@@ -82,20 +83,14 @@ class ManageMembersScreen extends ConsumerWidget {
               final member = members[index];
               final isSelf = member.uid == currentUser?.uid;
               final isOwner = member.uid == household.createdByUserId;
-              final hasPhoto = member.photoUrl?.isNotEmpty ?? false;
-
-              return Card(
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: hasPhoto ? NetworkImage(member.photoUrl!) : null,
-                    child: hasPhoto
-                        ? null
-                        : Text(
-                            member.displayName.isNotEmpty
-                                ? member.displayName[0].toUpperCase()
-                                : '?',
-                          ),
-                  ),
+               return Card(
+                 child: ListTile(
+                   onTap: () => context.push(AppRoutes.profileDetailsFor(member.uid)),
+                   leading: UserAvatar(
+                     photoUrl: member.photoUrl,
+                     displayName: member.displayName,
+                     radius: 20,
+                   ),
                   title: Text(
                     member.displayName +
                         (isSelf ? ' (You)' : '') +

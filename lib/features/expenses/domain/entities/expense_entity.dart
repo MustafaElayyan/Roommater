@@ -24,6 +24,7 @@ class ExpenseEntity {
     required this.amount,
     this.category,
     required this.payerId,
+    required this.createdByUserId,
     required this.createdAt,
     required this.splits,
   });
@@ -34,6 +35,7 @@ class ExpenseEntity {
   final double amount;
   final String? category;
   final String payerId;
+  final String createdByUserId;
   final DateTime createdAt;
   final List<ExpenseSplitEntity> splits;
 

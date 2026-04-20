@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -8,6 +10,30 @@ class NotificationRemoteDataSource {
   const NotificationRemoteDataSource(this._firestore);
 
   final FirebaseFirestore _firestore;
+
+  Stream<List<NotificationModel>> watchNotifications(String recipientUserId) {
+    return _firestore
+        .collection('users')
+        .doc(recipientUserId)
+        .collection('notifications')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map(NotificationModel.fromFirestore).toList())
+        .transform(
+          StreamTransformer<List<NotificationModel>, List<NotificationModel>>.fromHandlers(
+            handleError: (error, stackTrace, sink) {
+              if (error is FirebaseException) {
+                sink.addError(
+                  ApiException('Failed to load notifications (${error.code}).', error),
+                  stackTrace,
+                );
+                return;
+              }
+              sink.addError(error, stackTrace);
+            },
+          ),
+        );
+  }
 
   Future<List<NotificationModel>> getNotifications(String recipientUserId) async {
     try {
