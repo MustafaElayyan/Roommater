@@ -81,7 +81,6 @@ class ExpensesScreen extends ConsumerWidget {
                       if (expense.category?.isNotEmpty ?? false)
                         Text('Category: ${expense.category}'),
                       _memberProfileLink(
-                        context,
                         members: members,
                         uid: expense.payerId,
                         label: 'Payer',
@@ -103,14 +102,8 @@ class ExpensesScreen extends ConsumerWidget {
                             photoUrl: _memberPhotoUrl(members, split.userId),
                             displayName: _memberName(members, split.userId),
                             radius: 12,
-                            onTap: () =>
-                                context.push(AppRoutes.profileDetailsFor(split.userId)),
                           ),
-                          title: InkWell(
-                            onTap: () =>
-                                context.push(AppRoutes.profileDetailsFor(split.userId)),
-                            child: Text(_memberName(members, split.userId)),
-                          ),
+                          title: Text(_memberName(members, split.userId)),
                           subtitle: Text(
                             '${split.shareAmount.toStringAsFixed(2)} JOD',
                           ),
@@ -170,29 +163,25 @@ class ExpensesScreen extends ConsumerWidget {
   }
 
   Widget _memberProfileLink(
-    BuildContext context, {
+    {
     required List<MemberEntity> members,
     required String uid,
     required String label,
   }) {
     final memberName = _memberName(members, uid);
-    return InkWell(
-      onTap: () => context.push(AppRoutes.profileDetailsFor(uid)),
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            UserAvatar(
-              photoUrl: _memberPhotoUrl(members, uid),
-              displayName: memberName,
-              radius: 10,
-            ),
-            const SizedBox(width: 6),
-            Text('$label: $memberName'),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          UserAvatar(
+            photoUrl: _memberPhotoUrl(members, uid),
+            displayName: memberName,
+            radius: 10,
+          ),
+          const SizedBox(width: 6),
+          Text('$label: $memberName'),
+        ],
       ),
     );
   }

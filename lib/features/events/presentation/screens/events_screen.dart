@@ -87,6 +87,6 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
     final date =
         '${event.eventDate.year}-${event.eventDate.month.toString().padLeft(2, '0')}-${event.eventDate.day.toString().padLeft(2, '0')}';
     final time = event.eventTime == null ? '' : ' • ${event.eventTime}';
-    return '$date$time • ${event.eventType}';
+    return '$date$time';
   }
 }

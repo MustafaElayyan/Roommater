@@ -13,10 +13,10 @@ abstract final class AppColors {
   static const Color accent = Color(0xFF23967F);
 
   // Neutral
-  static const Color backgroundLight = Color(0xFFE8F5F2);
-  static const Color backgroundDark = Color(0xFF313638);
+  static const Color backgroundLight = Color(0xFFF0F5F5);
+  static const Color backgroundDark = Color(0xFF081418);
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceDark = Color(0xFF3E4245);
+  static const Color surfaceDark = Color(0xFF112126);
 
   // Text
   static const Color textPrimary = Color(0xFF0E2E29);

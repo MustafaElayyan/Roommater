@@ -17,6 +17,7 @@ class TasksScreen extends ConsumerStatefulWidget {
 }
 
 class _TasksScreenState extends ConsumerState<TasksScreen> {
+  static const double _trailingActionsMaxHeight = 72;
   bool _myTasks = true;
 
   @override
@@ -97,48 +98,53 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             )
                           : null,
                       trailing: (userCanEditTask || userCanDeleteTask || userCanApprove)
-                          ? Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (userCanEditTask)
-                                  IconButton(
-                                    visualDensity: VisualDensity.compact,
-                                    constraints: const BoxConstraints.tightFor(
-                                      width: 36,
-                                      height: 36,
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.edit_calendar_outlined),
-                                    onPressed: () => context.push(
-                                      AppRoutes.editTask,
-                                      extra: task,
-                                    ),
-                                  ),
-                                if (userCanDeleteTask)
-                                  IconButton(
-                                    visualDensity: VisualDensity.compact,
-                                    constraints: const BoxConstraints.tightFor(
-                                      width: 36,
-                                      height: 36,
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.delete_outline),
-                                    onPressed: () => _confirmDeleteTask(context, ref, task),
-                                  ),
-                                if (userCanApprove)
-                                  IconButton(
-                                    visualDensity: VisualDensity.compact,
-                                    constraints: const BoxConstraints.tightFor(
-                                      width: 36,
-                                      height: 36,
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.verified_outlined),
-                                    onPressed: () => ref
-                                        .read(taskControllerProvider.notifier)
-                                        .approveTask(task),
-                                  ),
-                              ],
+                          ? SizedBox(
+                              height: _trailingActionsMaxHeight,
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (userCanEditTask)
+                                      IconButton(
+                                        visualDensity: VisualDensity.compact,
+                                        constraints: const BoxConstraints.tightFor(
+                                          width: 36,
+                                          height: 36,
+                                        ),
+                                        padding: EdgeInsets.zero,
+                                        icon: const Icon(Icons.edit_calendar_outlined),
+                                        onPressed: () => context.push(
+                                          AppRoutes.editTask,
+                                          extra: task,
+                                        ),
+                                      ),
+                                    if (userCanDeleteTask)
+                                      IconButton(
+                                        visualDensity: VisualDensity.compact,
+                                        constraints: const BoxConstraints.tightFor(
+                                          width: 36,
+                                          height: 36,
+                                        ),
+                                        padding: EdgeInsets.zero,
+                                        icon: const Icon(Icons.delete_outline),
+                                        onPressed: () => _confirmDeleteTask(context, ref, task),
+                                      ),
+                                    if (userCanApprove)
+                                      IconButton(
+                                        visualDensity: VisualDensity.compact,
+                                        constraints: const BoxConstraints.tightFor(
+                                          width: 36,
+                                          height: 36,
+                                        ),
+                                        padding: EdgeInsets.zero,
+                                        icon: const Icon(Icons.verified_outlined),
+                                        onPressed: () => ref
+                                            .read(taskControllerProvider.notifier)
+                                            .approveTask(task),
+                                      ),
+                                  ],
+                                ),
+                              ),
                             )
                           : null,
                       title: Text(
