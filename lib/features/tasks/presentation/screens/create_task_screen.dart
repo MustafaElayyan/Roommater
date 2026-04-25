@@ -168,7 +168,7 @@ class _CreateTaskScreenState extends ConsumerState<CreateTaskScreen> {
                     (value == null || value.trim().isEmpty) ? 'Title is required' : null,
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              TextField(
                 controller: _descController,
                 maxLines: 3,
                 decoration: const InputDecoration(labelText: 'Description'),

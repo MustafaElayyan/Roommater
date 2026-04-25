@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -35,6 +38,8 @@ class TaskRemoteDataSource {
           if (myTasks == true) {
             final uid = _firebaseAuth.currentUser?.uid;
             if (uid == null) return <TaskModel>[];
+            // We support both legacy single-assignee and new multi-assignee
+            // fields, so filtering is performed client-side for compatibility.
             return tasks.where((task) {
               if (task.assignedToUserIds.contains(uid)) return true;
               return task.assignedToUserId == uid;
@@ -80,6 +85,8 @@ class TaskRemoteDataSource {
       if (myTasks != true) return tasks;
       final uid = _firebaseAuth.currentUser?.uid;
       if (uid == null) return <TaskModel>[];
+      // We support both legacy single-assignee and new multi-assignee
+      // fields, so filtering is performed client-side for compatibility.
       return tasks.where((task) {
         if (task.assignedToUserIds.contains(uid)) return true;
         return task.assignedToUserId == uid;
@@ -107,21 +114,12 @@ class TaskRemoteDataSource {
           .collection('tasks')
           .doc();
       final currentUser = _firebaseAuth.currentUser;
-      final normalizedAssignedIds = assignedToUserIds
-          .map((id) => id.trim())
-          .where((id) => id.isNotEmpty)
-          .toSet()
-          .toList();
-      final normalizedAssignedNames = assignedToNames
-          .map((name) => name.trim())
-          .where((name) => name.isNotEmpty)
-          .toList();
-      final firstAssignedId = normalizedAssignedIds.isNotEmpty
-          ? normalizedAssignedIds.first
-          : assignedToUserId;
-      final firstAssignedName = normalizedAssignedNames.isNotEmpty
-          ? normalizedAssignedNames.first
-          : assignedToName;
+      final normalized = _normalizeAssignments(
+        assignedToUserIds: assignedToUserIds,
+        assignedToNames: assignedToNames,
+        assignedToUserId: assignedToUserId,
+        assignedToName: assignedToName,
+      );
       final isOwner = await _isCurrentUserOwner(householdId);
       final model = TaskModel(
         id: taskRef.id,
@@ -132,10 +130,10 @@ class TaskRemoteDataSource {
         dueDate: dueDate,
         createdByUserId: currentUser?.uid ?? 'guest',
         createdByName: currentUser?.displayName ?? currentUser?.email,
-        assignedToUserIds: normalizedAssignedIds,
-        assignedToNames: normalizedAssignedNames,
-        assignedToUserId: firstAssignedId,
-        assignedToName: firstAssignedName,
+        assignedToUserIds: normalized.ids,
+        assignedToNames: normalized.names,
+        assignedToUserId: normalized.firstId,
+        assignedToName: normalized.firstName,
         completionNote: null,
         repeatDays: repeatDays,
         approvalStatus:
@@ -176,21 +174,12 @@ class TaskRemoteDataSource {
       final previousDoc = await taskRef.get();
       final previousTask =
           previousDoc.exists ? TaskModel.fromFirestore(previousDoc) : null;
-      final normalizedAssignedIds = assignedToUserIds
-          .map((id) => id.trim())
-          .where((id) => id.isNotEmpty)
-          .toSet()
-          .toList();
-      final normalizedAssignedNames = assignedToNames
-          .map((name) => name.trim())
-          .where((name) => name.isNotEmpty)
-          .toList();
-      final firstAssignedId = normalizedAssignedIds.isNotEmpty
-          ? normalizedAssignedIds.first
-          : assignedToUserId;
-      final firstAssignedName = normalizedAssignedNames.isNotEmpty
-          ? normalizedAssignedNames.first
-          : assignedToName;
+      final normalized = _normalizeAssignments(
+        assignedToUserIds: assignedToUserIds,
+        assignedToNames: assignedToNames,
+        assignedToUserId: assignedToUserId,
+        assignedToName: assignedToName,
+      );
       await taskRef.set({
         'id': taskId,
         'householdId': householdId,
@@ -198,14 +187,14 @@ class TaskRemoteDataSource {
         if (description != null) 'description': description else 'description': null,
         'isCompleted': isCompleted,
         if (dueDate != null) 'dueDate': Timestamp.fromDate(dueDate!) else 'dueDate': null,
-        'assignedToUserIds': normalizedAssignedIds,
-        'assignedToNames': normalizedAssignedNames,
-        if (firstAssignedId != null)
-          'assignedToUserId': firstAssignedId
+        'assignedToUserIds': normalized.ids,
+        'assignedToNames': normalized.names,
+        if (normalized.firstId != null)
+          'assignedToUserId': normalized.firstId
         else
           'assignedToUserId': null,
-        if (firstAssignedName != null)
-          'assignedToName': firstAssignedName
+        if (normalized.firstName != null)
+          'assignedToName': normalized.firstName
         else
           'assignedToName': null,
         if (completionNote != null)
@@ -314,10 +303,46 @@ class TaskRemoteDataSource {
   bool _sameAssignments(List<String> left, List<String> right) {
     final leftSet = left.toSet();
     final rightSet = right.toSet();
-    if (leftSet.length != rightSet.length) return false;
-    for (final id in leftSet) {
-      if (!rightSet.contains(id)) return false;
-    }
-    return true;
+    return const SetEquality<String>().equals(leftSet, rightSet);
   }
+
+  _NormalizedAssignments _normalizeAssignments({
+    required List<String> assignedToUserIds,
+    required List<String> assignedToNames,
+    required String? assignedToUserId,
+    required String? assignedToName,
+  }) {
+    final normalizedAssignedIds = assignedToUserIds
+        .map((id) => id.trim())
+        .where((id) => id.isNotEmpty);
+    final uniqueIds = LinkedHashSet<String>.of(normalizedAssignedIds).toList();
+    final normalizedAssignedNames = assignedToNames
+        .map((name) => name.trim())
+        .where((name) => name.isNotEmpty)
+        .toList();
+    return _NormalizedAssignments(
+      ids: uniqueIds,
+      names: normalizedAssignedNames,
+      firstId: uniqueIds.isNotEmpty
+          ? uniqueIds.first
+          : assignedToUserId,
+      firstName: normalizedAssignedNames.isNotEmpty
+          ? normalizedAssignedNames.first
+          : assignedToName,
+    );
+  }
+}
+
+class _NormalizedAssignments {
+  const _NormalizedAssignments({
+    required this.ids,
+    required this.names,
+    required this.firstId,
+    required this.firstName,
+  });
+
+  final List<String> ids;
+  final List<String> names;
+  final String? firstId;
+  final String? firstName;
 }

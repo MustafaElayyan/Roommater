@@ -26,12 +26,8 @@ class TaskModel extends TaskEntity {
   factory TaskModel.fromJson(Map<String, dynamic> data) {
     final legacyAssignedUid = data['assignedToUserId'] as String?;
     final legacyAssignedName = data['assignedToName'] as String?;
-    final assignedToUserIds = (data['assignedToUserIds'] as List<dynamic>? ?? const [])
-        .map((e) => e.toString())
-        .toList();
-    final assignedToNames = (data['assignedToNames'] as List<dynamic>? ?? const [])
-        .map((e) => e.toString())
-        .toList();
+    final assignedToUserIds = _stringList(data['assignedToUserIds']);
+    final assignedToNames = _stringList(data['assignedToNames']);
     return TaskModel(
       id: data['id'] as String? ?? '',
       householdId: data['householdId'] as String? ?? '',
@@ -56,10 +52,7 @@ class TaskModel extends TaskEntity {
       assignedToUserId: legacyAssignedUid,
       assignedToName: legacyAssignedName,
       completionNote: data['completionNote'] as String?,
-      repeatDays: (data['repeatDays'] as List<dynamic>? ?? const [])
-          .whereType<num>()
-          .map((e) => e.toInt())
-          .toList(),
+      repeatDays: _intList(data['repeatDays']),
       approvalStatus:
           data['approvalStatus'] as String? ?? TaskEntity.statusActive,
       createdAt: DateTime.parse(
@@ -76,12 +69,8 @@ class TaskModel extends TaskEntity {
     final createdAtRaw = data['createdAt'];
     final legacyAssignedUid = data['assignedToUserId'] as String?;
     final legacyAssignedName = data['assignedToName'] as String?;
-    final assignedToUserIds = (data['assignedToUserIds'] as List<dynamic>? ?? const [])
-        .map((e) => e.toString())
-        .toList();
-    final assignedToNames = (data['assignedToNames'] as List<dynamic>? ?? const [])
-        .map((e) => e.toString())
-        .toList();
+    final assignedToUserIds = _stringList(data['assignedToUserIds']);
+    final assignedToNames = _stringList(data['assignedToNames']);
 
     return TaskModel(
       id: data['id'] as String? ?? doc.id,
@@ -109,10 +98,7 @@ class TaskModel extends TaskEntity {
       assignedToUserId: legacyAssignedUid,
       assignedToName: legacyAssignedName,
       completionNote: data['completionNote'] as String?,
-      repeatDays: (data['repeatDays'] as List<dynamic>? ?? const [])
-          .whereType<num>()
-          .map((e) => e.toInt())
-          .toList(),
+      repeatDays: _intList(data['repeatDays']),
       approvalStatus:
           data['approvalStatus'] as String? ?? TaskEntity.statusActive,
       createdAt: switch (createdAtRaw) {
@@ -163,5 +149,19 @@ class TaskModel extends TaskEntity {
       'approvalStatus': approvalStatus,
       'createdAt': Timestamp.fromDate(createdAt),
     };
+  }
+
+  static List<String> _stringList(dynamic raw) {
+    return (raw as List<dynamic>? ?? const [])
+        .where((e) => e != null)
+        .map((e) => e.toString())
+        .toList();
+  }
+
+  static List<int> _intList(dynamic raw) {
+    return (raw as List<dynamic>? ?? const [])
+        .whereType<num>()
+        .map((e) => e.toInt())
+        .toList();
   }
 }

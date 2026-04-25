@@ -71,10 +71,14 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
   }
 
   List<EventEntity> _eventsForDay(List<EventEntity> events, DateTime day) {
-    final selected = DateTime(day.year, day.month, day.day);
+    final selectedYear = day.year;
+    final selectedMonth = day.month;
+    final selectedDay = day.day;
     return events.where((event) {
-      final date = DateTime(event.eventDate.year, event.eventDate.month, event.eventDate.day);
-      return date == selected;
+      final date = event.eventDate;
+      return date.year == selectedYear &&
+          date.month == selectedMonth &&
+          date.day == selectedDay;
     }).toList()
       ..sort((a, b) => a.eventDate.compareTo(b.eventDate));
   }

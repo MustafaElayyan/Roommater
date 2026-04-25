@@ -179,6 +179,7 @@ class HouseholdRemoteDataSource {
       final currentOwnerId = data['createdByUserId'] as String?;
 
       if (remainingMembers.isEmpty) {
+        // If the last member leaves, remove the household record entirely.
         await householdRef.delete();
       } else {
         String? nextOwnerId = currentOwnerId;
