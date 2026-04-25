@@ -16,6 +16,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  static const int _maxHouseholdNameLength = 64;
   bool _notifications = true;
   final _householdNameController = TextEditingController();
   String? _boundHouseholdId;
@@ -106,6 +107,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                   child: TextField(
                     controller: _householdNameController,
+                    maxLength: _maxHouseholdNameLength,
                     decoration: const InputDecoration(
                       labelText: 'Household Name',
                     ),

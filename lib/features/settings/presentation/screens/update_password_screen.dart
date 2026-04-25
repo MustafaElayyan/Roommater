@@ -15,6 +15,7 @@ class UpdatePasswordScreen extends ConsumerStatefulWidget {
 
 class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
   static const int _minPasswordLength = 8;
+  static const int _maxPasswordLength = 128;
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
 
@@ -94,12 +95,14 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
             TextField(
               controller: _currentPasswordController,
               obscureText: true,
+              maxLength: _maxPasswordLength,
               decoration: const InputDecoration(labelText: 'Current Password'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _newPasswordController,
               obscureText: true,
+              maxLength: _maxPasswordLength,
               decoration: const InputDecoration(labelText: 'New Password'),
             ),
             const SizedBox(height: 16),
