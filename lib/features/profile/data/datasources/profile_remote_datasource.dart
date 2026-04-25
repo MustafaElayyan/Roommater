@@ -23,6 +23,7 @@ class ProfileRemoteDataSource {
   static const int _downloadUrlRetryAttempts = 6;
   static const int _downloadUrlRetryBaseDelayMs = 400;
   static const String _objectNotFoundCode = 'object-not-found';
+  static const String _httpNotFoundStatusCode = '404';
   static final RegExp _objectNotFoundTokenPattern = RegExp(
     r'(^|[^a-z0-9-])object-not-found([^a-z0-9-]|$)',
   );
@@ -31,7 +32,7 @@ class ProfileRemoteDataSource {
     caseSensitive: false,
   );
   static final RegExp _firebaseStorageNotFoundDetailsPattern = RegExp(
-    r'("code"\s*:\s*404|httpresult:\s*404)',
+    '("code"\\s*:\\s*$_httpNotFoundStatusCode|httpresult:\\s*$_httpNotFoundStatusCode)',
     caseSensitive: false,
   );
 
@@ -155,11 +156,12 @@ class ProfileRemoteDataSource {
       // Native Firebase Storage not-found code observed on some platforms.
       '-13010',
       // HTTP not-found status surfaced through Storage exception wrappers.
-      '404',
+      _httpNotFoundStatusCode,
     };
     final normalizedCode = code.trim();
-    if (objectNotFoundCodes.contains(normalizedCode.toLowerCase()) ||
-        objectNotFoundNumericCodes.contains(normalizedCode)) {
+    final normalizedCodeLower = normalizedCode.toLowerCase();
+    if (objectNotFoundCodes.contains(normalizedCodeLower) ||
+        objectNotFoundNumericCodes.contains(normalizedCodeLower)) {
       return true;
     }
 
