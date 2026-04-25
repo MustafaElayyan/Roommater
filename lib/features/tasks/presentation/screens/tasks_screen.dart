@@ -17,6 +17,7 @@ class TasksScreen extends ConsumerStatefulWidget {
 }
 
 class _TasksScreenState extends ConsumerState<TasksScreen> {
+  static const double _trailingActionsMaxHeight = 72;
   bool _myTasks = true;
 
   @override
@@ -98,7 +99,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           : null,
                       trailing: (userCanEditTask || userCanDeleteTask || userCanApprove)
                           ? SizedBox(
-                              height: 72,
+                              height: _trailingActionsMaxHeight,
                               child: SingleChildScrollView(
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
