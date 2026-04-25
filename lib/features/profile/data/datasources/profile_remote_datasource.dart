@@ -26,6 +26,9 @@ class ProfileRemoteDataSource {
   static final RegExp _objectNotFoundTokenPattern = RegExp(
     r'(^|[^a-z0-9-])object-not-found([^a-z0-9-]|$)',
   );
+  static final RegExp _firebaseStorageNotFoundMessagePattern = RegExp(
+    r'(object does not exist at location|not found)',
+  );
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _firebaseAuth;
@@ -142,13 +145,21 @@ class ProfileRemoteDataSource {
       _objectNotFoundCode,
       'storage/$_objectNotFoundCode',
       'firebase_storage/$_objectNotFoundCode',
+      '-13010',
+      '404',
     };
-    if (objectNotFoundCodes.contains(code)) {
+    final normalizedCode = code.toLowerCase().trim();
+    if (objectNotFoundCodes.contains(normalizedCode)) {
       return true;
     }
 
     final normalizedMessage = (message ?? '').toLowerCase();
     final normalizedDetails = (details ?? '').toLowerCase();
+    if (_firebaseStorageNotFoundMessagePattern.hasMatch(normalizedMessage) ||
+        _firebaseStorageNotFoundMessagePattern.hasMatch(normalizedDetails)) {
+      return true;
+    }
+
     return _containsObjectNotFoundToken(normalizedMessage) ||
         _containsObjectNotFoundToken(normalizedDetails);
   }
