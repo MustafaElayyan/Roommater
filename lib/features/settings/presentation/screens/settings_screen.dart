@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
-import '../../../../core/theme/theme_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
 
@@ -17,7 +16,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   static const int _maxHouseholdNameLength = 64;
-  bool _notifications = true;
   final _householdNameController = TextEditingController();
   String? _boundHouseholdId;
 
@@ -37,8 +35,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = ref.watch(themeModeProvider);
-    final isDarkMode = themeMode == ThemeMode.dark;
     final household = ref.watch(currentHouseholdProvider);
     final user = ref.watch(authStateProvider).valueOrNull;
     final isOwner = household != null && user?.uid == household.createdByUserId;
@@ -74,20 +70,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               leading: const Icon(Icons.lock_outline),
               title: const Text('Update Password'),
               onTap: () => context.push(AppRoutes.updatePassword),
-            ),
-            SwitchListTile(
-              value: isDarkMode,
-              onChanged: (value) {
-                ref
-                    .read(themeModeProvider.notifier)
-                    .setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
-              },
-              title: const Text('Dark Mode'),
-            ),
-            SwitchListTile(
-              value: _notifications,
-              onChanged: (value) => setState(() => _notifications = value),
-              title: const Text('Push Notifications'),
             ),
             const Divider(),
             const ListTile(
