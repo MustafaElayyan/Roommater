@@ -39,7 +39,7 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
     final newPassword = _newPasswordController.text;
     if (currentPassword.isEmpty || newPassword.length < _minPasswordLength) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter current password and new password (min 8 chars).')),
+        const SnackBar(content: Text('Enter current password and new password (8-128 chars).')),
       );
       return;
     }
