@@ -27,7 +27,11 @@ class ProfileRemoteDataSource {
     r'(^|[^a-z0-9-])object-not-found([^a-z0-9-]|$)',
   );
   static final RegExp _firebaseStorageNotFoundMessagePattern = RegExp(
-    r'(object does not exist at location|not found)',
+    r'object does not exist at location',
+    caseSensitive: false,
+  );
+  static final RegExp _firebaseStorageNotFoundDetailsPattern = RegExp(
+    r'("code"\s*:\s*404|httpresult:\s*404)',
     caseSensitive: false,
   );
 
@@ -146,20 +150,24 @@ class ProfileRemoteDataSource {
       _objectNotFoundCode,
       'storage/$_objectNotFoundCode',
       'firebase_storage/$_objectNotFoundCode',
+    };
+    const objectNotFoundNumericCodes = {
       // Native Firebase Storage not-found code observed on some platforms.
       '-13010',
       // HTTP not-found status surfaced through Storage exception wrappers.
       '404',
     };
-    final normalizedCode = code.toLowerCase().trim();
-    if (objectNotFoundCodes.contains(normalizedCode)) {
+    final normalizedCode = code.trim();
+    if (objectNotFoundCodes.contains(normalizedCode.toLowerCase()) ||
+        objectNotFoundNumericCodes.contains(normalizedCode)) {
       return true;
     }
 
     final normalizedMessage = (message ?? '').toLowerCase();
     final normalizedDetails = (details ?? '').toLowerCase();
     if (_firebaseStorageNotFoundMessagePattern.hasMatch(normalizedMessage) ||
-        _firebaseStorageNotFoundMessagePattern.hasMatch(normalizedDetails)) {
+        _firebaseStorageNotFoundMessagePattern.hasMatch(normalizedDetails) ||
+        _firebaseStorageNotFoundDetailsPattern.hasMatch(normalizedDetails)) {
       return true;
     }
 
