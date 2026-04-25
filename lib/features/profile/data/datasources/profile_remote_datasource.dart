@@ -31,6 +31,8 @@ class ProfileRemoteDataSource {
     r'object does not exist at location',
     caseSensitive: false,
   );
+  // Matches Firebase Storage details payload variants like:
+  // {"error":{"code":404,...}} or "HttpResult: 404".
   static final RegExp _firebaseStorageNotFoundDetailsPattern = RegExp(
     '("code"\\s*:\\s*$_httpNotFoundStatusCode|httpresult:\\s*$_httpNotFoundStatusCode)',
     caseSensitive: false,
@@ -158,8 +160,7 @@ class ProfileRemoteDataSource {
       // HTTP not-found status surfaced through Storage exception wrappers.
       _httpNotFoundStatusCode,
     };
-    final normalizedCode = code.trim();
-    final normalizedCodeLower = normalizedCode.toLowerCase();
+    final normalizedCodeLower = code.trim().toLowerCase();
     if (objectNotFoundCodes.contains(normalizedCodeLower) ||
         objectNotFoundNumericCodes.contains(normalizedCodeLower)) {
       return true;
