@@ -28,6 +28,7 @@ class ProfileRemoteDataSource {
   );
   static final RegExp _firebaseStorageNotFoundMessagePattern = RegExp(
     r'(object does not exist at location|not found)',
+    caseSensitive: false,
   );
 
   final FirebaseFirestore _firestore;
@@ -145,7 +146,9 @@ class ProfileRemoteDataSource {
       _objectNotFoundCode,
       'storage/$_objectNotFoundCode',
       'firebase_storage/$_objectNotFoundCode',
+      // Native Firebase Storage not-found code observed on some platforms.
       '-13010',
+      // HTTP not-found status surfaced through Storage exception wrappers.
       '404',
     };
     final normalizedCode = code.toLowerCase().trim();
