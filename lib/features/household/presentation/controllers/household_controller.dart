@@ -13,6 +13,7 @@ import '../../domain/usecases/get_members_usecase.dart';
 import '../../domain/usecases/join_household_usecase.dart';
 import '../../domain/usecases/leave_household_usecase.dart';
 import '../../domain/usecases/remove_member_usecase.dart';
+import '../../domain/usecases/update_household_name_usecase.dart';
 
 // --- Dependency graph ---
 
@@ -51,6 +52,10 @@ final _removeMemberUseCaseProvider = Provider<RemoveMemberUseCase>((ref) {
 
 final _leaveHouseholdUseCaseProvider = Provider<LeaveHouseholdUseCase>((ref) {
   return LeaveHouseholdUseCase(ref.watch(householdRepositoryProvider));
+});
+
+final _updateHouseholdNameUseCaseProvider = Provider<UpdateHouseholdNameUseCase>((ref) {
+  return UpdateHouseholdNameUseCase(ref.watch(householdRepositoryProvider));
 });
 
 // --- State ---
@@ -148,6 +153,21 @@ class HouseholdController extends AsyncNotifier<void> {
     state = await AsyncValue.guard(() async {
       await ref.read(_leaveHouseholdUseCaseProvider)(householdId);
       ref.read(_currentHouseholdOverrideProvider.notifier).state = null;
+      ref.invalidate(householdBootstrapProvider);
+    });
+  }
+
+  Future<void> updateHouseholdName({
+    required String householdId,
+    required String name,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final updated = await ref.read(_updateHouseholdNameUseCaseProvider)(
+        householdId: householdId,
+        name: name,
+      );
+      ref.read(_currentHouseholdOverrideProvider.notifier).state = updated;
       ref.invalidate(householdBootstrapProvider);
     });
   }

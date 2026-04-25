@@ -21,6 +21,12 @@ abstract interface class HouseholdRepository {
   /// Removes the current signed-in user from [householdId].
   Future<void> leaveHousehold(String householdId);
 
+  /// Updates the household display name.
+  Future<HouseholdEntity> updateHouseholdName({
+    required String householdId,
+    required String name,
+  });
+
   /// Deletes the household with [id].
   Future<void> deleteHousehold(String id);
 }

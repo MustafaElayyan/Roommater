@@ -40,6 +40,17 @@ class HouseholdRepositoryImpl implements HouseholdRepository {
   }
 
   @override
+  Future<HouseholdEntity> updateHouseholdName({
+    required String householdId,
+    required String name,
+  }) {
+    return _dataSource.updateHouseholdName(
+      householdId: householdId,
+      name: name,
+    );
+  }
+
+  @override
   Future<void> deleteHousehold(String id) {
     return _dataSource.deleteHousehold(id);
   }
