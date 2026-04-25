@@ -42,8 +42,6 @@ class ProfileModel extends ProfileEntity {
       'phone': phone,
       'photoUrl': photoUrl,
       'age': age,
-      'occupation': occupation,
-      'location': location,
     };
   }
 }

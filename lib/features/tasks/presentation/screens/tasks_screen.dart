@@ -102,6 +102,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                               children: [
                                 if (userCanEditTask)
                                   IconButton(
+                                    visualDensity: VisualDensity.compact,
+                                    constraints: const BoxConstraints.tightFor(
+                                      width: 36,
+                                      height: 36,
+                                    ),
+                                    padding: EdgeInsets.zero,
                                     icon: const Icon(Icons.edit_calendar_outlined),
                                     onPressed: () => context.push(
                                       AppRoutes.editTask,
@@ -110,11 +116,23 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                                   ),
                                 if (userCanDeleteTask)
                                   IconButton(
+                                    visualDensity: VisualDensity.compact,
+                                    constraints: const BoxConstraints.tightFor(
+                                      width: 36,
+                                      height: 36,
+                                    ),
+                                    padding: EdgeInsets.zero,
                                     icon: const Icon(Icons.delete_outline),
                                     onPressed: () => _confirmDeleteTask(context, ref, task),
                                   ),
                                 if (userCanApprove)
                                   IconButton(
+                                    visualDensity: VisualDensity.compact,
+                                    constraints: const BoxConstraints.tightFor(
+                                      width: 36,
+                                      height: 36,
+                                    ),
+                                    padding: EdgeInsets.zero,
                                     icon: const Icon(Icons.verified_outlined),
                                     onPressed: () => ref
                                         .read(taskControllerProvider.notifier)

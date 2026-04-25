@@ -209,6 +209,37 @@ class HouseholdRemoteDataSource {
     }
   }
 
+  Future<HouseholdModel> updateHouseholdName({
+    required String householdId,
+    required String name,
+  }) async {
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty) {
+      throw const ApiException('Household name cannot be empty.');
+    }
+    try {
+      final currentUid = _firebaseAuth.currentUser?.uid;
+      if (currentUid == null) {
+        throw const AuthException('You must be signed in to update household name.');
+      }
+      final householdRef = _firestore.collection('households').doc(householdId);
+      final snapshot = await householdRef.get();
+      if (!snapshot.exists) {
+        throw const ApiException('Household not found.');
+      }
+      final data = snapshot.data()!;
+      final ownerId = data['createdByUserId'] as String?;
+      if (ownerId != currentUid) {
+        throw const AuthException('Only the household owner can update household name.');
+      }
+      await householdRef.update({'name': trimmedName});
+      final updated = await householdRef.get();
+      return HouseholdModel.fromFirestore(updated);
+    } on FirebaseException catch (e) {
+      throw ApiException('Failed to update household name.', e);
+    }
+  }
+
   Future<void> deleteHousehold(String id) async {
     try {
       await _firestore.collection('households').doc(id).delete();

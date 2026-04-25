@@ -25,8 +25,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
         phone: profile.phone,
         photoUrl: profile.photoUrl,
         age: profile.age,
-        occupation: profile.occupation,
-        location: profile.location,
       ),
     );
   }

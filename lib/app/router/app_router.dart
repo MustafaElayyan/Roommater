@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../core/theme/theme_provider.dart';
 import '../../core/network/firestore_service.dart';
@@ -30,6 +29,7 @@ import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_details_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/settings/presentation/screens/update_password_screen.dart';
 import '../../features/tasks/presentation/screens/create_task_screen.dart';
 import '../../features/tasks/presentation/screens/tasks_screen.dart';
 import '../../features/tasks/domain/entities/task_entity.dart';
@@ -237,6 +237,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.settings,
         builder: (context, state) => const SettingsScreen(),
       ),
+      GoRoute(
+        path: AppRoutes.updatePassword,
+        builder: (context, state) => const UpdatePasswordScreen(),
+      ),
     ],
   );
 });
@@ -303,9 +307,7 @@ class _MainShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = _selectedIndex();
     final themeMode = ref.watch(themeModeProvider);
-    final household = ref.watch(currentHouseholdProvider);
     final user = ref.watch(authStateProvider).valueOrNull;
-    final isOwner = household != null && user?.uid == household.createdByUserId;
     final avatarLabel = (user?.displayName?.trim().isNotEmpty ?? false)
         ? user!.displayName!.trim()[0]
         : (user?.email.isNotEmpty ?? false)
@@ -404,77 +406,6 @@ class _MainShell extends ConsumerWidget {
                   leading: const Icon(Icons.settings_outlined),
                   title: const Text('Settings'),
                   onTap: () => pushToTopLevelRoute(AppRoutes.settings),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.group_outlined),
-                  title: Text(isOwner ? 'Manage Members' : 'View Members'),
-                  onTap: () => pushToTopLevelRoute(AppRoutes.manageMembers),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.exit_to_app),
-                  title: const Text('Leave Household'),
-                  enabled: household != null,
-                  onTap: household == null
-                      ? null
-                      : () async {
-                          final shouldLeave = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Leave Household'),
-                              content: const Text(
-                                'Are you sure you want to leave this household?',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(false),
-                                  child: const Text('Cancel'),
-                                ),
-                                FilledButton(
-                                  onPressed: () => Navigator.of(context).pop(true),
-                                  child: const Text('Leave'),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (shouldLeave != true) return;
-                          Navigator.of(context).pop();
-                          await ref
-                              .read(householdControllerProvider.notifier)
-                              .leaveHousehold(household.id);
-                          if (!context.mounted) return;
-                          final state = ref.read(householdControllerProvider);
-                          if (state.hasError) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(state.error.toString())),
-                            );
-                            return;
-                          }
-                          context.go(AppRoutes.noHousehold);
-                        },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.vpn_key_outlined),
-                  title: const Text('Household Code'),
-                  subtitle: Text(
-                    household?.inviteCode ?? 'No household',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  enabled: household != null,
-                  onTap: household == null
-                      ? null
-                      : () {
-                          final inviteCode = household.inviteCode;
-                          Clipboard.setData(ClipboardData(text: inviteCode));
-                          Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Household code copied!'),
-                            ),
-                          );
-                        },
                 ),
                 ListTile(
                   leading: const Icon(Icons.notifications_outlined),
