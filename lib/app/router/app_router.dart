@@ -32,6 +32,7 @@ import '../../features/profile/presentation/screens/profile_details_screen.dart'
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/tasks/presentation/screens/create_task_screen.dart';
 import '../../features/tasks/presentation/screens/tasks_screen.dart';
+import '../../features/tasks/domain/entities/task_entity.dart';
 import '../../shared/widgets/user_avatar.dart';
 import 'app_routes.dart';
 
@@ -193,6 +194,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const CreateTaskScreen(),
       ),
       GoRoute(
+        path: AppRoutes.editTask,
+        builder: (context, state) {
+          final task = state.extra;
+          if (task is! TaskEntity) {
+            return const CreateTaskScreen();
+          }
+          return CreateTaskScreen(editingTask: task);
+        },
+      ),
+      GoRoute(
         path: AppRoutes.createEvent,
         builder: (context, state) => const CreateEventScreen(),
       ),
@@ -294,6 +305,7 @@ class _MainShell extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final household = ref.watch(currentHouseholdProvider);
     final user = ref.watch(authStateProvider).valueOrNull;
+    final isOwner = household != null && user?.uid == household.createdByUserId;
     final avatarLabel = (user?.displayName?.trim().isNotEmpty ?? false)
         ? user!.displayName!.trim()[0]
         : (user?.email.isNotEmpty ?? false)
@@ -395,8 +407,50 @@ class _MainShell extends ConsumerWidget {
                 ),
                 ListTile(
                   leading: const Icon(Icons.group_outlined),
-                  title: const Text('Manage Members'),
+                  title: Text(isOwner ? 'Manage Members' : 'View Members'),
                   onTap: () => pushToTopLevelRoute(AppRoutes.manageMembers),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.exit_to_app),
+                  title: const Text('Leave Household'),
+                  enabled: household != null,
+                  onTap: household == null
+                      ? null
+                      : () async {
+                          final shouldLeave = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Leave Household'),
+                              content: const Text(
+                                'Are you sure you want to leave this household?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(false),
+                                  child: const Text('Cancel'),
+                                ),
+                                FilledButton(
+                                  onPressed: () => Navigator.of(context).pop(true),
+                                  child: const Text('Leave'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (shouldLeave != true) return;
+                          Navigator.of(context).pop();
+                          await ref
+                              .read(householdControllerProvider.notifier)
+                              .leaveHousehold(household.id);
+                          if (!context.mounted) return;
+                          final state = ref.read(householdControllerProvider);
+                          if (state.hasError) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(state.error.toString())),
+                            );
+                            return;
+                          }
+                          context.go(AppRoutes.noHousehold);
+                        },
                 ),
                 ListTile(
                   leading: const Icon(Icons.vpn_key_outlined),

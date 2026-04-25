@@ -14,9 +14,13 @@ class UpdateTaskUseCase {
     String? description,
     required bool isCompleted,
     DateTime? dueDate,
+    List<String> assignedToUserIds = const [],
+    List<String> assignedToNames = const [],
     String? assignedToUserId,
     String? assignedToName,
     String? completionNote,
+    List<int> repeatDays = const [],
+    String? approvalStatus,
   }) =>
       _repository.updateTask(
         householdId,
@@ -25,8 +29,12 @@ class UpdateTaskUseCase {
         description: description,
         isCompleted: isCompleted,
         dueDate: dueDate,
+        assignedToUserIds: assignedToUserIds,
+        assignedToNames: assignedToNames,
         assignedToUserId: assignedToUserId,
         assignedToName: assignedToName,
         completionNote: completionNote,
+        repeatDays: repeatDays,
+        approvalStatus: approvalStatus,
       );
 }

@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../../household/presentation/controllers/household_controller.dart';
 import '../../../household/domain/entities/member_entity.dart';
+import '../../../household/presentation/controllers/household_controller.dart';
 import '../../domain/entities/task_entity.dart';
 import '../controllers/task_controller.dart';
 
@@ -24,12 +24,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final tasksAsync = ref.watch(tasksProvider);
     final authState = ref.watch(authStateProvider);
     final currentUid = authState.valueOrNull?.uid;
-
     final household = ref.watch(currentHouseholdProvider);
+    final isOwner = household != null && currentUid == household.createdByUserId;
     final membersAsync = household != null
         ? ref.watch(householdMembersProvider(household.id))
         : const AsyncValue<List<MemberEntity>>.data([]);
-
     final members = membersAsync.valueOrNull ?? [];
 
     return Scaffold(
@@ -38,9 +37,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         error: (error, _) => Center(child: Text('Error: $error')),
         data: (tasks) {
           final visibleTasks = _myTasks && currentUid != null
-              ? tasks
-                  .where((t) => t.assignedToUserId == currentUid)
-                  .toList()
+              ? tasks.where((t) => _isAssignedToUser(t, currentUid)).toList()
               : tasks;
 
           return ListView(
@@ -70,33 +67,58 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               else
                 ...visibleTasks.map((task) {
                   final done = task.isCompleted;
-                  final assigneeName = task.assignedToName ?? _resolveAssignee(task, members);
-                  final creatorName = task.createdByName ?? _resolveCreator(task, members);
+                  final overdue = !done &&
+                      task.dueDate != null &&
+                      DateTime.now().isAfter(task.dueDate!);
+                  final assigneeNames = _resolveAssignees(task, members);
+                  final creatorName = _resolveCreator(task, members);
                   final dueText = _formatDueDate(task.dueDate);
-                  final userCanCompleteTask = task.assignedToUserId == currentUid;
-                  final userCanEditDueDate = task.createdByUserId == currentUid;
-                  final userCanDeleteTask = task.createdByUserId == currentUid;
+                  final userCanCompleteTask =
+                      currentUid != null && _isAssignedToUser(task, currentUid);
+                  final userCanEditTask =
+                      currentUid != null && (task.createdByUserId == currentUid || isOwner);
+                  final userCanDeleteTask =
+                      currentUid != null && (task.createdByUserId == currentUid || isOwner);
+                  final userCanApprove =
+                      isOwner && task.approvalStatus == TaskEntity.statusPendingApproval;
+
                   return Card(
+                    color: done
+                        ? Colors.green.withValues(alpha: 0.14)
+                        : overdue
+                            ? Colors.red.withValues(alpha: 0.12)
+                            : null,
                     child: ListTile(
-                      leading: userCanCompleteTask
+                      leading: userCanCompleteTask &&
+                              task.approvalStatus == TaskEntity.statusActive
                           ? Checkbox(
                               value: done,
                               onChanged: (_) => _toggleTask(context, ref, task),
                             )
                           : null,
-                      trailing: (userCanEditDueDate || userCanDeleteTask)
-                          ? Row(
+                      trailing: (userCanEditTask || userCanDeleteTask || userCanApprove)
+                          ? Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                if (userCanEditDueDate)
+                                if (userCanEditTask)
                                   IconButton(
                                     icon: const Icon(Icons.edit_calendar_outlined),
-                                    onPressed: () => _editDueDate(context, ref, task),
+                                    onPressed: () => context.push(
+                                      AppRoutes.editTask,
+                                      extra: task,
+                                    ),
                                   ),
                                 if (userCanDeleteTask)
                                   IconButton(
                                     icon: const Icon(Icons.delete_outline),
                                     onPressed: () => _confirmDeleteTask(context, ref, task),
+                                  ),
+                                if (userCanApprove)
+                                  IconButton(
+                                    icon: const Icon(Icons.verified_outlined),
+                                    onPressed: () => ref
+                                        .read(taskControllerProvider.notifier)
+                                        .approveTask(task),
                                   ),
                               ],
                             )
@@ -110,21 +132,33 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildMemberProfileLink(
-                            context,
-                            members: members,
-                            uid: task.createdByUserId,
-                            label: 'Assigned by',
-                            fallbackName: creatorName ?? task.createdByUserId,
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text('Assigned by: ${creatorName ?? task.createdByUserId}'),
                           ),
-                          _buildMemberProfileLink(
-                            context,
-                            members: members,
-                            uid: task.assignedToUserId,
-                            label: 'Assigned to',
-                            fallbackName: assigneeName ?? 'Unassigned',
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text('Assigned to: $assigneeNames'),
                           ),
-                          if (dueText != null) Text('Due: $dueText'),
+                          if (task.approvalStatus == TaskEntity.statusPendingApproval)
+                            const Padding(
+                              padding: EdgeInsets.only(top: 4),
+                              child: Chip(
+                                label: Text('Pending approval'),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ),
+                          if (dueText != null) Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text('Due: $dueText'),
+                          ),
+                          if (task.repeatDays.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                'Repeats: ${_weekdayLabels(task.repeatDays)}',
+                              ),
+                            ),
                           if (task.completionNote != null &&
                               task.completionNote!.trim().isNotEmpty)
                             Text('Completion note: ${task.completionNote}'),
@@ -134,7 +168,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         context,
                         task,
                         assignedBy: creatorName ?? task.createdByUserId,
-                        assignedTo: assigneeName ?? 'Unassigned',
+                        assignedTo: assigneeNames,
                         dueText: dueText,
                       ),
                     ),
@@ -151,12 +185,26 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     );
   }
 
-  String? _resolveAssignee(TaskEntity task, List<MemberEntity> members) {
-    if (task.assignedToUserId == null) return null;
-    final match = members
-        .where((m) => m.uid == task.assignedToUserId)
-        .toList();
-    return match.isNotEmpty ? match.first.displayName : task.assignedToUserId;
+  bool _isAssignedToUser(TaskEntity task, String? uid) {
+    if (uid == null) return false;
+    if (task.assignedToUserIds.contains(uid)) return true;
+    return task.assignedToUserId == uid;
+  }
+
+  String _resolveAssignees(TaskEntity task, List<MemberEntity> members) {
+    final ids = task.assignedToUserIds.isNotEmpty
+        ? task.assignedToUserIds
+        : (task.assignedToUserId == null || task.assignedToUserId!.trim().isEmpty)
+            ? const <String>[]
+            : <String>[task.assignedToUserId!];
+    if (ids.isEmpty) return 'Unassigned';
+    final names = ids.map((id) {
+      for (final member in members) {
+        if (member.uid == id) return member.displayName;
+      }
+      return id;
+    }).toList();
+    return names.join(', ');
   }
 
   String? _resolveCreator(TaskEntity task, List<MemberEntity> members) {
@@ -182,9 +230,17 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             Text('Assigned by: $assignedBy'),
             const SizedBox(height: 4),
             Text('Assigned to: $assignedTo'),
+            if (task.approvalStatus == TaskEntity.statusPendingApproval) ...[
+              const SizedBox(height: 4),
+              const Text('Status: Pending approval'),
+            ],
             if (dueText != null) ...[
               const SizedBox(height: 4),
               Text('Due: $dueText'),
+            ],
+            if (task.repeatDays.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text('Repeats: ${_weekdayLabels(task.repeatDays)}'),
             ],
             if (task.description?.trim().isNotEmpty == true) ...[
               const SizedBox(height: 8),
@@ -202,39 +258,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             child: const Text('Close'),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildMemberProfileLink(
-    BuildContext context, {
-    required List<MemberEntity> members,
-    required String? uid,
-    required String label,
-    required String fallbackName,
-  }) {
-    if (uid == null || uid.trim().isEmpty) {
-      return Text('$label: $fallbackName');
-    }
-    MemberEntity? member;
-    for (final candidate in members) {
-      if (candidate.uid == uid) {
-        member = candidate;
-        break;
-      }
-    }
-    final displayName = (member?.displayName.trim().isNotEmpty ?? false)
-        ? member!.displayName
-        : fallbackName;
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: InkWell(
-        onTap: () => context.push(AppRoutes.profileDetailsFor(uid)),
-        borderRadius: BorderRadius.circular(20),
-        child: Text(
-          '$label: $displayName',
-          overflow: TextOverflow.ellipsis,
-        ),
       ),
     );
   }
@@ -282,38 +305,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         );
   }
 
-  Future<void> _editDueDate(
-    BuildContext context,
-    WidgetRef ref,
-    TaskEntity task,
-  ) async {
-    final current = task.dueDate ?? DateTime.now();
-    final date = await showDatePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-      initialDate: current,
-    );
-    if (date == null || !context.mounted) return;
-    final pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: current.hour, minute: current.minute),
-    );
-    if (!context.mounted) return;
-    final time = pickedTime ?? TimeOfDay(hour: current.hour, minute: current.minute);
-    final dueDate = DateTime(date.year, date.month, date.day, time.hour, time.minute);
-    await ref.read(taskControllerProvider.notifier).updateTask(
-          taskId: task.id,
-          title: task.title,
-          description: task.description,
-          isCompleted: task.isCompleted,
-          dueDate: dueDate,
-          assignedToUserId: task.assignedToUserId,
-          assignedToName: task.assignedToName,
-          completionNote: task.completionNote,
-        );
-  }
-
   Future<String?> _showCompletionNoteDialog(BuildContext context) async {
     final controller = TextEditingController();
     final result = await showDialog<String>(
@@ -356,5 +347,20 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
     return '${months[dueDate.month - 1]} ${dueDate.day}';
+  }
+
+  String _weekdayLabels(List<int> days) {
+    const names = {
+      1: 'Mon',
+      2: 'Tue',
+      3: 'Wed',
+      4: 'Thu',
+      5: 'Fri',
+      6: 'Sat',
+      7: 'Sun',
+    };
+    final sortedDays = [...days]..sort();
+    final labels = sortedDays.map((day) => names[day] ?? day.toString()).toList();
+    return labels.join(', ');
   }
 }

@@ -27,16 +27,22 @@ class TaskRepositoryImpl implements TaskRepository {
     required String title,
     String? description,
     DateTime? dueDate,
+    List<String> assignedToUserIds = const [],
+    List<String> assignedToNames = const [],
     String? assignedToUserId,
     String? assignedToName,
+    List<int> repeatDays = const [],
   }) {
     return _dataSource.createTask(
       householdId,
       title: title,
       description: description,
       dueDate: dueDate,
+      assignedToUserIds: assignedToUserIds,
+      assignedToNames: assignedToNames,
       assignedToUserId: assignedToUserId,
       assignedToName: assignedToName,
+      repeatDays: repeatDays,
     );
   }
 
@@ -48,9 +54,13 @@ class TaskRepositoryImpl implements TaskRepository {
     String? description,
     required bool isCompleted,
     DateTime? dueDate,
+    List<String> assignedToUserIds = const [],
+    List<String> assignedToNames = const [],
     String? assignedToUserId,
     String? assignedToName,
     String? completionNote,
+    List<int> repeatDays = const [],
+    String? approvalStatus,
   }) {
     return _dataSource.updateTask(
       householdId,
@@ -59,9 +69,13 @@ class TaskRepositoryImpl implements TaskRepository {
       description: description,
       isCompleted: isCompleted,
       dueDate: dueDate,
+      assignedToUserIds: assignedToUserIds,
+      assignedToNames: assignedToNames,
       assignedToUserId: assignedToUserId,
       assignedToName: assignedToName,
       completionNote: completionNote,
+      repeatDays: repeatDays,
+      approvalStatus: approvalStatus,
     );
   }
 

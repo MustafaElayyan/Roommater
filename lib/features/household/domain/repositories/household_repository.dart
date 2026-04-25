@@ -18,6 +18,9 @@ abstract interface class HouseholdRepository {
   /// Removes the member with [userId] from the household with [householdId].
   Future<void> removeMember(String householdId, String userId);
 
+  /// Removes the current signed-in user from [householdId].
+  Future<void> leaveHousehold(String householdId);
+
   /// Deletes the household with [id].
   Future<void> deleteHousehold(String id);
 }

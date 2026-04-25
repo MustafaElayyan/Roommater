@@ -12,15 +12,21 @@ class CreateTaskUseCase {
     required String title,
     String? description,
     DateTime? dueDate,
+    List<String> assignedToUserIds = const [],
+    List<String> assignedToNames = const [],
     String? assignedToUserId,
     String? assignedToName,
+    List<int> repeatDays = const [],
   }) =>
       _repository.createTask(
         householdId,
         title: title,
         description: description,
         dueDate: dueDate,
+        assignedToUserIds: assignedToUserIds,
+        assignedToNames: assignedToNames,
         assignedToUserId: assignedToUserId,
         assignedToName: assignedToName,
+        repeatDays: repeatDays,
       );
 }

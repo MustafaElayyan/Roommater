@@ -35,6 +35,11 @@ class HouseholdRepositoryImpl implements HouseholdRepository {
   }
 
   @override
+  Future<void> leaveHousehold(String householdId) {
+    return _dataSource.leaveHousehold(householdId);
+  }
+
+  @override
   Future<void> deleteHousehold(String id) {
     return _dataSource.deleteHousehold(id);
   }

@@ -24,6 +24,7 @@ abstract final class AppRoutes {
   // --- Tasks ---
   static const String tasks = '/tasks';
   static const String createTask = '/tasks/create';
+  static const String editTask = '/tasks/edit';
 
   // --- Grocery ---
   static const String grocery = '/grocery';

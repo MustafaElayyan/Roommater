@@ -63,8 +63,11 @@ class TaskController extends AsyncNotifier<void> {
     required String title,
     String? description,
     DateTime? dueDate,
+    List<String> assignedToUserIds = const [],
+    List<String> assignedToNames = const [],
     String? assignedToUserId,
     String? assignedToName,
+    List<int> repeatDays = const [],
   }) async {
     final household = ref.read(currentHouseholdProvider);
     if (household == null) return;
@@ -76,8 +79,11 @@ class TaskController extends AsyncNotifier<void> {
         title: title,
         description: description,
         dueDate: dueDate,
+        assignedToUserIds: assignedToUserIds,
+        assignedToNames: assignedToNames,
         assignedToUserId: assignedToUserId,
         assignedToName: assignedToName,
+        repeatDays: repeatDays,
       );
     });
   }
@@ -88,9 +94,13 @@ class TaskController extends AsyncNotifier<void> {
     String? description,
     required bool isCompleted,
     DateTime? dueDate,
+    List<String> assignedToUserIds = const [],
+    List<String> assignedToNames = const [],
     String? assignedToUserId,
     String? assignedToName,
     String? completionNote,
+    List<int> repeatDays = const [],
+    String? approvalStatus,
   }) async {
     final household = ref.read(currentHouseholdProvider);
     if (household == null) return;
@@ -104,9 +114,13 @@ class TaskController extends AsyncNotifier<void> {
         description: description,
         isCompleted: isCompleted,
         dueDate: dueDate,
+        assignedToUserIds: assignedToUserIds,
+        assignedToNames: assignedToNames,
         assignedToUserId: assignedToUserId,
         assignedToName: assignedToName,
         completionNote: completionNote,
+        repeatDays: repeatDays,
+        approvalStatus: approvalStatus,
       );
     });
   }
@@ -125,7 +139,9 @@ class TaskController extends AsyncNotifier<void> {
     final household = ref.read(currentHouseholdProvider);
     if (household == null) return;
     final currentUid = ref.read(firebaseAuthProvider).currentUser?.uid;
-    if (task.assignedToUserId == null || task.assignedToUserId != currentUid) {
+    final isAssigned = task.assignedToUserIds.contains(currentUid) ||
+        task.assignedToUserId == currentUid;
+    if (!isAssigned || task.approvalStatus != TaskEntity.statusActive) {
       return;
     }
 
@@ -138,9 +154,40 @@ class TaskController extends AsyncNotifier<void> {
         description: task.description,
         isCompleted: !task.isCompleted,
         dueDate: task.dueDate,
+        assignedToUserIds: task.assignedToUserIds,
+        assignedToNames: task.assignedToNames,
         assignedToUserId: task.assignedToUserId,
         assignedToName: task.assignedToName,
         completionNote: !task.isCompleted ? completionNote : null,
+        repeatDays: task.repeatDays,
+        approvalStatus: task.approvalStatus,
+      );
+    });
+  }
+
+  Future<void> approveTask(TaskEntity task) async {
+    final household = ref.read(currentHouseholdProvider);
+    if (household == null) return;
+    final currentUid = ref.read(firebaseAuthProvider).currentUser?.uid;
+    if (currentUid == null || currentUid != household.createdByUserId) return;
+    if (task.approvalStatus == TaskEntity.statusActive) return;
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(_updateTaskUseCaseProvider)(
+        household.id,
+        task.id,
+        title: task.title,
+        description: task.description,
+        isCompleted: task.isCompleted,
+        dueDate: task.dueDate,
+        assignedToUserIds: task.assignedToUserIds,
+        assignedToNames: task.assignedToNames,
+        assignedToUserId: task.assignedToUserId,
+        assignedToName: task.assignedToName,
+        completionNote: task.completionNote,
+        repeatDays: task.repeatDays,
+        approvalStatus: TaskEntity.statusActive,
       );
     });
   }
