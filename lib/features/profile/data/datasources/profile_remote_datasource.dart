@@ -23,8 +23,19 @@ class ProfileRemoteDataSource {
   static const int _downloadUrlRetryAttempts = 6;
   static const int _downloadUrlRetryBaseDelayMs = 400;
   static const String _objectNotFoundCode = 'object-not-found';
+  static const String _httpNotFoundStatusCode = '404';
   static final RegExp _objectNotFoundTokenPattern = RegExp(
     r'(^|[^a-z0-9-])object-not-found([^a-z0-9-]|$)',
+  );
+  static final RegExp _firebaseStorageNotFoundMessagePattern = RegExp(
+    r'object does not exist at location',
+    caseSensitive: false,
+  );
+  // Matches Firebase Storage details payload variants like:
+  // {"error":{"code":404,...}} or "HttpResult: 404".
+  static final RegExp _firebaseStorageNotFoundDetailsPattern = RegExp(
+    '("code"\\s*:\\s*$_httpNotFoundStatusCode|httpresult:\\s*$_httpNotFoundStatusCode)',
+    caseSensitive: false,
   );
 
   final FirebaseFirestore _firestore;
@@ -143,12 +154,26 @@ class ProfileRemoteDataSource {
       'storage/$_objectNotFoundCode',
       'firebase_storage/$_objectNotFoundCode',
     };
-    if (objectNotFoundCodes.contains(code)) {
+    const objectNotFoundNumericCodes = {
+      // Native Firebase Storage not-found code observed on some platforms.
+      '-13010',
+      // HTTP not-found status surfaced through Storage exception wrappers.
+      _httpNotFoundStatusCode,
+    };
+    final normalizedCodeLower = code.trim().toLowerCase();
+    if (objectNotFoundCodes.contains(normalizedCodeLower) ||
+        objectNotFoundNumericCodes.contains(normalizedCodeLower)) {
       return true;
     }
 
     final normalizedMessage = (message ?? '').toLowerCase();
     final normalizedDetails = (details ?? '').toLowerCase();
+    if (_firebaseStorageNotFoundMessagePattern.hasMatch(normalizedMessage) ||
+        _firebaseStorageNotFoundMessagePattern.hasMatch(normalizedDetails) ||
+        _firebaseStorageNotFoundDetailsPattern.hasMatch(normalizedDetails)) {
+      return true;
+    }
+
     return _containsObjectNotFoundToken(normalizedMessage) ||
         _containsObjectNotFoundToken(normalizedDetails);
   }
