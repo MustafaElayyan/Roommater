@@ -112,7 +112,8 @@ class _DashboardTab extends ConsumerWidget {
                     .map(
                       (task) => CheckboxListTile(
                         value: taskChecks[task.id] ?? task.isCompleted,
-                        onChanged: task.assignedToUserId == currentUid
+                        onChanged: _isAssignedToUser(task, currentUid) &&
+                                task.approvalStatus == TaskEntity.statusActive
                             ? (_) => _toggleTask(context, ref, task)
                             : null,
                         title: Text(task.title),
@@ -122,9 +123,7 @@ class _DashboardTab extends ConsumerWidget {
                                 _findMemberName(members, task.createdByUserId) ??
                                 task.createdByUserId;
                             final assignee = task.assignedToName ??
-                                _findMemberName(members, task.assignedToUserId) ??
-                                task.assignedToUserId ??
-                                'Unassigned';
+                                _findMemberNames(members, task).join(', ');
                             return Text('Assigned by: $creator\nAssigned to: $assignee');
                           },
                           orElse: () => null,
@@ -269,6 +268,22 @@ class _DashboardTab extends ConsumerWidget {
       if (member.uid == uid) return member.displayName;
     }
     return null;
+  }
+
+  bool _isAssignedToUser(TaskEntity task, String? uid) {
+    if (uid == null) return false;
+    if (task.assignedToUserIds.contains(uid)) return true;
+    return task.assignedToUserId == uid;
+  }
+
+  List<String> _findMemberNames(List<MemberEntity> members, TaskEntity task) {
+    final ids = task.assignedToUserIds.isNotEmpty
+        ? task.assignedToUserIds
+        : (task.assignedToUserId == null || task.assignedToUserId!.trim().isEmpty)
+            ? const <String>[]
+            : <String>[task.assignedToUserId!];
+    if (ids.isEmpty) return const ['Unassigned'];
+    return ids.map((uid) => _findMemberName(members, uid) ?? uid).toList();
   }
 
   List<EventEntity> _upcomingEvents(List<EventEntity> events) {

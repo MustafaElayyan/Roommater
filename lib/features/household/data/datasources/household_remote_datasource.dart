@@ -161,6 +161,53 @@ class HouseholdRemoteDataSource {
     }
   }
 
+  Future<void> leaveHousehold(String householdId) async {
+    try {
+      final currentUid = _firebaseAuth.currentUser?.uid;
+      if (currentUid == null) {
+        throw const ApiException('You must be signed in to leave a household.');
+      }
+      final householdRef = _firestore.collection('households').doc(householdId);
+      final snapshot = await householdRef.get();
+      final data = snapshot.data() ?? const <String, dynamic>{};
+      final existingMembers = (data['members'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .toList();
+      final remainingMembers = existingMembers
+          .where((member) => member['uid'] != currentUid)
+          .toList();
+      final currentOwnerId = data['createdByUserId'] as String?;
+
+      if (remainingMembers.isEmpty) {
+        await householdRef.delete();
+      } else {
+        String? nextOwnerId = currentOwnerId;
+        if (currentOwnerId == currentUid) {
+          nextOwnerId = remainingMembers.first['uid'] as String?;
+        }
+        final updatedMembers = remainingMembers.map((member) {
+          final uid = member['uid'] as String?;
+          if (uid == null) return member;
+          final role = uid == nextOwnerId ? 'owner' : 'member';
+          return {
+            ...member,
+            'role': role,
+          };
+        }).toList();
+        await householdRef.update({
+          'members': updatedMembers,
+          if (nextOwnerId != null) 'createdByUserId': nextOwnerId,
+        });
+      }
+
+      await _firestore.collection('users').doc(currentUid).set({
+        'householdId': null,
+      }, SetOptions(merge: true));
+    } on FirebaseException catch (e) {
+      throw ApiException('Failed to leave household.', e);
+    }
+  }
+
   Future<void> deleteHousehold(String id) async {
     try {
       await _firestore.collection('households').doc(id).delete();

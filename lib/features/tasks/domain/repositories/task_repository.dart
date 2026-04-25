@@ -15,8 +15,11 @@ abstract interface class TaskRepository {
     required String title,
     String? description,
     DateTime? dueDate,
+    List<String> assignedToUserIds = const [],
+    List<String> assignedToNames = const [],
     String? assignedToUserId,
     String? assignedToName,
+    List<int> repeatDays = const [],
   });
 
   /// Updates the task with [taskId] in the household with [householdId].
@@ -27,9 +30,13 @@ abstract interface class TaskRepository {
     String? description,
     required bool isCompleted,
     DateTime? dueDate,
+    List<String> assignedToUserIds = const [],
+    List<String> assignedToNames = const [],
     String? assignedToUserId,
     String? assignedToName,
     String? completionNote,
+    List<int> repeatDays = const [],
+    String? approvalStatus,
   });
 
   /// Deletes the task with [taskId] from the household with [householdId].

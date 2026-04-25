@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import '../../../../core/errors/app_exception.dart';
+import '../../domain/entities/task_entity.dart';
 import '../models/task_model.dart';
 
 /// Handles task Firestore reads/writes.
@@ -23,20 +24,24 @@ class TaskRemoteDataSource {
         .collection('tasks')
         .orderBy('createdAt', descending: true);
 
-    if (myTasks == true) {
-      final uid = _firebaseAuth.currentUser?.uid;
-      if (uid != null) {
-        query = query.where('assignedToUserId', isEqualTo: uid);
-      }
-    }
-
     if (pageSize != null && pageSize > 0) {
       query = query.limit(pageSize);
     }
 
     return query
         .snapshots()
-        .map((snapshot) => snapshot.docs.map(TaskModel.fromFirestore).toList())
+        .map((snapshot) {
+          final tasks = snapshot.docs.map(TaskModel.fromFirestore).toList();
+          if (myTasks == true) {
+            final uid = _firebaseAuth.currentUser?.uid;
+            if (uid == null) return <TaskModel>[];
+            return tasks.where((task) {
+              if (task.assignedToUserIds.contains(uid)) return true;
+              return task.assignedToUserId == uid;
+            }).toList();
+          }
+          return tasks;
+        })
         .transform(
           StreamTransformer<List<TaskModel>, List<TaskModel>>.fromHandlers(
             handleError: (error, stackTrace, sink) {
@@ -66,19 +71,19 @@ class TaskRemoteDataSource {
           .collection('tasks')
           .orderBy('createdAt', descending: true);
 
-      if (myTasks == true) {
-        final uid = _firebaseAuth.currentUser?.uid;
-        if (uid != null) {
-          query = query.where('assignedToUserId', isEqualTo: uid);
-        }
-      }
-
       if (pageSize != null && pageSize > 0) {
         query = query.limit(pageSize);
       }
 
       final snapshot = await query.get();
-      return snapshot.docs.map(TaskModel.fromFirestore).toList();
+      final tasks = snapshot.docs.map(TaskModel.fromFirestore).toList();
+      if (myTasks != true) return tasks;
+      final uid = _firebaseAuth.currentUser?.uid;
+      if (uid == null) return <TaskModel>[];
+      return tasks.where((task) {
+        if (task.assignedToUserIds.contains(uid)) return true;
+        return task.assignedToUserId == uid;
+      }).toList();
     } on FirebaseException catch (e) {
       throw ApiException('Failed to load tasks.', e);
     }
@@ -89,8 +94,11 @@ class TaskRemoteDataSource {
     required String title,
     String? description,
     DateTime? dueDate,
+    List<String> assignedToUserIds = const [],
+    List<String> assignedToNames = const [],
     String? assignedToUserId,
     String? assignedToName,
+    List<int> repeatDays = const [],
   }) async {
     try {
       final taskRef = _firestore
@@ -99,6 +107,22 @@ class TaskRemoteDataSource {
           .collection('tasks')
           .doc();
       final currentUser = _firebaseAuth.currentUser;
+      final normalizedAssignedIds = assignedToUserIds
+          .map((id) => id.trim())
+          .where((id) => id.isNotEmpty)
+          .toSet()
+          .toList();
+      final normalizedAssignedNames = assignedToNames
+          .map((name) => name.trim())
+          .where((name) => name.isNotEmpty)
+          .toList();
+      final firstAssignedId = normalizedAssignedIds.isNotEmpty
+          ? normalizedAssignedIds.first
+          : assignedToUserId;
+      final firstAssignedName = normalizedAssignedNames.isNotEmpty
+          ? normalizedAssignedNames.first
+          : assignedToName;
+      final isOwner = await _isCurrentUserOwner(householdId);
       final model = TaskModel(
         id: taskRef.id,
         householdId: householdId,
@@ -108,9 +132,14 @@ class TaskRemoteDataSource {
         dueDate: dueDate,
         createdByUserId: currentUser?.uid ?? 'guest',
         createdByName: currentUser?.displayName ?? currentUser?.email,
-        assignedToUserId: assignedToUserId,
-        assignedToName: assignedToName,
+        assignedToUserIds: normalizedAssignedIds,
+        assignedToNames: normalizedAssignedNames,
+        assignedToUserId: firstAssignedId,
+        assignedToName: firstAssignedName,
         completionNote: null,
+        repeatDays: repeatDays,
+        approvalStatus:
+            isOwner ? TaskEntity.statusActive : TaskEntity.statusPendingApproval,
         createdAt: DateTime.now(),
       );
       await taskRef.set(model.toFirestore(), SetOptions(merge: true));
@@ -130,9 +159,13 @@ class TaskRemoteDataSource {
     String? description,
     required bool isCompleted,
     DateTime? dueDate,
+    List<String> assignedToUserIds = const [],
+    List<String> assignedToNames = const [],
     String? assignedToUserId,
     String? assignedToName,
     String? completionNote,
+    List<int> repeatDays = const [],
+    String? approvalStatus,
   }) async {
     try {
       final taskRef = _firestore
@@ -143,6 +176,21 @@ class TaskRemoteDataSource {
       final previousDoc = await taskRef.get();
       final previousTask =
           previousDoc.exists ? TaskModel.fromFirestore(previousDoc) : null;
+      final normalizedAssignedIds = assignedToUserIds
+          .map((id) => id.trim())
+          .where((id) => id.isNotEmpty)
+          .toSet()
+          .toList();
+      final normalizedAssignedNames = assignedToNames
+          .map((name) => name.trim())
+          .where((name) => name.isNotEmpty)
+          .toList();
+      final firstAssignedId = normalizedAssignedIds.isNotEmpty
+          ? normalizedAssignedIds.first
+          : assignedToUserId;
+      final firstAssignedName = normalizedAssignedNames.isNotEmpty
+          ? normalizedAssignedNames.first
+          : assignedToName;
       await taskRef.set({
         'id': taskId,
         'householdId': householdId,
@@ -150,23 +198,29 @@ class TaskRemoteDataSource {
         if (description != null) 'description': description else 'description': null,
         'isCompleted': isCompleted,
         if (dueDate != null) 'dueDate': Timestamp.fromDate(dueDate!) else 'dueDate': null,
-        if (assignedToUserId != null)
-          'assignedToUserId': assignedToUserId
+        'assignedToUserIds': normalizedAssignedIds,
+        'assignedToNames': normalizedAssignedNames,
+        if (firstAssignedId != null)
+          'assignedToUserId': firstAssignedId
         else
           'assignedToUserId': null,
-        if (assignedToName != null)
-          'assignedToName': assignedToName
+        if (firstAssignedName != null)
+          'assignedToName': firstAssignedName
         else
           'assignedToName': null,
         if (completionNote != null)
           'completionNote': completionNote
         else if (!isCompleted)
           'completionNote': null,
+        'repeatDays': repeatDays,
+        if (approvalStatus != null) 'approvalStatus': approvalStatus,
       }, SetOptions(merge: true));
       final updated = await taskRef.get();
       final updatedTask = TaskModel.fromFirestore(updated);
-      final assignmentChanged =
-          previousTask?.assignedToUserId != updatedTask.assignedToUserId;
+      final assignmentChanged = !_sameAssignments(
+        previousTask?.assignedToUserIds ?? const [],
+        updatedTask.assignedToUserIds,
+      );
       if (assignmentChanged) {
         await _createTaskAssignmentNotificationIfNeeded(updatedTask);
       }
@@ -192,8 +246,11 @@ class TaskRemoteDataSource {
         throw const ApiException('Task not found.');
       }
       final task = TaskModel.fromFirestore(doc);
-      if (task.createdByUserId != currentUid) {
-        throw const AuthException('Only the task creator can delete this task.');
+      final isOwner = await _isCurrentUserOwner(householdId);
+      if (!isOwner && task.createdByUserId != currentUid) {
+        throw const AuthException(
+          'Only the task creator or household owner can delete this task.',
+        );
       }
       await taskRef.delete();
     } on FirebaseException catch (e) {
@@ -202,9 +259,12 @@ class TaskRemoteDataSource {
   }
 
   Future<void> _createTaskAssignmentNotificationIfNeeded(TaskModel task) async {
-    final assigneeId = task.assignedToUserId?.trim();
-    if (assigneeId == null || assigneeId.isEmpty) return;
-    if (assigneeId == task.createdByUserId) return;
+    final assigneeIds = task.assignedToUserIds
+        .map((id) => id.trim())
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+    if (assigneeIds.isEmpty) return;
 
     final senderName = _firebaseAuth.currentUser?.displayName?.trim();
     final senderEmail = _firebaseAuth.currentUser?.email?.trim();
@@ -216,25 +276,48 @@ class TaskRemoteDataSource {
                 ? task.createdByName!.trim()
                 : 'A roommate';
 
-    final notificationRef = _firestore
-        .collection('users')
-        .doc(assigneeId)
-        .collection('notifications')
-        .doc();
+    for (final assigneeId in assigneeIds) {
+      if (assigneeId == task.createdByUserId) continue;
+      final notificationRef = _firestore
+          .collection('users')
+          .doc(assigneeId)
+          .collection('notifications')
+          .doc();
 
-    await notificationRef.set({
-      'id': notificationRef.id,
-      'recipientUserId': assigneeId,
-      'householdId': task.householdId,
-      'type': 'task_assignment',
-      'title': '$assigner assigned you a task',
-      'body': task.description?.trim().isNotEmpty == true
-          ? '${task.title} — ${task.description!.trim()}'
-          : task.title,
-      'isRead': false,
-      'referenceId': task.id,
-      'referenceType': 'task',
-      'createdAt': Timestamp.fromDate(DateTime.now()),
-    }, SetOptions(merge: true));
+      await notificationRef.set({
+        'id': notificationRef.id,
+        'recipientUserId': assigneeId,
+        'householdId': task.householdId,
+        'type': 'task_assignment',
+        'title': '$assigner assigned you a task',
+        'body': task.description?.trim().isNotEmpty == true
+            ? '${task.title} — ${task.description!.trim()}'
+            : task.title,
+        'isRead': false,
+        'referenceId': task.id,
+        'referenceType': 'task',
+        'createdAt': Timestamp.fromDate(DateTime.now()),
+      }, SetOptions(merge: true));
+    }
+  }
+
+  Future<bool> _isCurrentUserOwner(String householdId) async {
+    final currentUid = _firebaseAuth.currentUser?.uid;
+    if (currentUid == null) return false;
+    final householdDoc =
+        await _firestore.collection('households').doc(householdId).get();
+    final householdData = householdDoc.data() ?? const <String, dynamic>{};
+    final ownerId = householdData['createdByUserId'] as String?;
+    return ownerId == currentUid;
+  }
+
+  bool _sameAssignments(List<String> left, List<String> right) {
+    final leftSet = left.toSet();
+    final rightSet = right.toSet();
+    if (leftSet.length != rightSet.length) return false;
+    for (final id in leftSet) {
+      if (!rightSet.contains(id)) return false;
+    }
+    return true;
   }
 }

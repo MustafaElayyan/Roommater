@@ -3,6 +3,9 @@ import 'package:flutter/foundation.dart';
 /// Domain entity representing a household task.
 @immutable
 class TaskEntity {
+  static const String statusActive = 'active';
+  static const String statusPendingApproval = 'pending_approval';
+
   const TaskEntity({
     required this.id,
     required this.householdId,
@@ -12,9 +15,13 @@ class TaskEntity {
     this.dueDate,
     required this.createdByUserId,
     this.createdByName,
+    this.assignedToUserIds = const [],
+    this.assignedToNames = const [],
     this.assignedToUserId,
     this.assignedToName,
     this.completionNote,
+    this.repeatDays = const [],
+    this.approvalStatus = statusActive,
     required this.createdAt,
   });
 
@@ -26,9 +33,13 @@ class TaskEntity {
   final DateTime? dueDate;
   final String createdByUserId;
   final String? createdByName;
+  final List<String> assignedToUserIds;
+  final List<String> assignedToNames;
   final String? assignedToUserId;
   final String? assignedToName;
   final String? completionNote;
+  final List<int> repeatDays;
+  final String approvalStatus;
   final DateTime createdAt;
 
   @override
