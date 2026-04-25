@@ -227,7 +227,10 @@ class HouseholdRemoteDataSource {
       if (!snapshot.exists) {
         throw const ApiException('Household not found.');
       }
-      final data = snapshot.data() ?? const <String, dynamic>{};
+      final data = snapshot.data();
+      if (data == null) {
+        throw const ApiException('Failed to load household data.');
+      }
       final ownerId = data['createdByUserId'] as String?;
       if (ownerId != currentUid) {
         throw const AuthException('Only the household owner can update household name.');
