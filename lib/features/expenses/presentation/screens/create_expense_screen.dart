@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../controllers/expense_controller.dart';
 import '../../../household/domain/entities/member_entity.dart';
@@ -21,7 +22,6 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
   final _amountController = TextEditingController();
   final _categoryController = TextEditingController();
   final _splitAmong = <String>{};
-  String? _payer;
   bool _isSubmitting = false;
 
   void _handleBackNavigation() {
@@ -38,14 +38,6 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
     _amountController.dispose();
     _categoryController.dispose();
     super.dispose();
-  }
-
-  void _resetForm(List<MemberEntity> members) {
-    _titleController.clear();
-    _amountController.clear();
-    _categoryController.clear();
-    _splitAmong.clear();
-    _payer = members.isEmpty ? null : members.first.uid;
   }
 
   @override
@@ -84,7 +76,6 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
                 child: Text('No members found. Join or create a household first.'),
               );
             }
-            _payer ??= members.first.uid;
             return Form(
               key: _formKey,
               child: ListView(
@@ -115,21 +106,6 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
               TextFormField(
                 controller: _categoryController,
                 decoration: const InputDecoration(labelText: 'Category'),
-              ),
-              const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                value: _payer,
-                decoration: const InputDecoration(labelText: 'Payer'),
-                items: members
-                    .map(
-                      (m) => DropdownMenuItem(
-                        value: m.uid,
-                        child: Text(m.displayName),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) =>
-                    setState(() => _payer = value ?? members.first.uid),
               ),
               const SizedBox(height: 12),
               const Text('Split Among'),
@@ -182,6 +158,7 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
     if (amount <= 0) return;
 
     setState(() => _isSubmitting = true);
+    final currentUserId = ref.read(authStateProvider).valueOrNull?.uid;
     final eachShare = amount / _splitAmong.length;
     final splits = _splitAmong
         .map(
@@ -194,13 +171,21 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
         )
         .toList();
 
+    if (currentUserId == null) {
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please sign in to create an expense.')),
+      );
+      return;
+    }
+    final payerId = currentUserId;
     await ref.read(expenseControllerProvider.notifier).createExpense(
           title: _titleController.text.trim(),
           amount: amount,
           category: _categoryController.text.trim().isEmpty
               ? null
               : _categoryController.text.trim(),
-          payerId: _payer ?? members.first.uid,
+          payerId: payerId,
           splits: splits,
         );
 
@@ -216,11 +201,14 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
     if (context.canPop()) {
       context.pop();
     } else {
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-          _resetForm(members);
-        });
+        if (mounted) {
+          setState(() {
+            _isSubmitting = false;
+            _titleController.clear();
+            _amountController.clear();
+            _categoryController.clear();
+            _splitAmong.clear();
+          });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Expense created successfully')),
         );

@@ -31,7 +31,7 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
       context.pop();
       return;
     }
-    context.go(AppRoutes.settings);
+    context.go(AppRoutes.profile);
   }
 
   Future<void> _changePassword(String email) async {

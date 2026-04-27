@@ -29,6 +29,7 @@ import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_details_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/settings/presentation/screens/household_settings_screen.dart';
 import '../../features/settings/presentation/screens/update_password_screen.dart';
 import '../../features/tasks/presentation/screens/create_task_screen.dart';
 import '../../features/tasks/presentation/screens/tasks_screen.dart';
@@ -238,6 +239,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SettingsScreen(),
       ),
       GoRoute(
+        path: AppRoutes.householdSettings,
+        builder: (context, state) => const HouseholdSettingsScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.updatePassword,
         builder: (context, state) => const UpdatePasswordScreen(),
       ),
@@ -406,11 +411,6 @@ class _MainShell extends ConsumerWidget {
                   leading: const Icon(Icons.settings_outlined),
                   title: const Text('Settings'),
                   onTap: () => pushToTopLevelRoute(AppRoutes.settings),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.notifications_outlined),
-                  title: const Text('Notifications'),
-                  onTap: () => pushToTopLevelRoute(AppRoutes.notifications),
                 ),
                 const Divider(),
                 ListTile(
