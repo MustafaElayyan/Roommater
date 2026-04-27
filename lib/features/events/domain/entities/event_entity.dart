@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 
 @immutable
 class EventEntity {
+  static const String defaultEventType = 'meeting';
+
   const EventEntity({
     required this.id,
     required this.householdId,

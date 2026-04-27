@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../controllers/event_controller.dart';
+import '../../domain/entities/event_entity.dart';
 
 class CreateEventScreen extends ConsumerStatefulWidget {
   const CreateEventScreen({super.key});
@@ -16,7 +17,6 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _locationController = TextEditingController();
-  static const String _defaultEventType = 'meeting';
   DateTime? _date;
   TimeOfDay? _time;
   bool _isSubmitting = false;
@@ -145,7 +145,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
           location: _locationController.text.trim().isEmpty
               ? null
               : _locationController.text.trim(),
-          eventType: _defaultEventType,
+          eventType: EventEntity.defaultEventType,
         );
 
     if (!mounted) return;
