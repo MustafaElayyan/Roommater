@@ -160,12 +160,6 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
 
   Future<void> _submit(BuildContext context, List<MemberEntity> members) async {
     if (!(_formKey.currentState?.validate() ?? false) || _isSubmitting) return;
-    if (members.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No household members available.')),
-      );
-      return;
-    }
     if (_splitAmong.isEmpty) return;
     final amount = double.tryParse(_amountController.text.trim()) ?? 0;
     if (amount <= 0) return;
