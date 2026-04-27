@@ -22,6 +22,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
     final tasksAsync = ref.watch(tasksProvider);
     final authState = ref.watch(authStateProvider);
     final currentUid = authState.valueOrNull?.uid;
@@ -42,7 +43,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               : tasks;
 
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
             children: [
               SegmentedButton<bool>(
                 segments: const [

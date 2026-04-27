@@ -197,6 +197,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   onPressed: isSubmitting ? null : () => _saveProfile(profile),
                   child: const Text('Save Profile'),
                 ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: () => context.push(AppRoutes.updatePassword),
+                  icon: const Icon(Icons.lock_outline),
+                  label: const Text('Update Password'),
+                ),
               ],
             );
           },

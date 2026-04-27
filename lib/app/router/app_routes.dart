@@ -50,4 +50,5 @@ abstract final class AppRoutes {
   // --- Settings ---
   static const String settings = '/settings';
   static const String updatePassword = '/settings/update-password';
+  static const String householdSettings = '/settings/household';
 }

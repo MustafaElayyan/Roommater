@@ -16,9 +16,9 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _locationController = TextEditingController();
+  static const String _defaultEventType = 'other';
   DateTime? _date;
   TimeOfDay? _time;
-  String _type = 'meeting';
   bool _isSubmitting = false;
 
   @override
@@ -35,7 +35,6 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
     _locationController.clear();
     _date = null;
     _time = null;
-    _type = 'meeting';
   }
 
   @override
@@ -107,19 +106,6 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
             controller: _locationController,
             decoration: const InputDecoration(labelText: 'Location'),
           ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            value: _type,
-            decoration: const InputDecoration(labelText: 'Event Type'),
-            items: const [
-              DropdownMenuItem(value: 'meeting', child: Text('Meeting')),
-              DropdownMenuItem(value: 'dinner', child: Text('Dinner')),
-              DropdownMenuItem(value: 'party', child: Text('Party')),
-              DropdownMenuItem(value: 'quiet_hours', child: Text('Quiet Hours')),
-              DropdownMenuItem(value: 'other', child: Text('Other')),
-            ],
-            onChanged: (value) => setState(() => _type = value ?? 'meeting'),
-          ),
           const SizedBox(height: 24),
           FilledButton(
             onPressed: _isSubmitting ? null : _submit,
@@ -159,7 +145,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
           location: _locationController.text.trim().isEmpty
               ? null
               : _locationController.text.trim(),
-          eventType: _type,
+          eventType: _defaultEventType,
         );
 
     if (!mounted) return;
