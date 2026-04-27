@@ -16,7 +16,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _locationController = TextEditingController();
-  static const String _kDefaultEventType = 'meeting';
+  static const String _defaultEventType = 'meeting';
   DateTime? _date;
   TimeOfDay? _time;
   bool _isSubmitting = false;
@@ -145,7 +145,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
           location: _locationController.text.trim().isEmpty
               ? null
               : _locationController.text.trim(),
-          eventType: _kDefaultEventType,
+          eventType: _defaultEventType,
         );
 
     if (!mounted) return;

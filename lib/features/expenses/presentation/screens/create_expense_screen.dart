@@ -178,14 +178,14 @@ class _CreateExpenseScreenState extends ConsumerState<CreateExpenseScreen> {
         )
         .toList();
 
-    final payerId = currentUserId ?? (members.isNotEmpty ? members.first.uid : null);
-    if (payerId == null) {
+    if (currentUserId == null) {
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No household members available.')),
+        const SnackBar(content: Text('Please sign in to create an expense.')),
       );
       return;
     }
+    final payerId = currentUserId;
     await ref.read(expenseControllerProvider.notifier).createExpense(
           title: _titleController.text.trim(),
           amount: amount,
