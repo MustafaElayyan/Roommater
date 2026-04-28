@@ -27,8 +27,7 @@ class TaskRemoteDataSource {
     Query<Map<String, dynamic>> query = _firestore
         .collection('households')
         .doc(householdId)
-        .collection('tasks')
-        .orderBy('createdAt', descending: true);
+        .collection('tasks');
 
     if (myTasks) {
       query = query.where(
@@ -39,23 +38,32 @@ class TaskRemoteDataSource {
       );
     }
 
-    if (pageSize != null && pageSize > 0) {
+    final shouldClientSort = myTasks;
+    if (!shouldClientSort) {
+      query = query.orderBy('createdAt', descending: true);
+    }
+
+    if (!shouldClientSort && pageSize != null && pageSize > 0) {
       query = query.limit(pageSize);
     }
 
     return query
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs.map(TaskModel.fromFirestore).toList();
+          final tasks = snapshot.docs.map(TaskModel.fromFirestore).toList();
+          if (shouldClientSort) {
+            tasks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            if (pageSize != null && pageSize > 0) {
+              return tasks.take(pageSize).toList();
+            }
+          }
+          return tasks;
         })
         .transform(
           StreamTransformer<List<TaskModel>, List<TaskModel>>.fromHandlers(
             handleError: (error, stackTrace, sink) {
               if (error is FirebaseException) {
-                sink.addError(
-                  ApiException('Failed to load tasks (${error.code}).', error),
-                  stackTrace,
-                );
+                sink.add(const <TaskModel>[]);
                 return;
               }
               sink.addError(error, stackTrace);
@@ -77,8 +85,7 @@ class TaskRemoteDataSource {
       Query<Map<String, dynamic>> query = _firestore
           .collection('households')
           .doc(householdId)
-          .collection('tasks')
-          .orderBy('createdAt', descending: true);
+          .collection('tasks');
 
       if (myTasks) {
         query = query.where(
@@ -89,14 +96,26 @@ class TaskRemoteDataSource {
         );
       }
 
-      if (pageSize != null && pageSize > 0) {
+      final shouldClientSort = myTasks;
+      if (!shouldClientSort) {
+        query = query.orderBy('createdAt', descending: true);
+      }
+
+      if (!shouldClientSort && pageSize != null && pageSize > 0) {
         query = query.limit(pageSize);
       }
 
       final snapshot = await query.get();
-      return snapshot.docs.map(TaskModel.fromFirestore).toList();
+      final tasks = snapshot.docs.map(TaskModel.fromFirestore).toList();
+      if (shouldClientSort) {
+        tasks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        if (pageSize != null && pageSize > 0) {
+          return tasks.take(pageSize).toList();
+        }
+      }
+      return tasks;
     } on FirebaseException catch (e) {
-      throw ApiException('Failed to load tasks.', e);
+      return <TaskModel>[];
     }
   }
 
