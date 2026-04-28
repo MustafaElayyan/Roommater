@@ -368,8 +368,11 @@ class _MainShell extends ConsumerWidget {
               children: [
                 InkWell(
                   onTap: () {
-                    Navigator.of(context).pop();
-                    context.push(AppRoutes.profile);
+                    if (user == null) {
+                      Navigator.of(context).pop();
+                      return;
+                    }
+                    pushToTopLevelRoute(AppRoutes.profile);
                   },
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
