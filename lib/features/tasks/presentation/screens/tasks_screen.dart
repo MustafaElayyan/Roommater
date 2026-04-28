@@ -20,7 +20,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
-    final myTasks = ref.watch(myTasksFilterProvider);
+    final showMyTasksOnly = ref.watch(myTasksFilterProvider);
     final tasksAsync = ref.watch(tasksProvider);
     final authState = ref.watch(authStateProvider);
     final currentUid = authState.valueOrNull?.uid;
@@ -44,7 +44,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   ButtonSegment<bool>(value: true, label: Text('My Tasks')),
                   ButtonSegment<bool>(value: false, label: Text('All Tasks')),
                 ],
-                selected: <bool>{myTasks},
+                selected: <bool>{showMyTasksOnly},
                 onSelectionChanged: (selection) {
                   ref.read(myTasksFilterProvider.notifier).state =
                       selection.first;
