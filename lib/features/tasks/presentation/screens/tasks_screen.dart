@@ -17,11 +17,10 @@ class TasksScreen extends ConsumerStatefulWidget {
 }
 
 class _TasksScreenState extends ConsumerState<TasksScreen> {
-  bool _myTasks = true;
-
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    final myTasks = ref.watch(myTasksFilterProvider);
     final tasksAsync = ref.watch(tasksProvider);
     final authState = ref.watch(authStateProvider);
     final currentUid = authState.valueOrNull?.uid;
@@ -37,7 +36,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error: $error')),
         data: (tasks) {
-          final visibleTasks = _myTasks && currentUid != null
+          final visibleTasks = myTasks && currentUid != null
               ? tasks.where((t) => _isAssignedToUser(t, currentUid)).toList()
               : tasks;
 
@@ -49,9 +48,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   ButtonSegment<bool>(value: true, label: Text('My Tasks')),
                   ButtonSegment<bool>(value: false, label: Text('All Tasks')),
                 ],
-                selected: <bool>{_myTasks},
+                selected: <bool>{myTasks},
                 onSelectionChanged: (selection) {
-                  setState(() => _myTasks = selection.first);
+                  ref.read(myTasksFilterProvider.notifier).state =
+                      selection.first;
                 },
               ),
               const SizedBox(height: 16),

@@ -43,13 +43,19 @@ final _deleteTaskUseCaseProvider = Provider<DeleteTaskUseCase>((ref) {
 
 // --- State ---
 
+final myTasksFilterProvider = StateProvider<bool>((ref) => true);
+
 /// Watches all tasks for the current household.
 final tasksProvider = StreamProvider<List<TaskEntity>>((ref) {
   final user = ref.watch(authStateProvider).valueOrNull;
   if (user == null) return const Stream.empty();
   final household = ref.watch(currentHouseholdProvider);
   if (household == null) return const Stream.empty();
-  return ref.watch(_getTasksUseCaseProvider)(household.id);
+  final myTasks = ref.watch(myTasksFilterProvider);
+  return ref.watch(_getTasksUseCaseProvider)(
+    household.id,
+    myTasks: myTasks,
+  );
 });
 
 // --- Controller ---
