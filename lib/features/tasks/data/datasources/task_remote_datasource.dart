@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/errors/app_exception.dart';
 import '../../domain/entities/task_entity.dart';
@@ -38,12 +39,12 @@ class TaskRemoteDataSource {
       );
     }
 
-    final shouldClientSort = myTasks;
-    if (!shouldClientSort) {
+    final shouldUseClientSideSort = myTasks;
+    if (!shouldUseClientSideSort) {
       query = query.orderBy('createdAt', descending: true);
     }
 
-    if (!shouldClientSort && pageSize != null && pageSize > 0) {
+    if (!shouldUseClientSideSort && pageSize != null && pageSize > 0) {
       query = query.limit(pageSize);
     }
 
@@ -51,7 +52,7 @@ class TaskRemoteDataSource {
         .snapshots()
         .map((snapshot) {
           final tasks = snapshot.docs.map(TaskModel.fromFirestore).toList();
-          if (shouldClientSort) {
+          if (shouldUseClientSideSort) {
             tasks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
             if (pageSize != null && pageSize > 0) {
               return tasks.take(pageSize).toList();
@@ -63,6 +64,9 @@ class TaskRemoteDataSource {
           StreamTransformer<List<TaskModel>, List<TaskModel>>.fromHandlers(
             handleError: (error, stackTrace, sink) {
               if (error is FirebaseException) {
+                debugPrint(
+                  'Task watch query failed: ${error.code} ${error.message}',
+                );
                 sink.add(const <TaskModel>[]);
                 return;
               }
@@ -96,18 +100,18 @@ class TaskRemoteDataSource {
         );
       }
 
-      final shouldClientSort = myTasks;
-      if (!shouldClientSort) {
+      final shouldUseClientSideSort = myTasks;
+      if (!shouldUseClientSideSort) {
         query = query.orderBy('createdAt', descending: true);
       }
 
-      if (!shouldClientSort && pageSize != null && pageSize > 0) {
+      if (!shouldUseClientSideSort && pageSize != null && pageSize > 0) {
         query = query.limit(pageSize);
       }
 
       final snapshot = await query.get();
       final tasks = snapshot.docs.map(TaskModel.fromFirestore).toList();
-      if (shouldClientSort) {
+      if (shouldUseClientSideSort) {
         tasks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         if (pageSize != null && pageSize > 0) {
           return tasks.take(pageSize).toList();
@@ -115,6 +119,7 @@ class TaskRemoteDataSource {
       }
       return tasks;
     } on FirebaseException catch (e) {
+      debugPrint('Task query failed: ${e.code} ${e.message}');
       return <TaskModel>[];
     }
   }
