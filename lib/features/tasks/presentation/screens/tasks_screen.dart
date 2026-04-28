@@ -79,118 +79,152 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   final userCanApprove =
                       isOwner && task.approvalStatus == TaskEntity.statusPendingApproval;
 
-                  return Card(
-                    color: done
-                        ? Colors.green.withValues(alpha: 0.14)
-                        : overdue
-                            ? Colors.red.withValues(alpha: 0.12)
-                            : null,
-                    child: ListTile(
-                      leading: userCanCompleteTask &&
-                              task.approvalStatus == TaskEntity.statusActive
-                          ? Checkbox(
-                              value: done,
-                              onChanged: (_) => _toggleTask(context, ref, task),
-                            )
-                          : null,
-                      trailing: (userCanEditTask || userCanDeleteTask || userCanApprove)
-                          ? Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                if (userCanEditTask)
-                                  IconButton(
-                                    visualDensity: VisualDensity.compact,
-                                    constraints: const BoxConstraints.tightFor(
-                                      width: 36,
-                                      height: 36,
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.edit_calendar_outlined),
-                                    onPressed: () => context.push(
-                                      AppRoutes.editTask,
-                                      extra: task,
-                                    ),
-                                  ),
-                                if (userCanDeleteTask)
-                                  IconButton(
-                                    visualDensity: VisualDensity.compact,
-                                    constraints: const BoxConstraints.tightFor(
-                                      width: 36,
-                                      height: 36,
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.delete_outline),
-                                    onPressed: () => _confirmDeleteTask(context, ref, task),
-                                  ),
-                                if (userCanApprove)
-                                  IconButton(
-                                    visualDensity: VisualDensity.compact,
-                                    constraints: const BoxConstraints.tightFor(
-                                      width: 36,
-                                      height: 36,
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.verified_outlined),
-                                    onPressed: () => ref
-                                        .read(taskControllerProvider.notifier)
-                                        .approveTask(task),
-                                  ),
-                              ],
-                            )
-                          : null,
-                      title: Text(
-                        task.title,
-                        style: TextStyle(
-                          decoration: done ? TextDecoration.lineThrough : null,
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text('Assigned by: ${creatorName ?? task.createdByUserId}'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text('Assigned to: $assigneeNames'),
-                          ),
-                          if (task.approvalStatus == TaskEntity.statusPendingApproval)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 4),
-                              child: Chip(
-                                label: Text('Pending approval'),
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            ),
-                          if (dueText != null) Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text('Due: $dueText'),
-                          ),
-                          if (task.repeatDays.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                'Repeats: ${_weekdayLabels(task.repeatDays)}',
-                              ),
-                            ),
-                          if (task.completionNote != null &&
-                              task.completionNote!.trim().isNotEmpty)
-                            Text('Completion note: ${task.completionNote}'),
-                        ],
-                      ),
-                      onTap: () => _showTaskDetails(
-                        context,
-                        task,
-                        assignedBy: creatorName ?? task.createdByUserId,
-                        assignedTo: assigneeNames,
-                        dueText: dueText,
-                      ),
-                    ),
-                  );
-                }),
+                   final showActions =
+                       userCanEditTask || userCanDeleteTask || userCanApprove;
+                   final showCheckbox = userCanCompleteTask &&
+                       task.approvalStatus == TaskEntity.statusActive;
+
+                   return Card(
+                     color: done
+                         ? Colors.green.withValues(alpha: 0.14)
+                         : overdue
+                             ? Colors.red.withValues(alpha: 0.12)
+                             : null,
+                     child: InkWell(
+                       onTap: () => _showTaskDetails(
+                         context,
+                         task,
+                         assignedBy: creatorName ?? task.createdByUserId,
+                         assignedTo: assigneeNames,
+                         dueText: dueText,
+                       ),
+                       child: Padding(
+                         padding: const EdgeInsets.symmetric(
+                           horizontal: 16,
+                           vertical: 12,
+                         ),
+                         child: Row(
+                           crossAxisAlignment: CrossAxisAlignment.start,
+                           children: [
+                             if (showCheckbox)
+                               Padding(
+                                 padding: const EdgeInsets.only(top: 2),
+                                 child: Checkbox(
+                                   value: done,
+                                   onChanged: (_) =>
+                                       _toggleTask(context, ref, task),
+                                 ),
+                               ),
+                             if (showCheckbox) const SizedBox(width: 8),
+                             Expanded(
+                               child: Column(
+                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                 children: [
+                                   Text(
+                                     task.title,
+                                     style: TextStyle(
+                                       decoration: done
+                                           ? TextDecoration.lineThrough
+                                           : null,
+                                     ),
+                                   ),
+                                   Padding(
+                                     padding: const EdgeInsets.only(top: 4),
+                                     child: Text(
+                                       'Assigned by: ${creatorName ?? task.createdByUserId}',
+                                     ),
+                                   ),
+                                   Padding(
+                                     padding: const EdgeInsets.only(top: 4),
+                                     child: Text('Assigned to: $assigneeNames'),
+                                   ),
+                                   if (task.approvalStatus ==
+                                       TaskEntity.statusPendingApproval)
+                                     const Padding(
+                                       padding: EdgeInsets.only(top: 4),
+                                       child: Chip(
+                                         label: Text('Pending approval'),
+                                         visualDensity: VisualDensity.compact,
+                                       ),
+                                     ),
+                                   if (dueText != null)
+                                     Padding(
+                                       padding: const EdgeInsets.only(top: 4),
+                                       child: Text('Due: $dueText'),
+                                     ),
+                                   if (task.repeatDays.isNotEmpty)
+                                     Padding(
+                                       padding: const EdgeInsets.only(top: 4),
+                                       child: Text(
+                                         'Repeats: ${_weekdayLabels(task.repeatDays)}',
+                                       ),
+                                     ),
+                                   if (task.completionNote != null &&
+                                       task.completionNote!.trim().isNotEmpty)
+                                     Padding(
+                                       padding: const EdgeInsets.only(top: 4),
+                                       child: Text(
+                                         'Completion note: ${task.completionNote}',
+                                       ),
+                                     ),
+                                 ],
+                               ),
+                             ),
+                             if (showActions) const SizedBox(width: 8),
+                             if (showActions)
+                               Column(
+                                 mainAxisSize: MainAxisSize.min,
+                                 mainAxisAlignment: MainAxisAlignment.start,
+                                 crossAxisAlignment: CrossAxisAlignment.end,
+                                 children: [
+                                   if (userCanEditTask)
+                                     IconButton(
+                                       visualDensity: VisualDensity.compact,
+                                       constraints: const BoxConstraints.tightFor(
+                                         width: 36,
+                                         height: 36,
+                                       ),
+                                       padding: EdgeInsets.zero,
+                                       icon:
+                                           const Icon(Icons.edit_calendar_outlined),
+                                       onPressed: () => context.push(
+                                         AppRoutes.editTask,
+                                         extra: task,
+                                       ),
+                                     ),
+                                   if (userCanDeleteTask)
+                                     IconButton(
+                                       visualDensity: VisualDensity.compact,
+                                       constraints: const BoxConstraints.tightFor(
+                                         width: 36,
+                                         height: 36,
+                                       ),
+                                       padding: EdgeInsets.zero,
+                                       icon: const Icon(Icons.delete_outline),
+                                       onPressed: () =>
+                                           _confirmDeleteTask(context, ref, task),
+                                     ),
+                                   if (userCanApprove)
+                                     IconButton(
+                                       visualDensity: VisualDensity.compact,
+                                       constraints: const BoxConstraints.tightFor(
+                                         width: 36,
+                                         height: 36,
+                                       ),
+                                       padding: EdgeInsets.zero,
+                                       icon: const Icon(Icons.verified_outlined),
+                                       onPressed: () => ref
+                                           .read(taskControllerProvider.notifier)
+                                           .approveTask(task),
+                                     ),
+                                 ],
+                               ),
+                           ],
+                         ),
+                       ),
+                     ),
+                   );
+                 }),
             ],
           );
         },
