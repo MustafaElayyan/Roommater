@@ -367,7 +367,10 @@ class _MainShell extends ConsumerWidget {
             child: ListView(
               children: [
                 InkWell(
-                  onTap: () => pushToTopLevelRoute(AppRoutes.profile),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    context.push(AppRoutes.profile);
+                  },
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
                     child: Row(
