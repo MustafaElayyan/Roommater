@@ -36,10 +36,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error: $error')),
         data: (tasks) {
-          final visibleTasks = myTasks && currentUid != null
-              ? tasks.where((t) => _isAssignedToUser(t, currentUid)).toList()
-              : tasks;
-
           return ListView(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
             children: [
@@ -55,7 +51,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              if (visibleTasks.isEmpty)
+              if (tasks.isEmpty)
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.only(top: 64),
@@ -66,7 +62,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   ),
                 )
               else
-                ...visibleTasks.map((task) {
+                ...tasks.map((task) {
                   final done = task.isCompleted;
                   final overdue = !done &&
                       task.dueDate != null &&
