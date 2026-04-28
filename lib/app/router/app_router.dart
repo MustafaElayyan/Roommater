@@ -372,7 +372,7 @@ class _MainShell extends ConsumerWidget {
                       Navigator.of(context).pop();
                       return;
                     }
-                    pushToTopLevelRoute(AppRoutes.profile);
+                    pushToTopLevelRoute(AppRoutes.profileDetailsFor(user.uid));
                   },
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
