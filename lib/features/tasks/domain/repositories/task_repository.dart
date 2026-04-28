@@ -5,7 +5,7 @@ abstract interface class TaskRepository {
   /// Returns tasks for the household with [householdId].
   Stream<List<TaskEntity>> watchTasks(
     String householdId, {
-    bool? myTasks,
+    bool myTasks = false,
     int? pageSize,
   });
 

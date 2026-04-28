@@ -18,14 +18,26 @@ class TaskRemoteDataSource {
 
   Stream<List<TaskModel>> watchTasks(
     String householdId, {
-    bool? myTasks,
+    bool myTasks = false,
     int? pageSize,
   }) {
+    final uid = myTasks ? _firebaseAuth.currentUser?.uid : null;
+    if (myTasks && uid == null) return const Stream<List<TaskModel>>.empty();
+
     Query<Map<String, dynamic>> query = _firestore
         .collection('households')
         .doc(householdId)
         .collection('tasks')
         .orderBy('createdAt', descending: true);
+
+    if (myTasks) {
+      query = query.where(
+        Filter.or(
+          Filter('assignedToUserIds', arrayContains: uid),
+          Filter('assignedToUserId', isEqualTo: uid),
+        ),
+      );
+    }
 
     if (pageSize != null && pageSize > 0) {
       query = query.limit(pageSize);
@@ -34,18 +46,7 @@ class TaskRemoteDataSource {
     return query
         .snapshots()
         .map((snapshot) {
-          final tasks = snapshot.docs.map(TaskModel.fromFirestore).toList();
-          if (myTasks == true) {
-            final uid = _firebaseAuth.currentUser?.uid;
-            if (uid == null) return <TaskModel>[];
-            // We support both legacy single-assignee and new multi-assignee
-            // fields, so filtering is performed client-side for compatibility.
-            return tasks.where((task) {
-              if (task.assignedToUserIds.contains(uid)) return true;
-              return task.assignedToUserId == uid;
-            }).toList();
-          }
-          return tasks;
+          return snapshot.docs.map(TaskModel.fromFirestore).toList();
         })
         .transform(
           StreamTransformer<List<TaskModel>, List<TaskModel>>.fromHandlers(
@@ -65,32 +66,35 @@ class TaskRemoteDataSource {
 
   Future<List<TaskModel>> getTasks(
     String householdId, {
-    bool? myTasks,
+    bool myTasks = false,
     int? page,
     int? pageSize,
   }) async {
     try {
+      final uid = myTasks ? _firebaseAuth.currentUser?.uid : null;
+      if (myTasks && uid == null) return <TaskModel>[];
+
       Query<Map<String, dynamic>> query = _firestore
           .collection('households')
           .doc(householdId)
           .collection('tasks')
           .orderBy('createdAt', descending: true);
 
+      if (myTasks) {
+        query = query.where(
+          Filter.or(
+            Filter('assignedToUserIds', arrayContains: uid),
+            Filter('assignedToUserId', isEqualTo: uid),
+          ),
+        );
+      }
+
       if (pageSize != null && pageSize > 0) {
         query = query.limit(pageSize);
       }
 
       final snapshot = await query.get();
-      final tasks = snapshot.docs.map(TaskModel.fromFirestore).toList();
-      if (myTasks != true) return tasks;
-      final uid = _firebaseAuth.currentUser?.uid;
-      if (uid == null) return <TaskModel>[];
-      // We support both legacy single-assignee and new multi-assignee
-      // fields, so filtering is performed client-side for compatibility.
-      return tasks.where((task) {
-        if (task.assignedToUserIds.contains(uid)) return true;
-        return task.assignedToUserId == uid;
-      }).toList();
+      return snapshot.docs.map(TaskModel.fromFirestore).toList();
     } on FirebaseException catch (e) {
       throw ApiException('Failed to load tasks.', e);
     }
