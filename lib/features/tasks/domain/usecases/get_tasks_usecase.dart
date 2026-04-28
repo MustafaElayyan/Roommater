@@ -9,7 +9,7 @@ class GetTasksUseCase {
 
   Stream<List<TaskEntity>> call(
     String householdId, {
-    bool? myTasks,
+    bool myTasks = false,
     int? pageSize,
   }) =>
       _repository.watchTasks(

@@ -18,18 +18,19 @@ class TaskRemoteDataSource {
 
   Stream<List<TaskModel>> watchTasks(
     String householdId, {
-    bool? myTasks,
+    bool myTasks = false,
     int? pageSize,
   }) {
+    final uid = myTasks ? _firebaseAuth.currentUser?.uid : null;
+    if (myTasks && uid == null) return const Stream<List<TaskModel>>.empty();
+
     Query<Map<String, dynamic>> query = _firestore
         .collection('households')
         .doc(householdId)
         .collection('tasks')
         .orderBy('createdAt', descending: true);
 
-    if (myTasks == true) {
-      final uid = _firebaseAuth.currentUser?.uid;
-      if (uid == null) return const Stream<List<TaskModel>>.empty();
+    if (myTasks) {
       query = query.where(
         Filter.or(
           Filter('assignedToUserIds', arrayContains: uid),
@@ -65,7 +66,7 @@ class TaskRemoteDataSource {
 
   Future<List<TaskModel>> getTasks(
     String householdId, {
-    bool? myTasks,
+    bool myTasks = false,
     int? page,
     int? pageSize,
   }) async {
@@ -82,7 +83,7 @@ class TaskRemoteDataSource {
 
       final snapshot = await query.get();
       final tasks = snapshot.docs.map(TaskModel.fromFirestore).toList();
-      if (myTasks != true) return tasks;
+      if (!myTasks) return tasks;
       final uid = _firebaseAuth.currentUser?.uid;
       if (uid == null) return <TaskModel>[];
       // We support both legacy single-assignee and new multi-assignee

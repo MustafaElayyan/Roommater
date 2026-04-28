@@ -11,7 +11,7 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   Stream<List<TaskEntity>> watchTasks(
     String householdId, {
-    bool? myTasks,
+    bool myTasks = false,
     int? pageSize,
   }) {
     return _dataSource.watchTasks(
