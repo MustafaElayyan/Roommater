@@ -284,6 +284,10 @@ class TaskRemoteDataSource {
         );
       }
       await taskRef.delete();
+      await _deleteNotificationsForReference(
+        referenceId: taskId,
+        referenceType: 'task',
+      );
     } on FirebaseException catch (e) {
       throw ApiException('Failed to delete task.', e);
     }
@@ -346,6 +350,26 @@ class TaskRemoteDataSource {
     final leftSet = left.toSet();
     final rightSet = right.toSet();
     return const SetEquality<String>().equals(leftSet, rightSet);
+  }
+
+  Future<void> _deleteNotificationsForReference({
+    required String referenceId,
+    required String referenceType,
+  }) async {
+    final query = _firestore
+        .collectionGroup('notifications')
+        .where('referenceId', isEqualTo: referenceId)
+        .where('referenceType', isEqualTo: referenceType);
+    QuerySnapshot<Map<String, dynamic>> snapshot;
+    do {
+      snapshot = await query.limit(500).get();
+      if (snapshot.docs.isEmpty) return;
+      final batch = _firestore.batch();
+      for (final doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+    } while (snapshot.docs.length == 500);
   }
 
   _NormalizedAssignments _normalizeAssignments({

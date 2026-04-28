@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/firestore_service.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../household/presentation/controllers/household_controller.dart';
+import '../../../notifications/presentation/controllers/notification_controller.dart';
 import '../../data/datasources/expense_remote_datasource.dart';
 import '../../data/repositories/expense_repository_impl.dart';
 import '../../domain/entities/expense_entity.dart';
@@ -98,6 +99,7 @@ class ExpenseController extends AsyncNotifier<void> {
     state = await AsyncValue.guard(() async {
       await ref.read(expenseRepositoryProvider).deleteExpense(household.id, expenseId);
       ref.invalidate(expensesProvider);
+      ref.invalidate(notificationsProvider);
     });
   }
 }
