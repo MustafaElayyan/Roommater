@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/errors/app_exception.dart';
 import '../../domain/entities/task_entity.dart';
@@ -27,8 +28,7 @@ class TaskRemoteDataSource {
     Query<Map<String, dynamic>> query = _firestore
         .collection('households')
         .doc(householdId)
-        .collection('tasks')
-        .orderBy('createdAt', descending: true);
+        .collection('tasks');
 
     if (myTasks) {
       query = query.where(
@@ -39,23 +39,45 @@ class TaskRemoteDataSource {
       );
     }
 
-    if (pageSize != null && pageSize > 0) {
+    if (!myTasks) {
+      query = query.orderBy('createdAt', descending: true);
+    }
+
+    if (!myTasks && pageSize != null && pageSize > 0) {
       query = query.limit(pageSize);
     }
 
     return query
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs.map(TaskModel.fromFirestore).toList();
+          final tasks = snapshot.docs.map(TaskModel.fromFirestore).toList();
+          if (myTasks) {
+            tasks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            if (pageSize != null && pageSize > 0) {
+              return tasks.take(pageSize).toList();
+            }
+          }
+          return tasks;
         })
         .transform(
           StreamTransformer<List<TaskModel>, List<TaskModel>>.fromHandlers(
             handleError: (error, stackTrace, sink) {
               if (error is FirebaseException) {
-                sink.addError(
-                  ApiException('Failed to load tasks (${error.code}).', error),
-                  stackTrace,
-                );
+                if (error.code == 'failed-precondition') {
+                  debugPrint(
+                    'Task watch query failed: ${error.code} ${error.message}. '
+                    'Returning empty task list.',
+                  );
+                  sink.add(const <TaskModel>[]);
+                } else {
+                  sink.addError(
+                    ApiException(
+                      'Failed to load tasks (${error.code}).',
+                      error,
+                    ),
+                    stackTrace,
+                  );
+                }
                 return;
               }
               sink.addError(error, stackTrace);
@@ -77,8 +99,7 @@ class TaskRemoteDataSource {
       Query<Map<String, dynamic>> query = _firestore
           .collection('households')
           .doc(householdId)
-          .collection('tasks')
-          .orderBy('createdAt', descending: true);
+          .collection('tasks');
 
       if (myTasks) {
         query = query.where(
@@ -89,13 +110,30 @@ class TaskRemoteDataSource {
         );
       }
 
-      if (pageSize != null && pageSize > 0) {
+      if (!myTasks) {
+        query = query.orderBy('createdAt', descending: true);
+      }
+
+      if (!myTasks && pageSize != null && pageSize > 0) {
         query = query.limit(pageSize);
       }
 
       final snapshot = await query.get();
-      return snapshot.docs.map(TaskModel.fromFirestore).toList();
+      final tasks = snapshot.docs.map(TaskModel.fromFirestore).toList();
+      if (myTasks) {
+        tasks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        if (pageSize != null && pageSize > 0) {
+          return tasks.take(pageSize).toList();
+        }
+      }
+      return tasks;
     } on FirebaseException catch (e) {
+      if (e.code == 'failed-precondition') {
+        debugPrint(
+          'Task query failed: ${e.code} ${e.message}. Returning empty task list.',
+        );
+        return <TaskModel>[];
+      }
       throw ApiException('Failed to load tasks.', e);
     }
   }
