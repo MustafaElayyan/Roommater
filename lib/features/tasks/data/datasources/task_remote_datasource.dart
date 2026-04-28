@@ -39,12 +39,11 @@ class TaskRemoteDataSource {
       );
     }
 
-    final shouldUseClientSideSort = myTasks;
-    if (!shouldUseClientSideSort) {
+    if (!myTasks) {
       query = query.orderBy('createdAt', descending: true);
     }
 
-    if (!shouldUseClientSideSort && pageSize != null && pageSize > 0) {
+    if (!myTasks && pageSize != null && pageSize > 0) {
       query = query.limit(pageSize);
     }
 
@@ -52,7 +51,7 @@ class TaskRemoteDataSource {
         .snapshots()
         .map((snapshot) {
           final tasks = snapshot.docs.map(TaskModel.fromFirestore).toList();
-          if (shouldUseClientSideSort) {
+          if (myTasks) {
             tasks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
             if (pageSize != null && pageSize > 0) {
               return tasks.take(pageSize).toList();
@@ -65,7 +64,8 @@ class TaskRemoteDataSource {
             handleError: (error, stackTrace, sink) {
               if (error is FirebaseException) {
                 debugPrint(
-                  'Task watch query failed: ${error.code} ${error.message}',
+                  'Task watch query failed: ${error.code} ${error.message}. '
+                  'Returning empty task list.',
                 );
                 sink.add(const <TaskModel>[]);
                 return;
@@ -100,18 +100,17 @@ class TaskRemoteDataSource {
         );
       }
 
-      final shouldUseClientSideSort = myTasks;
-      if (!shouldUseClientSideSort) {
+      if (!myTasks) {
         query = query.orderBy('createdAt', descending: true);
       }
 
-      if (!shouldUseClientSideSort && pageSize != null && pageSize > 0) {
+      if (!myTasks && pageSize != null && pageSize > 0) {
         query = query.limit(pageSize);
       }
 
       final snapshot = await query.get();
       final tasks = snapshot.docs.map(TaskModel.fromFirestore).toList();
-      if (shouldUseClientSideSort) {
+      if (myTasks) {
         tasks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         if (pageSize != null && pageSize > 0) {
           return tasks.take(pageSize).toList();
@@ -119,7 +118,9 @@ class TaskRemoteDataSource {
       }
       return tasks;
     } on FirebaseException catch (e) {
-      debugPrint('Task query failed: ${e.code} ${e.message}');
+      debugPrint(
+        'Task query failed: ${e.code} ${e.message}. Returning empty task list.',
+      );
       return <TaskModel>[];
     }
   }
