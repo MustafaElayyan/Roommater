@@ -162,6 +162,10 @@ class ExpenseRemoteDataSource {
         throw const AuthException('Only the expense creator can delete this expense.');
       }
       await expenseRef.delete();
+      await _deleteNotificationsForReference(
+        referenceId: expenseId,
+        referenceType: 'expense',
+      );
     } on FirebaseException catch (e) {
       throw ApiException('Failed to delete expense.', e);
     }
@@ -275,5 +279,25 @@ class ExpenseRemoteDataSource {
     } on FirebaseException catch (e) {
       debugPrint('Expense notification fan-out failed: ${e.code} ${e.message}');
     }
+  }
+
+  Future<void> _deleteNotificationsForReference({
+    required String referenceId,
+    required String referenceType,
+  }) async {
+    final query = _firestore
+        .collectionGroup('notifications')
+        .where('referenceId', isEqualTo: referenceId)
+        .where('referenceType', isEqualTo: referenceType);
+    QuerySnapshot<Map<String, dynamic>> snapshot;
+    do {
+      snapshot = await query.limit(500).get();
+      if (snapshot.docs.isEmpty) return;
+      final batch = _firestore.batch();
+      for (final doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+    } while (snapshot.docs.length == 500);
   }
 }
