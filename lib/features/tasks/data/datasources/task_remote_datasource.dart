@@ -63,11 +63,21 @@ class TaskRemoteDataSource {
           StreamTransformer<List<TaskModel>, List<TaskModel>>.fromHandlers(
             handleError: (error, stackTrace, sink) {
               if (error is FirebaseException) {
-                debugPrint(
-                  'Task watch query failed: ${error.code} ${error.message}. '
-                  'Returning empty task list.',
-                );
-                sink.add(const <TaskModel>[]);
+                if (error.code == 'failed-precondition') {
+                  debugPrint(
+                    'Task watch query failed: ${error.code} ${error.message}. '
+                    'Returning empty task list.',
+                  );
+                  sink.add(const <TaskModel>[]);
+                } else {
+                  sink.addError(
+                    ApiException(
+                      'Failed to load tasks (${error.code}).',
+                      error,
+                    ),
+                    stackTrace,
+                  );
+                }
                 return;
               }
               sink.addError(error, stackTrace);
@@ -118,10 +128,13 @@ class TaskRemoteDataSource {
       }
       return tasks;
     } on FirebaseException catch (e) {
-      debugPrint(
-        'Task query failed: ${e.code} ${e.message}. Returning empty task list.',
-      );
-      return <TaskModel>[];
+      if (e.code == 'failed-precondition') {
+        debugPrint(
+          'Task query failed: ${e.code} ${e.message}. Returning empty task list.',
+        );
+        return <TaskModel>[];
+      }
+      throw ApiException('Failed to load tasks.', e);
     }
   }
 
