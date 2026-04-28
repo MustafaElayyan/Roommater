@@ -30,7 +30,12 @@ class TaskRemoteDataSource {
     if (myTasks == true) {
       final uid = _firebaseAuth.currentUser?.uid;
       if (uid == null) return const Stream<List<TaskModel>>.empty();
-      query = query.where('assignedToUserIds', arrayContains: uid);
+      query = query.where(
+        Filter.or(
+          Filter('assignedToUserIds', arrayContains: uid),
+          Filter('assignedToUserId', isEqualTo: uid),
+        ),
+      );
     }
 
     if (pageSize != null && pageSize > 0) {
